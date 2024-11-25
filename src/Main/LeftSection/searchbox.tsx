@@ -20,9 +20,8 @@ const Searchbox = () => {
 
   return (
     <div className="h-[10%] min-w-[650px]min-h-16 flex items-center justify-center px-3">
-      <div className="relative group flex flex-col gap-2 justify-center mt-2">
-        <img src={userPfp} alt="pfp" className="rounded-full cursor-pointer" />
-
+      <div className="relative group">
+        <img src={userPfp} alt="pfp" className="rounded-full cursor-pointer w-fit h-fit" />
         <span className="absolute -bottom-12 bg-black/80 text-MainPinkishWhite pink w-fit h-fit p-2 pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100  group-hover:translate-y-0 translate-y-5 transition-all  z-50">
           Settings
         </span>

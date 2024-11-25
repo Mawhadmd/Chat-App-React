@@ -1,5 +1,4 @@
-import { useEffect, useState, createContext } from "react";
-import Contacts from "./LeftSection/Contacts";
+import {  useState, createContext, useEffect } from "react";
 import LeftSection from "./LeftSection/LeftSection";
 import RightSection from "./RightSection/RightSection";
 import { supabase } from "./Supabase";
@@ -7,13 +6,13 @@ import { supabase } from "./Supabase";
 export const ChatContext = createContext<any>(null);
 
 function App() {
-  const [Currentopenchatid, setCurrentopenchatid] = useState<string | undefined>(undefined);
   const [logged, setLogged] = useState(false);
+  const [Currentopenchatid, setCurrentopenchatid] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(event);
-      if (["INITIAL_SESSION", "SIGNED_IN"].includes(event)) setLogged(true);
+      console.log(event, session, "Event, Session");
+      if (["INITIAL_SESSION", "SIGNED_IN"].includes(event) && session != null) setLogged(true);
       if (event === "SIGNED_OUT") setLogged(false);
     });
 
@@ -21,6 +20,7 @@ function App() {
       data?.subscription?.unsubscribe();
     };
   }, []);
+
 
   return (
     <ChatContext.Provider

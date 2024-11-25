@@ -1,21 +1,27 @@
 import Searchbox from "./searchbox";
 
 import globe from "../../assets/global-communication_9512332.png";
-import { useContext } from "react";
+import { useContext, } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 
 const LeftSection = ({}) => {
-  const { setCurrentopenchatid , logged }= useContext(ChatContext);
+  const { setCurrentopenchatid, logged }= useContext(ChatContext);
+ 
 
   function handlelogin() {
     supabase.auth.signInWithOAuth({ provider: "google" });
   }
 
+  function Logout(){
+  if(confirm('Are you sure?'))
+  supabase.auth.signOut()
+  }
   return (
+   <>
     <section
       className="z-20 flex flex-col bg-MainBlack w-[500px]
-        h-screen "
+        h-screen relative "
     >
       {logged ? (
         <>
@@ -42,7 +48,12 @@ const LeftSection = ({}) => {
           Login to access more features
         </button>
       )}
+       <div className={`${!logged? 'hidden': 'static'}`}>
+      <button onClick={Logout} className="flex absolute bottom-2 left-2 hover:bg-MainSky/80 bg-MainBlue w-20 h-10 justify-center items-center rounded-3xl">Logout</button>
+    </div>
     </section>
+   
+   </>
   );
 };
 

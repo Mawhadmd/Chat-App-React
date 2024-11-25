@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 
@@ -12,7 +12,6 @@ const ChatArea = () => {
     let contentval = content;
     setinputcontent("");
     if (contentval != "") {
-      console.log(Currentopenchatid);
       const { data, error } = await supabase
         .from("Messages")
         .insert([
@@ -23,7 +22,7 @@ const ChatArea = () => {
         ])
         .select();
 
-      console.log(data, error);
+      console.log(data, error, "data,error for SetData");
     } else alert("Write something");
   }
 
@@ -33,6 +32,7 @@ const ChatArea = () => {
       className=" gap-3 transition-all  bg-MainBlack flex items-center  h-[10%]  w-full content-center px-5 "
     >
       <input
+      onKeyDown={({key})=>{if(String(key)=="Enter") SetData()}}
         onChange={(e) => {
           setinputcontent(e.target.value);
         }}
@@ -45,7 +45,7 @@ const ChatArea = () => {
         onClick={() => {
 			SetData();
         }}
-        className={`w-[5%] hover:bg-MainPinkishWhite transition-all duration-500 bg-Mainpink rounded-full p-4`}
+        className={`w-[5%] min-w-fit hover:bg-MainPinkishWhite transition-all duration-500 bg-Mainpink rounded-full p-4`}
       >
         Send
       </button>
