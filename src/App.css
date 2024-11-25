@@ -4,8 +4,27 @@
 
 *{
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
 }
 body{
     margin: 0;
-    padding: 0;
+    padding: 0; 
+    
+}
+#root{
+    display: flex;
+}
+
+
+
+
+button#login{
+    transition: all 0.3s;
+    &:hover{
+        color: rgb(255, 255, 255);
+        background-color: rgb(0, 0, 0);
+    }
 }

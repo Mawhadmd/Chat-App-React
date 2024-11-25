@@ -6,12 +6,21 @@ export default {
   ],
   theme: {
     extend: {
-      backgroundColor:{
-        Main: '#D9D9D9',
-      },borderColor:{
-        
+ borderColor:{
         BorderColor: '#3A3F00',
+      },
+      backgroundImage:{
+        ChatAreaBG: "url(src/assets/blackbackground.jpg)",
+      },
+
+      colors:{
+        MainBlack: '#363732',
+        MainSky: '#53D8FB',
+        MainBlue:'#66C3FF',
+        MainPinkishWhite: '#DCE1E9',
+        Mainpink: '#D4AFB9',
       }
+      
     },
   },
   plugins: [],
