@@ -5,8 +5,20 @@ import { supabase } from "./Supabase";
 
 export const ChatContext = createContext<any>(null);
 
+
 function App() {
+  
+  const [Content, setcontent] = useState<string>('');
   const [logged, setLogged] = useState(false);
+  const [uuid, setuuid] = useState<string | undefined>();
+  async function getuuid() {
+    let user = await supabase.auth.getUser();
+    let uuid = user.data.user?.id;
+    setuuid(uuid);
+  }
+  useEffect(() => {
+    getuuid(); // get uuid of the current user logged in
+  }, []);
   const [Currentopenchatid, setCurrentopenchatid] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -23,12 +35,14 @@ function App() {
 
 
   return (
+
     <ChatContext.Provider
-      value={{ setCurrentopenchatid, Currentopenchatid, logged }}
+      value={{ setCurrentopenchatid, Currentopenchatid, logged, uuid, setcontent,Content}}
     >
       <LeftSection />
       <RightSection />
     </ChatContext.Provider>
+
   );
 }
 

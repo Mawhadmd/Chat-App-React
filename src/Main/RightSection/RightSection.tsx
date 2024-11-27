@@ -7,9 +7,8 @@ import { useContext } from "react";
 const RightSection = () => {
   const context = useContext(ChatContext);
   const { logged, Currentopenchatid} = context;
-  console.log(Currentopenchatid)
   return (
-    logged || !!Currentopenchatid? 
+    logged && !!Currentopenchatid? 
       (    
         <section className="flex flex-col w-full max-h-dvh" >
         <CurrentChat></CurrentChat>
