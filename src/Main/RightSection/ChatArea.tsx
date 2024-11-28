@@ -13,7 +13,7 @@ const ChatArea = () => {
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const channels = supabase
-        .channel("Changes-in-chatArea")
+        .channel("Changes-in-chatArea-Global")
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "Messages" },
@@ -29,11 +29,11 @@ const ChatArea = () => {
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channels);
+        channels.unsubscribe()
       };
     } else if (Currentopenchatid != -1) {
       const channels = supabase
-        .channel("Changes-in-chatArea")
+        .channel("Changes-in-chatArea-Private")
         .on(
           "postgres_changes",
           {
@@ -51,16 +51,10 @@ const ChatArea = () => {
             );
           }
         )
-        .subscribe((status) => {
-          if (status === "SUBSCRIBED") {
-            console.log("Subscribed successfully");
-          } else {
-            console.error("Failed to subscribe:", status);
-          }
-        });
+        .subscribe();
 
       return () => {
-        supabase.removeChannel(channels);
+        channels.unsubscribe()
       };
     } else {
       setmessages([]);

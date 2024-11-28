@@ -38,9 +38,11 @@ function App() {
 
 
   return (
+    <>
+    <div className="absolute inset-[20%] bg-black z-[99]">
 
+    </div>
     <ReloadContactsCtxt.Provider value={{Reloadcontact, setReloadcontact}}>
-
     <ChatContext.Provider
     value={{ setCurrentopenchatid, Currentopenchatid,setOtheruserid,Otheruserid, logged, uuid, setcontent,Content, query, setquery}}
     >
@@ -48,7 +50,7 @@ function App() {
       <RightSection />
     </ChatContext.Provider>
       </ReloadContactsCtxt.Provider>
-
+      </>
 
   );
 }

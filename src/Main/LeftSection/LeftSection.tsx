@@ -60,7 +60,7 @@ const LeftSection = ({}) => {
   return (
     <>
       <section
-        className="z-20 flex flex-col bg-MainBlack w-[500px]
+        className=" flex flex-col bg-MainBlack w-[500px]
         h-screen relative "
       >
         {logged ? (
