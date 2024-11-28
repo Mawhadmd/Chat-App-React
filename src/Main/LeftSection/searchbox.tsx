@@ -1,9 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext } from "../App";
+import { ChatContext, SettingContext } from "../App";
 const Searchbox = ({ setquery, query, setSearchResults }: any) => {
   const [userPfp, setUserPfp] = useState<string | undefined>("");
   const {uuid} = useContext(ChatContext)
+  const {setshowsettings} = useContext(SettingContext)
 
   async function fetchPfp() {
     supabase.auth
@@ -52,6 +53,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
     <div className="h-[10%] min-w-[650px]min-h-16 flex items-center justify-center px-3">
       <div className="relative group">
         <img
+          onClick={()=>setshowsettings((prevvalue:boolean)=>!prevvalue)}
           src={userPfp}
           alt="pfp"
           className="rounded-full cursor-pointer w-fit h-fit"

@@ -1,9 +1,11 @@
 import { useContext } from "react";
 import { ChatContext } from "../App";
 import convertTime from "../util/convertTime";
+import getChatId from "../util/getChatId";
 
 const Message = ({ data, i, uuid, namesmap }: any) => {
-  const {Currentopenchatid} = useContext(ChatContext)
+  const { Currentopenchatid, setCurrentopenchatid,
+    setOtheruserid } = useContext(ChatContext);
 
   return (
     <div key={i}>
@@ -14,7 +16,9 @@ const Message = ({ data, i, uuid, namesmap }: any) => {
             : "bg-Mainpink m-2  rounded-e-lg rounded-t-lg  "
         }`}
       >
-        {Currentopenchatid == "Global"? <span className="text-sm w-full">{namesmap.get(data.Sender)}</span>: null}
+        {Currentopenchatid == "Global" ? (
+          <span onClick={()=>getChatId(data.Sender,uuid, setOtheruserid, setCurrentopenchatid)} className="cursor-pointer hover:text-MainPinkishWhite  text-sm w-full">{namesmap.get(data.Sender)}</span>
+        ) : null}
         <span className="p-2 w-full">{data.Content.toLocaleString()}</span>
         <span className="text-sm ml-auto w-full">
           {convertTime(data.created_at)}

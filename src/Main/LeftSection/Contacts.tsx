@@ -3,12 +3,12 @@ import React, {
   useEffect,
   useState,
   useCallback,
-  useId,
 } from "react";
 import pfp from "../../assets/grayuserpfp.png";
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 import convertTime from "../util/convertTime";
+import getChatId from "../util/getChatId";
 
 interface User {
   id: string;
@@ -28,11 +28,12 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
   const [latestMessagetime, setLatestMessagetime] = useState<string | undefined>();
   const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
     useContext(ChatContext);
-  const {
-    id: userId,
-    user_metadata: { name, avatar_url: customPfp },
-  } = user;
 
+    var userId = user.id
+    var name =  user.user_metadata.name
+    var customPfp = user.user_metadata.avatar_url 
+
+  useEffect
   const sortLatestMessage = useCallback(
     (data: any) => {
       var time = convertTime(data[0].created_at)
@@ -108,31 +109,13 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
     }
   }, [Currentopenchatid, issearch, userId]);
 
-  const getChatId = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("Contacts")
-        .select("chatId")
-        .or(`User1.eq.${userId},User2.eq.${userId}`)
-        .limit(1);
-
-      if (error) throw error;
-      setOtheruserid(userId);
-      if (data && data[0] && data.length != 0)
-        setCurrentopenchatid(data[0].chatId);
-      else setCurrentopenchatid(-1);
-    } catch (error) {
-      console.error("Error getting chat ID:", error);
-      alert(
-        "Couldn't get the chat. Please try again later or contact support."
-      );
-    }
-  };
+ 
 
   return (
     <div
-      onClick={getChatId}
-      className="text-MainPinkishWhite items-center border-collapse w-full mx-auto h-20 bg-MainBlack border-MainBlue/15 border-spacing-2 border-[1px] mb-[-1px] flex gap-3 border-solid cursor-pointer hover:bg-white/20 transition-all "
+      onClick={()=>{getChatId(userId,uuid, setOtheruserid, setCurrentopenchatid)}}
+      className="text-MainPinkishWhite items-center  w-full mx-auto h-20 bg-MainBlack border-blue-300/20 border-spacing-2 border-[1px]
+border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
       <div className="w-16 h-16 ml-1">
         <img
@@ -142,7 +125,7 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
         />
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
-        <span className="text-xl ">{`${name} #${userId.slice(0, 5)}`}</span>
+        <span className="text-xl font-bold ">{`${name} #${userId.slice(0, 5)}`}</span>
         {latestMessage && (
           <div className="flex justify-between">
             <span className="text-sm opacity-70">{latestMessage}</span>

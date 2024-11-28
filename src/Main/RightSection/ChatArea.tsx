@@ -6,10 +6,10 @@ import Message from "./Message";
 const ChatArea = () => {
   const [messages, setmessages] = useState<any[] | null>(null);
   const context = useContext(ChatContext);
-  const { Otheruserid, Currentopenchatid, uuid, setcontent } = context;
+  const { Currentopenchatid, uuid, setcontent } = context;
   const [namesmap, setnamesmap] = useState(new Map());
   const ChatArea = useRef<HTMLDivElement>(null);
-
+  console.log('chatid', Currentopenchatid)
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const channels = supabase

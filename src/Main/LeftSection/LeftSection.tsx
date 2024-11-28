@@ -1,14 +1,16 @@
 import Searchbox from "./searchbox";
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext, ReloadContactsCtxt } from "../App";
+import { ChatContext, ReloadContactsCtxt, SettingContext } from "../App";
 import Contacts from "./Contacts";
 import GlobalChat from "./GlobalChat";
 
 const LeftSection = ({}) => {
   const { setCurrentopenchatid, query,setquery, logged, uuid } =
     useContext(ChatContext);
-  const {Reloadcontact, setReloadcontact} = useContext(ReloadContactsCtxt)
+  const { MobileMode } =
+    useContext(SettingContext);
+  const {Reloadcontact} = useContext(ReloadContactsCtxt)
   const [contacts, setcontacts] = useState<any[] | undefined>();
   const [SearchResults, setSearchResults] = useState([]);
 
@@ -18,13 +20,14 @@ const LeftSection = ({}) => {
 
     let q2 = await supabase.from("Contacts").select("User1").eq("User2", uuid);
 
+
     if (q1.error && q2.error)
       error = q1.error.details + "errors2:" + q2.error.details;
     let arrayofusers: any[] = [];
 
+    console.log(q1,"user1 if user2 is current user")
+    console.log(q2,"user2 if user1 is current user")
     if (!!q1.data && !!q2.data) {
-      console.log(q1,"user1 if user2 is current user")
-      console.log(q2,"user2 if user1 is current user")
       for (let i = 0; i < q1.data?.length; i++) {
         let id = q1.data[i].User2;
         let res = await supabase.auth.admin.getUserById(id);
@@ -60,8 +63,9 @@ const LeftSection = ({}) => {
   return (
     <>
       <section
-        className=" flex flex-col bg-MainBlack w-[500px]
-        h-screen relative "
+      id="LeftSection"
+        className={`flex flex-col bg-MainBlack ${MobileMode? 'w-full': 'w-[500px]'}
+        h-screen relative z-20 transition-all`} 
       >
         {logged ? (
           <>

@@ -39,7 +39,7 @@ import convertTime from "../util/convertTime";
           setCurrentopenchatid("Global");
           console.log("Set");
         }}
-        className="h-24 gap-2 flex items-center pl-5 text-MainPinkishWhite hover:bg-white/20 cursor-pointer border-MainBlue/15 border-[1px]"
+        className="h-24 gap-2 flex items-center pl-5 text-MainPinkishWhite hover:bg-white/20 cursor-pointer border-blue-300/20 border-[1px]"
       >
         <img src={globe} className="h-10 invert" alt="Globe" />
         <div className="flex flex-col gap-2 w-full mx-1">

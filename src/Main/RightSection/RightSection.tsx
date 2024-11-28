@@ -10,14 +10,14 @@ const RightSection = () => {
   return (
     logged && !!Currentopenchatid? 
       (    
-        <section className="flex flex-col w-full max-h-dvh" >
+        <section id="RightSection" className="flex flex-col h-dvh w-full max-h-dvh" >
         <CurrentChat></CurrentChat>
         <ChatArea></ChatArea>
         <ChatInput></ChatInput>     
        </section>
       ):
       (
-        <section className="bg-MainPinkishWhite flex flex-col items-center justify-center w-full max-h-dvh" >
+        <section id="RightSection" className="h-dvh g-MainPinkishWhite flex flex-col items-center justify-center w-full max-h-dvh" >
          <span className="text-MainBlue font-bold text-7xl">{!!Currentopenchatid? "Login to Add Friends and Private message": "Select a chat"}</span>
        </section>
   )
