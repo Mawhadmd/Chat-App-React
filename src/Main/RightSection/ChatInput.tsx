@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext } from "../App";
+import { ChatContext, ReloadContactsCtxt } from "../App";
 
 const ChatArea = () => {
   const context = useContext(ChatContext);
-  const { Currentopenchatid, uuid } = context;
+  const { setCurrentopenchatid, setquery, Currentopenchatid, Otheruserid, uuid } = context;
+  const {setReloadcontact} = useContext(ReloadContactsCtxt)
   const [content, setinputcontent] = useState<
     string | number | readonly string[] | undefined
   >("");
@@ -14,52 +15,39 @@ const ChatArea = () => {
     setinputcontent("");
     if (contentval != "") {
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
-
-
-        var { data:datacheck, error:errorcheck } = await supabase
-          .from("PrivateMessages")
-          .select("id").match({Sender: uuid, Receiver: Currentopenchatid,}).limit(1);
-
-        var { data, error } = await supabase
+        var chatid = null
+        if (Currentopenchatid == -1) {
+          var { data: data2, error: error2 } = await supabase
+            .from("Contacts")
+            .insert([
+              {
+                User1: uuid,
+                User2: Otheruserid,
+              },
+            ])
+            .select();
+          console.log(data2, error2, "Inserting contact");
+          setCurrentopenchatid(data2?.[0].chatId)
+          chatid=data2?.[0].chatId
+          setquery('')
+          setReloadcontact((previous:boolean)=>!previous)
+        }
+        var { data, error } = await supabase // get users messages if exist
           .from("PrivateMessages")
           .insert([
             {
               Content: contentval,
-              Sender: uuid,
-              Receiver: Currentopenchatid,
+              chatId: Currentopenchatid < 1? chatid: Currentopenchatid,
+              Receiver: Otheruserid,
             },
           ])
           .select();
-          
-          console.log(errorcheck,datacheck, 'error,data,check if user has ever sent a message')
-          if(datacheck == null){
-          var { data:data2, error:error2 } = await supabase
-          .from("Contacts")
-          .insert([
-            {
-              Userid: uuid,
-              Contactid: Currentopenchatid,
-            },
-          ])
-          .select();
-          var { data:data3, error:error3 } = await supabase
-          .from("Contacts")
-          .insert([
-            { 
-              Userid: Currentopenchatid,
-              Contactid: uuid,
-            },
-          ])
-          .select();
-        
-          console.log(data2,error2, 'Inserting contact')
-          console.log(data3,error3, 'Inserting contact the other way')
-        }
       } else {
         var { data, error } = await supabase
           .from("Messages")
           .insert([
             {
+              //sender id automatically in
               Content: contentval,
             },
           ])

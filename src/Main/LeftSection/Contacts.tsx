@@ -1,50 +1,147 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback, useId } from "react";
 import pfp from "../../assets/grayuserpfp.png";
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
-const Contacts = ({name , id }:any) => {
-  const [latestmessage, setlatestmessage] = useState<{Content:string,Sender:string}[]>([])
-  let {setCurrentopenchatid, uuid} = useContext(ChatContext)
-  // useEffect(() => {
-  //   getlatestmessage()
-  // },[])
-  async function getlatestmessage() {
-    let { data, error } = await supabase
-    .from("PrivateMessages")
-    .select("Content, Sender")
-    .match({ 
-      Sender: uuid, 
-      Receiver: id 
-    })
-    .order('created_at', { ascending: false }).limit(1);
+
+interface User {
+  id: string;
+  user_metadata: {
+    name: string;
+    avatar_url?: string;
+  };
+}
+
+interface ContactsProps {
+  user: User;
+  issearch?: boolean;
+}
+
+const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
+  const [latestMessage, setLatestMessage] = useState<string | undefined>();
+  const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
+    useContext(ChatContext);
+  const {
+    id: userId,
+    user_metadata: { name, avatar_url: customPfp },
+  } = user;
+
+  const sortLatestMessage = useCallback(
+    (data: any) => {
+      if (data && data[0]) {
+        const message =
+          data[0].Sender === uuid
+            ? `You: ${data[0].Content}`
+            : `${name}: ${data[0].Content}`;
+        setLatestMessage(message);
+      }
+    },
+    [uuid, name]
+  );
+
+  const getLatestMessage = useCallback(async () => {
+    const { data: chatid, error: err } = await supabase
+    .from("Contacts")
+    .select("chatId")
+    .or(`and(User1.eq.${uuid},User2.eq.${userId}),and(User2.eq.${uuid},User1.eq.${userId})`)
+    .order("created_at", { ascending: false })
   
-  if (error) {
-    console.log("Error fetching messages:", error);
-  } else {
-    console.log(data, 'latest messages');
+    console.log(chatid, 'For my guy', userId)
+    
+    if(err){
+      console.log(err,'While getting user chatid')
+    }
+    if(chatid){
+    const { data, error } = await supabase
+      .from("PrivateMessages")
+      .select("Content, Sender")
+      .eq("chatId", chatid[0].chatId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    console.log(data, error, "data, error, latest messages");
+    sortLatestMessage(data);
   }
-  if(data)
-  setlatestmessage([data[0].Content,data[0].Sender])
-  }
+  }, [Currentopenchatid]);
+
+  useEffect(() => {
+    if (!issearch) {
+      getLatestMessage();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!issearch) {
+      const channel = supabase
+        .channel(`Receive-Pvt-Chat-changes-at-${userId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "PrivateMessages",
+            filter: `chatId=eq.${Currentopenchatid}`,
+          },
+          (payload: any) => {
+            console.log("Change received in contacts!");
+            sortLatestMessage([
+              { Content: payload.new.Content, Sender: payload.new.Sender },
+            ]);
+          }
+        )
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") {
+            console.log("Subscribed successfully");
+          } else {
+            console.error("Failed to subscribe:", status);
+          }
+        });
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [Currentopenchatid, issearch, userId]);
+
+  const getChatId = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("Contacts")
+        .select("chatId")
+        .or(`User1.eq.${userId},User2.eq.${userId}`)
+        .limit(1);
+
+      if (error) throw error;
+      setOtheruserid(userId);
+      if (data && data[0] && data.length!=0) setCurrentopenchatid(data[0].chatId);
+      else
+      setCurrentopenchatid(-1)
+    } catch (error) {
+      console.error("Error getting chat ID:", error);
+      alert(
+        "Couldn't get the chat. Please try again later or contact support."
+      );
+    }
+  };
 
   return (
-    <>
-      <div
-      onClick={()=>{setCurrentopenchatid(id)}}
-        className="text-MainPinkishWhite   border-collapse 
-w-full hover:z-10 mx-auto h-20 bg-MainBlack border-MainBlue/15
-      border-spacing-2 border-[1px]  mb-[-1px] flex
-      border-solid cursor-pointer hover:bg-white/20 transition-all items-start"
-      >
-        <div className="w-20 h-20">
-          <img src={pfp} alt="Profile Picture" className="w-20 rounded-full" />
-        </div>
-        <div className="flex flex-col my-2 ">
-          <span>{name.get(id) + " #" + id.slice(0,5)}</span>
-          {latestmessage && latestmessage[0] && <span className="text-xs opacity-70">you: {latestmessage[0].Content}</span>}
-        </div>
+    <div
+      onClick={getChatId}
+      className="text-MainPinkishWhite border-collapse w-full hover:z-10 mx-auto h-20 bg-MainBlack border-MainBlue/15 border-spacing-2 border-[1px] mb-[-1px] flex gap-3 border-solid cursor-pointer hover:bg-white/20 transition-all items-start"
+    >
+      <div className="w-20 h-20">
+        <img
+          src={customPfp || pfp}
+          alt="Profile Picture"
+          className="w-20 rounded-full"
+        />
       </div>
-    </>
+      <div className="flex flex-col my-2">
+        <span className="text-sm">{`${name} #${userId.slice(0, 5)}`}</span>
+        {latestMessage && (
+          <span className="text-xs opacity-70">{latestMessage}</span>
+        )}
+      </div>
+    </div>
   );
 };
 

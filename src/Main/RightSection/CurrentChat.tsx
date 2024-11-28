@@ -8,18 +8,21 @@ const ChatArea = () => {
   const context = useContext(ChatContext);
   const [lastseen, setlastseen] = useState<string>('');
   const [name, setname] = useState<string>('');
-  const { Currentopenchatid } = context;
+  const [pfp, setpfp] = useState<string>('');
+  const { Currentopenchatid,Otheruserid } = context;
   async function getlastseen() {
 
-      let res = await supabase.auth.admin.getUserById(Currentopenchatid);
+      let res = await supabase.auth.admin.getUserById(Otheruserid);
       setname(res.data.user?.user_metadata.name);
+      setpfp(res.data.user?.user_metadata.avatar_url);
+      
       setlastseen(res.data.user?.last_sign_in_at?.slice(0, 18).replace("T", " ") || '');
     
   }
 
   useEffect(() => {
     getlastseen();
-  }, [Currentopenchatid]);
+  }, [Otheruserid]);
   return (
     <div
       id="CurrentChat"
@@ -28,7 +31,7 @@ const ChatArea = () => {
       <div className="w-fit pr-10 pl-5 h-full gap-2 flex items-center text-MainPinkishWhite hover:bg-white/20 cursor-pointer">
         {Currentopenchatid != "Global" ? (
           <>
-            <img alt="PFP" src={pfp} className="cursor-pointer w-20" />
+            <img  alt="PFP" src={pfp} className="cursor-pointer w-20 rounded-full" />
             <div>
               <span>{name}</span>
               <br />

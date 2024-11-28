@@ -20,7 +20,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
     fetchPfp();
   }, []);
 
-  async function queryusers() {
+  async function runquery() {
     console.log(query);
     let res = (await supabase.auth.admin.listUsers()).data.users.filter(
       (e) =>
@@ -40,7 +40,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
     setSearchResults()
      tout = setTimeout(() => {
      
-        queryusers();
+        runquery();
        
       }, 1500);
     }

@@ -4,10 +4,12 @@ import RightSection from "./RightSection/RightSection";
 import { supabase } from "./Supabase";
 
 export const ChatContext = createContext<any>(null);
+export const ReloadContactsCtxt = createContext<any>(null);
 
 
 function App() {
-  
+  const [Reloadcontact, setReloadcontact] = useState<boolean>();
+  const [query, setquery] = useState<string>("");
   const [Content, setcontent] = useState<string>('');
   const [logged, setLogged] = useState(false);
   const [uuid, setuuid] = useState<string | undefined>();
@@ -20,6 +22,7 @@ function App() {
     getuuid(); // get uuid of the current user logged in
   }, []);
   const [Currentopenchatid, setCurrentopenchatid] = useState<string | undefined>(undefined);
+  const [Otheruserid, setOtheruserid] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -36,12 +39,16 @@ function App() {
 
   return (
 
+    <ReloadContactsCtxt.Provider value={{Reloadcontact, setReloadcontact}}>
+
     <ChatContext.Provider
-      value={{ setCurrentopenchatid, Currentopenchatid, logged, uuid, setcontent,Content}}
+    value={{ setCurrentopenchatid, Currentopenchatid,setOtheruserid,Otheruserid, logged, uuid, setcontent,Content, query, setquery}}
     >
       <LeftSection />
       <RightSection />
     </ChatContext.Provider>
+      </ReloadContactsCtxt.Provider>
+
 
   );
 }

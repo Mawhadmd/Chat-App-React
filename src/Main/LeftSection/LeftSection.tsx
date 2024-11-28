@@ -1,40 +1,53 @@
 import Searchbox from "./searchbox";
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext } from "../App";
+import { ChatContext, ReloadContactsCtxt } from "../App";
 import Contacts from "./Contacts";
 import GlobalChat from "./GlobalChat";
 
 const LeftSection = ({}) => {
-  const { setCurrentopenchatid, logged, uuid } = useContext(ChatContext);
-  const [query, setquery] = useState<string>("");
-  const [contacts, setcontacts] = useState<{ Contactid: any }[]>();
+  const { setCurrentopenchatid, query,setquery, logged, uuid } =
+    useContext(ChatContext);
+  const {Reloadcontact, setReloadcontact} = useContext(ReloadContactsCtxt)
+  const [contacts, setcontacts] = useState<any[] | undefined>();
   const [SearchResults, setSearchResults] = useState([]);
-  const [namesmap, setnamesmap] = useState(new Map());
+
   async function getcontacts() {
-    var { data, error } = await supabase
-      .from("Contacts")
-      .select("Contactid")
-      .eq("Userid", uuid);
-    let map = new Map();
-    if (!!data) {
-      for (let i = 0; i < data?.length; i++) {
-        let id = data[i].Contactid;
-        let res = (await supabase.auth.admin.getUserById(id)).data.user
-          ?.user_metadata.name;
-        map.set(id, res);
+    var data, error;
+    let q1 = await supabase.from("Contacts").select("User2").eq("User1", uuid);
+
+    let q2 = await supabase.from("Contacts").select("User1").eq("User2", uuid);
+
+    if (q1.error && q2.error)
+      error = q1.error.details + "errors2:" + q2.error.details;
+    let arrayofusers: any[] = [];
+
+    if (!!q1.data && !!q2.data) {
+      console.log(q1,"user1 if user2 is current user")
+      console.log(q2,"user2 if user1 is current user")
+      for (let i = 0; i < q1.data?.length; i++) {
+        let id = q1.data[i].User2;
+        let res = await supabase.auth.admin.getUserById(id);
+        arrayofusers.push(res);
       }
-      setnamesmap(map);
-      setcontacts(data);
+      for (let i = 0; i < q2.data?.length; i++) {
+        let id = q2.data[i].User1;
+
+        let res = await supabase.auth.admin.getUserById(id);
+        arrayofusers.push(res);
+      }
     }
+    console.log(arrayofusers, "Array of contacts");
+    setcontacts(arrayofusers);
+
     console.log(data, error, "data,error getting contacts");
   }
-
+ 
   useEffect(() => {
     if (uuid) {
       getcontacts();
     }
-  }, [uuid]);
+  }, [uuid,Reloadcontact]);
 
   function handlelogin() {
     supabase.auth.signInWithOAuth({ provider: "google" });
@@ -43,7 +56,6 @@ const LeftSection = ({}) => {
   function Logout() {
     if (confirm("Are you sure?")) supabase.auth.signOut();
   }
-
 
   return (
     <>
@@ -70,11 +82,7 @@ const LeftSection = ({}) => {
                     </div>
                     {SearchResults.map((e: any, i) => {
                       return (
-                        <Contacts
-                          key={i}
-                          name={e.user_metadata.name}
-                          id={e.id}
-                        ></Contacts>
+                        <Contacts issearch={true} key={i} user={e}></Contacts>
                       );
                     })}
                   </>
@@ -85,21 +93,21 @@ const LeftSection = ({}) => {
                 )
               ) : (
                 <div className="mt-5 mx-auto text-2xl text-MainPinkishWhite">
-                  Loading
+                  Loading...
                 </div>
               )
             ) : (
-              <div className="h-24 gap-2 flex items-center mx-auto text-MainPinkishWhite text-2xl">
+              <div className=" h-fit gap-2 mt-1 flex flex-col items-center justify-center text-MainPinkishWhite text-2xl">
                 {contacts != undefined ? (
-                  contacts.map(({ Contactid }, i) => {
-                    return (
-                      <Contacts
-                        key={i}
-                        name={namesmap}
-                        id={Contactid}
-                      ></Contacts>
-                    );
-                  })
+                  contacts.length > 0 ? (
+                    contacts.map((item, i) => {
+                      return (
+                        <Contacts key={i} user={item?.data.user}></Contacts>
+                      );
+                    })
+                  ) : (
+                    <span>No Contacts</span>
+                  )
                 ) : (
                   <span>Loading...</span>
                 )}

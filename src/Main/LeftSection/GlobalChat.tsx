@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useEffect, useContext } from "react";
 import { supabase } from "../Supabase";
 import globe from "../../assets/global-communication_9512332.png";
 import { ChatContext } from "../App";
@@ -17,6 +17,7 @@ import { ChatContext } from "../App";
         .select("Content, Sender")
         .order("created_at", { ascending: false })
         .limit(1);
+
         if (data) {
         await getname(data[0].Sender)
         setcontent(data[0].Content)
@@ -25,6 +26,7 @@ import { ChatContext } from "../App";
 }
   
     useEffect(() => {
+      console.log('how tf')
       fetchlatestmessage();
     }, []);
   
@@ -39,7 +41,7 @@ import { ChatContext } from "../App";
         <img src={globe} className="h-10 invert" alt="Globe" />
         <div className="flex flex-col gap-2">
           <span>Global Chat</span>
-          <span>{`${name}: ${Content}`}</span>
+          <span className="text-sm text-MainPinkishWhite/60">{`${name}: ${Content}`}</span>
         </div>
       </div>
     );
