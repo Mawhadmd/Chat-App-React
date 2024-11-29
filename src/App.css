@@ -16,11 +16,11 @@ body {
   display: flex;
 }
 :root {
-  --MainBlack: #363732;
-  --MainBlue: #66c3ff;
-  --MainSky: #53d8fb;
-  --MainPinkishWhite: #dce1e9;
-  --Mainpink: #d4afb9;
+  --MainBlack: 54, 55, 50;
+  --MainBlue: 102, 195, 255;
+  --MainSky: 83, 216, 251;
+  --MainPinkishWhite: 220, 225, 233;
+  --Mainpink: 212, 175, 185;
 }
 
 button#login {

@@ -1,4 +1,4 @@
-import pfp from "../../assets/grayuserpfp.png";
+// import pfp from "../../assets/grayuserpfp.png";
 import globe from "../../assets/global-communication_9512332.png";
 import { ChatContext, SettingContext } from "../App";
 import { useContext, useEffect, useState } from "react";

@@ -7,15 +7,15 @@ export default {
         BorderColor: "#3A3F00",
       },
       backgroundImage: {
-        ChatAreaBG: "url(src/assets/blackbackground.png)",
+        ChatAreaBG: "url(public/blackbackground.png)",
       },
 
       colors: {
-        MainBlack: "var(--MainBlack)",
-        MainSky: "var(--MainBlue)",
-        MainBlue: " var(--MainSky)",
-        MainPinkishWhite: "var(--MainPinkishWhite)",
-        Mainpink: "var(--Mainpink)",
+        MainBlack: "rgba(var(--MainBlack))",
+        MainSky: "rgba(var(--MainBlue))",
+        MainBlue: " rgba(var(--MainSky))",
+        MainPinkishWhite: "rgba(var(--MainPinkishWhite))",
+        Mainpink: "rgba(var(--Mainpink))",
       },
     },
   },

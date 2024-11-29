@@ -6,7 +6,7 @@ import convertTime from "../util/convertTime";
  const GlobalChat = ({ setCurrentopenchatid }: any) => {
     const [name, setname] = useState<string>('');
     const [latestMessagetime, setlatestmessagetime] = useState<string>('');
-    var {Content,setcontent} = useContext(ChatContext)
+    var {Content:newmessage,setcontent} = useContext(ChatContext)
 
     async function getname(id: string) {
         let name = await (await (supabase.auth.admin.getUserById(id))).data.user?.user_metadata.name
@@ -22,16 +22,19 @@ import convertTime from "../util/convertTime";
 
         if (data) {
         await getname(data[0].Sender)
+        console.log(data[0].created_at)
         setlatestmessagetime(data[0].created_at)
-        setcontent(data[0].Content)
+        setcontent({Content: data[0].Content})
       console.log(data, error, "data,error for messages latest in global chat");
     }
 }
-  
-    useEffect(() => {
-      console.log('how tf')
-      fetchlatestmessage();
-    }, []);
+useEffect(() => {
+  fetchlatestmessage();
+}, []);
+useEffect(()=>{
+  if(newmessage.created_at)
+  setlatestmessagetime(newmessage.created_at)
+},[newmessage])
   
     return (
       <div
@@ -39,14 +42,14 @@ import convertTime from "../util/convertTime";
           setCurrentopenchatid("Global");
           console.log("Set");
         }}
-        className="h-24 gap-2 flex items-center pl-5 text-MainPinkishWhite hover:bg-white/20 cursor-pointer border-blue-300/20 border-[1px]"
+        className=" h-24 gap-2 flex items-center pl-5 text-MainPinkishWhite hover:bg-white/20 cursor-pointer border-MainBlue/20 border-[1px]"
       >
         <img src={globe} className="h-10 invert" alt="Globe" />
         <div className="flex flex-col gap-2 w-full mx-1">
-          <span>Global Chat</span>
+          <span className="font-bold">Global Chat</span>
           <div className="flex justify-between">
-          <span className="text-sm text-MainPinkishWhite/60">{`${name}: ${Content}`}</span>
-          <span className="text-sm text-MainPinkishWhite">At {convertTime(latestMessagetime)}</span>
+          <span className=" text-sm text-MainPinkishWhite/60">{`${name}: ${newmessage?.Content?.length>30? newmessage?.Content?.slice(0,30) + '...': newmessage?.Content}`}</span>
+          <span className=" text-sm text-MainPinkishWhite text-nowrap">At {convertTime(latestMessagetime)}</span>
           </div>
         </div>
       </div>

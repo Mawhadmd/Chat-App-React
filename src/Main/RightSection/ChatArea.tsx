@@ -9,7 +9,7 @@ const ChatArea = () => {
   const { Currentopenchatid, uuid, setcontent } = context;
   const [namesmap, setnamesmap] = useState(new Map());
   const ChatArea = useRef<HTMLDivElement>(null);
-  console.log('chatid', Currentopenchatid)
+  console.log("chatid", Currentopenchatid);
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const channels = supabase
@@ -20,16 +20,16 @@ const ChatArea = () => {
           (payload: any) => {
             console.log("Change received!", messages, payload);
             setmessages((PreviousMessages) => [
-              ...(PreviousMessages || []),
-              payload.new,
+              payload.new, ...(PreviousMessages || []),
+             
             ]);
-            setcontent(payload.new.Content);
+            setcontent(payload.new);
           }
         )
         .subscribe();
 
       return () => {
-        channels.unsubscribe()
+        channels.unsubscribe();
       };
     } else if (Currentopenchatid != -1) {
       const channels = supabase
@@ -46,7 +46,7 @@ const ChatArea = () => {
             console.log("Change received in chatarea!", messages, payload);
             setmessages((prevMessages) =>
               Array.isArray(prevMessages)
-                ? [...prevMessages, payload.new]
+                ? [payload.new,...prevMessages]
                 : [payload.new]
             );
           }
@@ -54,7 +54,7 @@ const ChatArea = () => {
         .subscribe();
 
       return () => {
-        channels.unsubscribe()
+        channels.unsubscribe();
       };
     } else {
       setmessages([]);
@@ -73,7 +73,7 @@ const ChatArea = () => {
         let query = await supabase
           .from("Messages")
           .select("*")
-          .order("id", { ascending: true })
+          .order("created_at", { ascending: false })
           .limit(30);
         data = query.data;
         error = query.error;
@@ -83,7 +83,7 @@ const ChatArea = () => {
           .select("*")
           .eq("chatId", Currentopenchatid)
           .limit(30)
-          .order("id", { ascending: true });
+          .order("created_at", { ascending: false });
 
         if (dt) data = dt;
         if (err) error = err;
@@ -115,9 +115,9 @@ const ChatArea = () => {
     <div
       id="ChatArea"
       ref={ChatArea}
-      className="scroll-smooth overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG "
+      className=" scroll-smooth overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
-      {messages? (
+      {messages ? (
         messages?.length == 0 ? (
           <div className="text-MainPinkishWhite h-full w-full text-2xl flex justify-center items-center">
             Start Messaging!

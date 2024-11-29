@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+
 } from "react";
 import pfp from "../../assets/grayuserpfp.png";
 import { supabase } from "../Supabase";
@@ -33,10 +34,11 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
     var name =  user.user_metadata.name
     var customPfp = user.user_metadata.avatar_url 
 
-  useEffect
+  
   const sortLatestMessage = useCallback(
     (data: any) => {
-      var time = convertTime(data[0].created_at)
+      
+      let time = convertTime(data[0].created_at)
       setLatestMessagetime(time)
       if (data && data[0]) {
         const message =
@@ -83,7 +85,7 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
   }, []);
 
   useEffect(() => {
-    if (!issearch) {
+    if (!issearch && userId && Currentopenchatid) {
       const channel = supabase
         .channel(`Receive-Pvt-Chat-changes-at-${userId}`)
         .on(
@@ -95,10 +97,8 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
             filter: `chatId=eq.${Currentopenchatid}`,
           },
           (payload: any) => {
-            console.log("Change received in contacts!");
-            sortLatestMessage([
-              { Content: payload.new.Content, Sender: payload.new.Sender },
-            ]);
+            console.log("Change received in contacts!", payload.new);
+            getLatestMessage()
           }
         )
         .subscribe();
@@ -107,14 +107,14 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
         channel.unsubscribe();
       };
     }
-  }, [Currentopenchatid, issearch, userId]);
+  }, [Currentopenchatid, userId, issearch]);
 
  
 
   return (
     <div
       onClick={()=>{getChatId(userId,uuid, setOtheruserid, setCurrentopenchatid)}}
-      className="text-MainPinkishWhite items-center  w-full mx-auto h-20 bg-MainBlack border-blue-300/20 border-spacing-2 border-[1px]
+      className="text-MainPinkishWhite items-center  w-full mx-auto h-20 bg-MainBlack border-MainBlue/20 border-spacing-2 border-[1px]
 border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
       <div className="w-16 h-16 ml-1">
@@ -128,8 +128,8 @@ border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-al
         <span className="text-xl font-bold ">{`${name} #${userId.slice(0, 5)}`}</span>
         {latestMessage && (
           <div className="flex justify-between">
-            <span className="text-sm opacity-70">{latestMessage}</span>
-            <span className="text-sm text-MainPinkishWhite">At {latestMessagetime}</span>
+            <span className="text-sm opacity-70">{`${latestMessage.length>38? latestMessage.slice(0,38) + '...': latestMessage}`}</span>
+            <span className="text-sm text-MainPinkishWhite text-nowrap">At {latestMessagetime}</span>
           </div>
         )}
       </div>
