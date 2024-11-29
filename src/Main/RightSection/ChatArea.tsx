@@ -3,6 +3,7 @@ import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3"
 import Message from "./Message";
+import BGimage from "../../assets/blackbackground.png";
 
 const ChatArea = () => {
   const [messages, setmessages] = useState<any[] | null>(null);
@@ -122,6 +123,7 @@ const ChatArea = () => {
     <div
       id="ChatArea"
       ref={ChatArea}
+      style={{backgroundImage: `url(${BGimage})`}}
       className=" scroll-smooth overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
       {messages ? (

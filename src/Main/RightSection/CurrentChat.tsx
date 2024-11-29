@@ -45,12 +45,7 @@ const ChatArea = () => {
              { <span>Last Seen: {lastseen}</span>}
             </div>
             </div>
-            {MobileMode && 
-            <div>
-            <button onClick={GoBack} className="text-MainBlack p-4 bg-MainPinkishWhite font-bold rounded-full ml-auto">
-              Back
-            </button>
-          </div>}
+            
           </>
         ) : (
           <>
@@ -60,6 +55,12 @@ const ChatArea = () => {
             </div>
           </>
         )}
+        {MobileMode && 
+            <div>
+            <button onClick={GoBack} className="text-MainBlack p-4 bg-MainPinkishWhite font-bold rounded-full ml-auto">
+              Back
+            </button>
+          </div>}
     </div>
   );
 };

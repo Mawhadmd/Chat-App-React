@@ -23,12 +23,13 @@ interface User {
 interface ContactsProps {
   user: User;
   issearch?: boolean;
-  chatId:string
+  chatId?:string
 }
-
+//make a new component called searchcontacts
 const Contacts: React.FC<ContactsProps> = ({ user,chatId, issearch = false }) => {
   const [latestMessage, setLatestMessage] = useState<string | undefined>();
   const [latestMessagetime, setLatestMessagetime] = useState<string | undefined>();
+  const [inyourcontacts, setinyourcontacts] = useState<boolean>(false);
   const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
     useContext(ChatContext);
     const userId = useRef(user.id);
@@ -53,10 +54,15 @@ const Contacts: React.FC<ContactsProps> = ({ user,chatId, issearch = false }) =>
     },
     [uuid, name.current]
   );
-
+  useEffect(()=>{
+    if(issearch && chatId!='-1'){
+      setinyourcontacts(true)
+    }
+  },[])
+//all this functions run only if its not search
   const getLatestMessage = useCallback(async () => {
  
-    if (chatId) {
+    if (chatId!='-1') {
       const { data, error } = await supabase
         .from("PrivateMessages")
         .select("Content, Sender, created_at")
@@ -70,7 +76,7 @@ const Contacts: React.FC<ContactsProps> = ({ user,chatId, issearch = false }) =>
   }, [Currentopenchatid]);
 
   useEffect(() => {
-    if (!issearch) {
+    if (chatId != '-1') {
       getLatestMessage();
     }
   }, []);
@@ -105,7 +111,7 @@ const Contacts: React.FC<ContactsProps> = ({ user,chatId, issearch = false }) =>
     }
   }, [Currentopenchatid, userId.current, issearch]);
 
- 
+ //to here
 
   return (
     <div
@@ -129,6 +135,7 @@ border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-al
           </div>
         )}
       </div>
+      {inyourcontacts && <div className="bg-green-600 flex items-center text-center justify-center rounded-xl w-fit h-fit p-1 text-sm">This guy is in your contacts</div>}
     </div>
   );
 };

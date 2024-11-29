@@ -1,11 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: 'Open Sans';
+  font-weight: 400;
   text-rendering: optimizeLegibility;
 }
 body {
@@ -23,13 +25,6 @@ body {
   --Mainpink: 212, 175, 185;
 }
 
-button#login {
-  transition: all 0.3s;
-  &:hover {
-    color: rgb(255, 255, 255);
-    background-color: rgb(0, 0, 0);
-  }
-}
 
 #RightSection {
     transition: all 150ms;

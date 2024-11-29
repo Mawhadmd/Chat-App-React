@@ -17,8 +17,8 @@ const RightSection = () => {
        </section>
       ):
       (
-        <section id="RightSection" className="h-dvh g-MainPinkishWhite flex flex-col items-center justify-center w-full max-h-dvh" >
-         <span className="text-MainBlue font-bold text-7xl">{!!Currentopenchatid? "Login to Add Friends and Private message": "Select a chat"}</span>
+        <section id="RightSection" className="bg-MainPinkishWhite flex flex-col items-center justify-center w-full h-dvh max-h-dvh" >
+         <span className="text-MainBlack font-bold text-6xl text-center p-5 bg-Mainpink w-fit max-w-[500px] rounded-lg h-fit">{!logged? "Login to Add Friends and Private message": "Select a chat"}</span>
        </section>
   )
 

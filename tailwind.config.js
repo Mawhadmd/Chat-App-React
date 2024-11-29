@@ -3,13 +3,6 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      borderColor: {
-        BorderColor: "#3A3F00",
-      },
-      backgroundImage: {
-        ChatAreaBG: "url(src/assets/blackbackground.png)",
-      },
-
       colors: {
         MainBlack: "rgba(var(--MainBlack))",
         MainSky: "rgba(var(--MainBlue))",

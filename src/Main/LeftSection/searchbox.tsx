@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext, SettingContext } from "../App";
+import getChatId from "../util/getChatId";
 const Searchbox = ({ setquery, query, setSearchResults }: any) => {
   const [userPfp, setUserPfp] = useState<string | undefined>("");
   const {uuid} = useContext(ChatContext)
@@ -30,8 +31,14 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
         && e.id != uuid
         
     );
-    setSearchResults(res);
-    console.log(res);
+    const result = await Promise.all(
+      res.map(async (user) => {
+        let id = await getChatId(user.id, uuid);
+        return { user, chatid: id };
+      })
+    );
+    setSearchResults(result);
+    console.log(res, 'Search results of the search');
   }
 
 
@@ -43,7 +50,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
      
         runquery();
        
-      }, 1500);
+      }, 1000);
     }
     return () => clearTimeout(tout);
   }, [query]);
