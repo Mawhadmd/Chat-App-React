@@ -7,7 +7,7 @@ export default {
         BorderColor: "#3A3F00",
       },
       backgroundImage: {
-        ChatAreaBG: "url(public/blackbackground.png)",
+        ChatAreaBG: "url(src/assets/blackbackground.png)",
       },
 
       colors: {

@@ -1,13 +1,14 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
+import audio from "../../assets/WhatsappMessage.mp3"
 import Message from "./Message";
 
 const ChatArea = () => {
   const [messages, setmessages] = useState<any[] | null>(null);
   const context = useContext(ChatContext);
   const { Currentopenchatid, uuid, setcontent } = context;
-  const [namesmap, setnamesmap] = useState(new Map());
+  const [UserMessageMap, setUserMessageMap] = useState(new Map());
   const ChatArea = useRef<HTMLDivElement>(null);
   console.log("chatid", Currentopenchatid);
   useEffect(() => {
@@ -20,10 +21,11 @@ const ChatArea = () => {
           (payload: any) => {
             console.log("Change received!", messages, payload);
             setmessages((PreviousMessages) => [
-              payload.new, ...(PreviousMessages || []),
-             
+              payload.new,
+              ...(PreviousMessages || []),
             ]);
             setcontent(payload.new);
+            (()=>new Audio(audio).play())()
           }
         )
         .subscribe();
@@ -46,7 +48,7 @@ const ChatArea = () => {
             console.log("Change received in chatarea!", messages, payload);
             setmessages((prevMessages) =>
               Array.isArray(prevMessages)
-                ? [payload.new,...prevMessages]
+                ? [payload.new, ...prevMessages]
                 : [payload.new]
             );
           }
@@ -89,18 +91,22 @@ const ChatArea = () => {
         if (err) error = err;
       }
 
-      let namesmap = new Map();
+      let UserMessageMap = new Map();
       if (!!data) {
         for (let i = 0; i < data?.length; i++) {
-          if (!namesmap.has(data[i].Sender)) {
+          if (!UserMessageMap.has(data[i].Sender)) {
             var { data: payload } = await supabase.auth.admin.getUserById(
               data[i].Sender
             );
 
-            namesmap.set(data[i].Sender, payload.user?.user_metadata.name);
+            UserMessageMap.set(data[i].Sender, {
+              name: payload.user?.user_metadata.name,
+              id: payload.user?.id,
+              color: null,
+            });
           }
         }
-        setnamesmap(namesmap);
+        setUserMessageMap(UserMessageMap);
         setmessages(data);
       }
       console.log(data, error, "data, error for Getdata");
@@ -108,6 +114,7 @@ const ChatArea = () => {
   }
 
   useEffect(() => {
+    
     ChatArea.current?.scrollTo(0, ChatArea.current.scrollHeight);
   }, [messages]); //scrolls down
 
@@ -129,7 +136,7 @@ const ChatArea = () => {
               uuid={uuid}
               i={i}
               data={data}
-              namesmap={namesmap}
+              UserMessageMap={UserMessageMap}
             />
           ))
         )

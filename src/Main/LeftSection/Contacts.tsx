@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 
 } from "react";
 import pfp from "../../assets/grayuserpfp.png";
@@ -22,17 +23,19 @@ interface User {
 interface ContactsProps {
   user: User;
   issearch?: boolean;
+  chatId:string
 }
 
-const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
+const Contacts: React.FC<ContactsProps> = ({ user,chatId, issearch = false }) => {
   const [latestMessage, setLatestMessage] = useState<string | undefined>();
   const [latestMessagetime, setLatestMessagetime] = useState<string | undefined>();
   const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
     useContext(ChatContext);
+    const userId = useRef(user.id);
+  const name = useRef(user.user_metadata.name);
+  const customPfp = useRef(user.user_metadata.avatar_url );
+  console.log(chatId, 'chatid for', userId, uuid)
 
-    var userId = user.id
-    var name =  user.user_metadata.name
-    var customPfp = user.user_metadata.avatar_url 
 
   
   const sortLatestMessage = useCallback(
@@ -44,32 +47,20 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
         const message =
           data[0].Sender === uuid
             ? `You: ${data[0].Content}`
-            : `${name}: ${data[0].Content}`;
+            : `${name.current}: ${data[0].Content}`;
         setLatestMessage(message);
       }
     },
-    [uuid, name]
+    [uuid, name.current]
   );
 
   const getLatestMessage = useCallback(async () => {
-    const { data: chatid, error: err } = await supabase
-      .from("Contacts")
-      .select("chatId")
-      .or(
-        `and(User1.eq.${uuid},User2.eq.${userId}),and(User2.eq.${uuid},User1.eq.${userId})`
-      )
-      .order("created_at", { ascending: false });
-
-    console.log(chatid, "For my guy", userId);
-
-    if (err) {
-      console.log(err, "While getting user chatid");
-    }
-    if (chatid) {
+ 
+    if (chatId) {
       const { data, error } = await supabase
         .from("PrivateMessages")
         .select("Content, Sender, created_at")
-        .eq("chatId", chatid[0].chatId)
+        .eq("chatId", chatId)
         .order("created_at", { ascending: false })
         .limit(1);
 
@@ -85,47 +76,52 @@ const Contacts: React.FC<ContactsProps> = ({ user, issearch = false }) => {
   }, []);
 
   useEffect(() => {
-    if (!issearch && userId && Currentopenchatid) {
+    if (!issearch && userId.current && Currentopenchatid) {
+
       const channel = supabase
-        .channel(`Receive-Pvt-Chat-changes-at-${userId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "PrivateMessages",
-            filter: `chatId=eq.${Currentopenchatid}`,
-          },
-          (payload: any) => {
-            console.log("Change received in contacts!", payload.new);
-            getLatestMessage()
+      .channel(`Receive-Pvt-Chat-changes-${chatId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT", // or use "*" if you want all events
+          schema: "public",
+          table: "PrivateMessages",
+          filter: `chatId=eq.${chatId}`
+        },
+        (payload) => {
+          console.log("Change received in contacts!", payload.new);
+          if (chatId == payload.new.chatId) {
+            sortLatestMessage([
+              { Content: payload.new.Content, Sender: payload.new.Sender, created_at: payload.new.created_at },
+            ]);
           }
-        )
-        .subscribe();
+        }
+      )
+      .subscribe();
 
       return () => {
         channel.unsubscribe();
       };
     }
-  }, [Currentopenchatid, userId, issearch]);
+  }, [Currentopenchatid, userId.current, issearch]);
 
  
 
   return (
     <div
-      onClick={()=>{getChatId(userId,uuid, setOtheruserid, setCurrentopenchatid)}}
+      onClick={()=>{getChatId(userId.current,uuid, setOtheruserid, setCurrentopenchatid)}}
       className="text-MainPinkishWhite items-center  w-full mx-auto h-20 bg-MainBlack border-MainBlue/20 border-spacing-2 border-[1px]
 border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
       <div className="w-16 h-16 ml-1">
         <img
-          src={customPfp || pfp}
+          src={customPfp.current || pfp}
           alt="Profile Picture"
           className="w-20 rounded-full"
         />
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
-        <span className="text-xl font-bold ">{`${name} #${userId.slice(0, 5)}`}</span>
+        <span className="text-xl font-bold ">{`${name.current} #${userId.current.slice(0, 5)}`}</span>
         {latestMessage && (
           <div className="flex justify-between">
             <span className="text-sm opacity-70">{`${latestMessage.length>38? latestMessage.slice(0,38) + '...': latestMessage}`}</span>

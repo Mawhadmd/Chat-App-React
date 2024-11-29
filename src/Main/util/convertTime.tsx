@@ -1,16 +1,21 @@
-// Time in the db is formated as follow: 2024-11-28 16:39:49.944192+00
-function convertTime(time:string){ 
+function convertTime(time: string): string {
+  if (!time) {
+    return 'loading';
+  }
 
-  if(!!!time)
-    return 'loading'
-    let isAm: boolean;
-    Number(time.slice(11, 13)) > 12 ? (isAm = false) : (isAm = true);
-    let timeconverted =
-      Number(time.slice(11, 13)) > 12
-        ? Number(time.slice(11, 13))-12
-        : Number(time.slice(11, 13))+12;
+  // Create a Date object from the UTC time string
+  const utcDate = new Date(time);
 
-    return timeconverted + time.slice(13, 19) + (isAm ? " am" : " pm");
+
+    // Format the time
+  const hours = utcDate.getHours();
+  const minutes = utcDate.getMinutes();
+  const isAm = hours < 12;
+
+  const formattedHours = hours % 12 || 12; // Convert 0 to 12 for 12 AM
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${formattedHours}:${formattedMinutes} ${isAm ? 'am' : 'pm'}`;
 }
 
-export default convertTime
+export default convertTime;

@@ -16,9 +16,9 @@ const LeftSection = ({}) => {
 
   async function getcontacts() {
     var data, error;
-    let q1 = await supabase.from("Contacts").select("User2").eq("User1", uuid);
+    let q1 = await supabase.from("Contacts").select("User2, chatId").eq("User1", uuid);
 
-    let q2 = await supabase.from("Contacts").select("User1").eq("User2", uuid);
+    let q2 = await supabase.from("Contacts").select("User1, chatId").eq("User2", uuid);
 
 
     if (q1.error && q2.error)
@@ -31,13 +31,15 @@ const LeftSection = ({}) => {
       for (let i = 0; i < q1.data?.length; i++) {
         let id = q1.data[i].User2;
         let res = await supabase.auth.admin.getUserById(id);
-        arrayofusers.push(res);
+        let  chatId = q1.data[i].chatId
+        arrayofusers.push({res, chatId});
       }
       for (let i = 0; i < q2.data?.length; i++) {
         let id = q2.data[i].User1;
 
         let res = await supabase.auth.admin.getUserById(id);
-        arrayofusers.push(res);
+       let  chatId = q2.data[i].chatId
+        arrayofusers.push({res, chatId});
       }
     }
     console.log(arrayofusers, "Array of contacts");
@@ -84,9 +86,9 @@ const LeftSection = ({}) => {
                     <div className="h-20 text-2xl content-center mx-auto text-MainPinkishWhite">
                       Search Results
                     </div>
-                    {SearchResults.map((e: any, i) => {
+                    {SearchResults.map((res: any, i) => {
                       return (
-                        <Contacts issearch={true} key={i} user={e}></Contacts>
+                        <Contacts issearch={true} chatId={''} key={i} user={res}></Contacts>
                       );
                     })}
                   </>
@@ -104,9 +106,9 @@ const LeftSection = ({}) => {
               <div className=" h-fit gap-2 mt-1 flex flex-col items-center justify-center text-MainPinkishWhite text-2xl">
                 {contacts != undefined ? (
                   contacts.length > 0 ? (
-                    contacts.map((item, i) => {
+                    contacts.map(({res,chatId}, i) => {
                       return (
-                        <Contacts key={i} user={item?.data.user}></Contacts>
+                        <Contacts key={i} chatId={chatId} user={res?.data.user}></Contacts>
                       );
                     })
                   ) : (
