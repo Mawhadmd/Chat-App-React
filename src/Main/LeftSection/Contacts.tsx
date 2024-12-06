@@ -127,7 +127,7 @@ border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-al
         />
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
-        <span className="text-xl font-bold ">{`${name.current} #${userId.current.slice(0, 5)}`}</span>
+        <span className="text-xl font-bold whitespace-nowrap">{`${name.current}`} <span className="text-xs">{`#${userId.current.slice(0, 5)}`}</span></span>
         {latestMessage && (
           <div className="flex justify-between">
             <span className="text-sm opacity-70">{`${latestMessage.length>38? latestMessage.slice(0,38) + '...': latestMessage}`}</span>

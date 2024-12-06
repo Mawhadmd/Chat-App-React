@@ -30,8 +30,7 @@ const LeftSection = ({}) => {
       error = q1.error.details + "errors2:" + q2.error.details;
     let arrayofusers: any[] = [];
 
-    console.log(q1, "user1 if user2 is current user");
-    console.log(q2, "user2 if user1 is current user");
+
     if (!!q1.data && !!q2.data) {
       for (let i = 0; i < q1.data?.length; i++) {
         let id = q1.data[i].User2;
@@ -72,7 +71,7 @@ const LeftSection = ({}) => {
       <section
         id="LeftSection"
         className={`flex flex-col bg-MainBlack ${
-          MobileMode ? "w-full" : "w-[500px]"
+          MobileMode ? "w-full" : "w-[500px] min-w-[400px]"
         }
         h-screen relative z-20 transition-all`}
       >
@@ -93,7 +92,7 @@ const LeftSection = ({}) => {
                     <div className="h-20 text-2xl content-center mx-auto text-MainPinkishWhite">
                       Search Results
                     </div>
-                    {SearchResults.map(({user,chatid}, i) => {
+                    {SearchResults.map(({ user, chatid }, i) => {
                       return (
                         <Contacts
                           issearch={true}

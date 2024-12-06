@@ -5,7 +5,7 @@ import getChatId from "../util/getChatId";
 const Searchbox = ({ setquery, query, setSearchResults }: any) => {
   const [userPfp, setUserPfp] = useState<string | undefined>("");
   const {uuid} = useContext(ChatContext)
-  const {setshowsettings} = useContext(SettingContext)
+  const {setshowsettings1} = useContext(SettingContext)
 
   async function fetchPfp() {
     supabase.auth
@@ -57,24 +57,28 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
 
 
   return (
-    <div className="h-[10%] min-w-[650px]min-h-16 flex items-center justify-center px-3">
-      <div className="relative group">
+    <div className="h-24 min-w-[650px]min-h-16 flex items-center justify-center px-3">
+      <div className=" relative group ">
         <img
-          onClick={()=>setshowsettings((prevvalue:boolean)=>!prevvalue)}
+          onClick={()=>setshowsettings1()}
           src={userPfp}
           alt="pfp"
-          className="rounded-full cursor-pointer w-fit h-fit"
+          className="rounded-full cursor-pointer"
         />
-        <span className="absolute -bottom-12 bg-black/80 text-MainPinkishWhite pink w-fit h-fit p-2 pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100  group-hover:translate-y-0 translate-y-5 transition-all  z-50">
+        <span className="absolute -bottom-12 bg-black/80 text-MainPinkishWhite 
+        pink w-fit h-fit p-2 
+        pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100
+         group-hover:translate-y-0 translate-y-5 transition-all  z-50">
           Settings
         </span>
       </div>
-      <div className="w-full h-20 bg-MainBlack flex items-center justify-center">
+      <div className=" w-full h-20 bg-MainBlack flex items-center justify-center">
         <input
           value={query}
           onChange={(e) => setquery(e.target.value)}
           type="text"
-          className="focus:ring-MainSky focus:ring-2 transition-all outline-none p-2 w-11/12 mx-auto h-10 placeholder:p-1 placeholder:text-black rounded-lg drop-shadow-xl"
+          className="focus:ring-MainSky focus:ring-2 transition-all outline-none p-2 w-11/12
+           mx-auto h-10 placeholder:p-1 placeholder:text-black rounded-lg drop-shadow-xl"
           placeholder="Search For a contact By ID"
         />
       </div>
