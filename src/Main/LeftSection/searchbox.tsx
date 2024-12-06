@@ -65,7 +65,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
           alt="pfp"
           className="rounded-full cursor-pointer"
         />
-        <span className="absolute -bottom-12 bg-black/80 text-MainPinkishWhite 
+        <span className="absolute -bottom-12 bg-MainBlackfr/80 text-MainPinkishWhite 
         pink w-fit h-fit p-2 
         pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100
          group-hover:translate-y-0 translate-y-5 transition-all  z-50">

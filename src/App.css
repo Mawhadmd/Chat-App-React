@@ -8,6 +8,8 @@
   -moz-osx-font-smoothing: grayscale;
   font-family: 'Open Sans', sans-serif;
   font-weight: 400;
+  transition: all 150ms;
+  color: var(--MainBlack);
   text-rendering: optimizeLegibility;
 }
 body {
@@ -23,6 +25,7 @@ body {
   --MainSky: 83, 216, 251;
   --MainPinkishWhite: 220, 225, 233;
   --Mainpink: 212, 175, 185;
+  --MainBlackfr: 0 ,0 ,0;
 }
 
 

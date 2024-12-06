@@ -9,6 +9,7 @@ export default {
         MainBlue: " rgba(var(--MainSky))",
         MainPinkishWhite: "rgba(var(--MainPinkishWhite))",
         Mainpink: "rgba(var(--Mainpink))",
+        MainBlackfr: "rgba(var(--MainBlackfr))",
       },
     },
   },

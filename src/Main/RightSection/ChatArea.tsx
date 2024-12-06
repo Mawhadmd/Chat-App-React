@@ -62,11 +62,11 @@ const ChatArea = () => {
     } else {
       setmessages([]);
     }
-  }, [Currentopenchatid]); //realtime listener websocket
+  }, [Currentopenchatid]); 
 
   useEffect(() => {
     getData(); //gets messages in the current chat area
-  }, [Currentopenchatid]); //runs whenever chat changes
+  }, [Currentopenchatid]); 
 
   async function getData() {
     var data, error;
@@ -117,7 +117,7 @@ const ChatArea = () => {
   useEffect(() => {
     
     ChatArea.current?.scrollTo(0, ChatArea.current.scrollHeight);
-  }, [messages]); //scrolls down
+  }, [messages]); 
 
   return (
     <div
@@ -139,6 +139,7 @@ const ChatArea = () => {
               i={i}
               data={data}
               UserMessageMap={UserMessageMap}
+              setUserMessageMap={setUserMessageMap}
             />
           ))
         )

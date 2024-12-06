@@ -93,7 +93,7 @@ const ChatArea = () => {
         value={content}
         type="text"
         placeholder="Text Here"
-        className={`w-[95%] shadow-[-5px_5px_15px_1px_rgba(0,0,0,0.589)] transition-all rounded-3xl p-4 focus:!ring-4 focus:p-3 bg-black/60 text-Mainpink ${
+        className={`w-[95%] shadow-[-5px_5px_15px_1px_rgba(0,0,0,0.589)] transition-all rounded-3xl p-4 focus:!ring-4 focus:p-3 bg-MainBlackfr/60 text-Mainpink ${
           !contentisfull ? "focus:ring-MainBlue" : "focus:ring-red-500"
         } focus:outline-none`}
       />

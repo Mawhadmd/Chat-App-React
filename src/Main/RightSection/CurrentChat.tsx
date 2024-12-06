@@ -16,15 +16,16 @@ const ChatArea = () => {
     Otheruserid,
   } = context;
   const { MobileMode } = useContext(SettingContext);
-
+  
   async function getlastseen() {
+   if(Currentopenchatid != "Global"){
     try {
-      // Fetch user metadata
+
       let res = await supabase.auth.admin.getUserById(Otheruserid);
       setname(res.data.user?.user_metadata.name);
       setpfp(res.data.user?.user_metadata.avatar_url);
   
-      // Fetch last seen timestamp
+
       let { data, error } = await supabase
         .from("Users")
         .select("LastSeen")
@@ -40,13 +41,15 @@ const ChatArea = () => {
         let now = new Date();
         let diffSeconds = Math.floor((Number(now) - Number(lastSeenDate)) / 1000);
   
-        // Determine the relative time
-        if (diffSeconds < 60 ) {
+       
+        if (diffSeconds < 13 ) {
           setlastseen("Online");
+        }else if (diffSeconds < 60 ) {
+          setlastseen("A few moments ago");
         } else if (diffSeconds < 3600) {
           setlastseen(`${Math.floor(diffSeconds / 60)} minute(s) ago`);
         } else if (now.toDateString() === lastSeenDate.toDateString()) {
-          setlastseen("Today at "+convertTime(String(lastSeenDate)));
+          setlastseen("Today at "+ convertTime(String(lastSeenDate)));
         } else if (diffSeconds < 7 * 24 * 3600) {
           setlastseen("This week");
         } else {
@@ -56,23 +59,28 @@ const ChatArea = () => {
     } catch (e) {
       setlastseen("Unknown");
     }
+   }
   }
   
 
   useEffect(() => {
-    
   const channels = supabase.channel('Get-LastSeen')
   .on(
     'postgres_changes',
-    { event: 'UPDATE', schema: 'public', table: 'Users', filter: `id=${Otheruserid}` },
+    { event: 'UPDATE', schema: 'public', table: 'Users', filter: `id=eq.${Otheruserid}` },
     (payload) => {
       console.log('Change received!', payload)
+      getlastseen();
     }
   )
   .subscribe()
+   getlastseen();
+   let interval = setInterval(() => {
     getlastseen();
+   }, 2000);
     return () => {
       channels.unsubscribe()
+      clearInterval(interval)
     }
   }, [Otheruserid]);
 

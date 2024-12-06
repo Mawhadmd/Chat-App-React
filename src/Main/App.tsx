@@ -8,7 +8,9 @@ export const ChatContext = createContext<any>(null);
 export const ReloadContactsCtxt = createContext<any>(null);
 
 function App() {
-  const [lightmode, setlightmode] = useState<boolean>(true);
+  const [lightmode, setlightmode] = useState<boolean>(
+    localStorage.getItem('islightmode') == '1'?  true: false
+  );
   const [MobileMode, setMobileMode] = useState<boolean>(false);
   const [showsettings, setshowsettings] = useState<string>(
     "hidden translate-y-[100vh]"
@@ -18,17 +20,63 @@ function App() {
   const [Content, setcontent] = useState<string>("");
   const [logged, setLogged] = useState(false);
   const [uuid, setuuid] = useState<string | undefined>();
-  const timeuntilnextlastseen = 60 * 1000;
+  const timeuntilnextlastseen = 10 * 1000;
   const [Currentopenchatid, setCurrentopenchatid] = useState<
     string | undefined
   >(undefined);
   const [Otheruserid, setOtheruserid] = useState<string | undefined>(undefined);
   const timeuntilnextupdate = timeuntilnextlastseen;
+  useEffect(() => {
+
+   
+      const colors = {  
+        "--MainBlack": "54, 55, 50",
+        "--MainBlue": "02, 195, 255",
+        "--MainSky": "83, 216, 251",
+        "--MainPinkishWhite": "220, 225, 233",
+        "--Mainpink": "212, 175, 185",
+        "--MainBlackfr": "0, 0, 0"
+      };
+     
+      const rootStyle = document.documentElement.style;
+
+    
+          if (!lightmode) {
+          
+            Object.entries(colors).forEach(([key, value]) => {
+              rootStyle.setProperty(key, value);
+            });
+            localStorage.setItem('islightmode','0')
+            setlightmode(false)
+          } else if(lightmode && getComputedStyle(document.documentElement).getPropertyValue("--MainBlack") == "54, 55, 50"){
+            
+            Object.keys(colors).forEach((key) => {
+              const currentValue = getComputedStyle(document.documentElement)
+                .getPropertyValue(key)
+                .trim();
+              const colorToInvert = currentValue;
+              const invertedColor = colorToInvert
+                .split(",")
+                .map((i: string) => 255 - Number(i.trim()))
+                .join(", ");
+              console.log(invertedColor, key)
+              rootStyle.setProperty(key, invertedColor);
+            });   
+             localStorage.setItem('islightmode','1')
+             setlightmode(true)
+          }
+        
+     
+  }, [lightmode]);
+
   async function getuuid() {
     let user = await supabase.auth.getUser();
     let uuid = user.data.user?.id;
 
     setuuid(uuid);
+  }
+  function changelightmode() {
+    setlightmode((prev) => !prev);
   }
   function getMobileMode(width: number) {
     let t;
@@ -70,26 +118,33 @@ function App() {
       data?.subscription?.unsubscribe();
     };
   }, []);
+  useEffect(() => {
+    window.addEventListener('focus',insertlastseen)
+    return () => {
+      window.removeEventListener('focus',insertlastseen)
+    };
+  }, [uuid]);
   async function insertlastseen() {
+   console.log(document.hasFocus(),uuid, uuid && document.hasFocus())
     if (uuid && document.hasFocus()) {
       var userinUserscheck = await supabase
+      .from("Users")
+      .select("*")
+      .eq("id", uuid);
+    var a;
+    if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
+      a = await supabase
         .from("Users")
-        .select("*")
-        .eq("id", uuid);
-      var a;
-      if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
-        a = await supabase
-          .from("Users")
-          .insert([{ LastSeen: `${Date.now()}` }])
-          .select();
-      } else {
-        a = await supabase
-          .from("Users")
-          .update([{ LastSeen: `${Date.now()}` }])
-          .eq("id", uuid)
-          .select();
-      }
-      localStorage.setItem("lastseenupdate", `${Date.now()}`);
+        .insert([{ LastSeen: `${Date.now()}` }])
+        .select();
+    } else {
+      a = await supabase
+        .from("Users")
+        .update([{ LastSeen: `${Date.now()}` }])
+        .eq("id", uuid)
+        .select();
+    }
+    localStorage.setItem("lastseenupdate", `${Date.now()}`);
     }
   }
   useEffect(() => {
@@ -123,7 +178,7 @@ function App() {
     <>
       <div
         onClick={() => setshowsettings1()}
-        className={`flex items-center justify-center gap-5 p-5  fixed inset-0 bg-black rounded-md z-[99] transition-all 
+        className={`flex items-center justify-center gap-5 p-5  fixed inset-0 bg-MainBlack rounded-md z-[99] transition-all 
           ${showsettings}`}
       >
         <div
@@ -150,12 +205,18 @@ function App() {
             or {uuid}
           </span>
           {lightmode ? (
-            <button className="p-2 bg-MainBlack text-MainPinkishWhite">
-              Light Mode
+            <button
+              onClick={changelightmode}
+              className="p-2 bg-MainBlack text-MainPinkishWhite"
+            >
+              Dark Mode
             </button>
           ) : (
-            <button className="bg-MainBlack text-MainPinkishWhite p-2">
-              Dark Mode
+            <button
+              onClick={changelightmode}
+              className="bg-MainBlack text-MainPinkishWhite p-2"
+            >
+              Light Mode
             </button>
           )}
         </div>
