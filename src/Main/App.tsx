@@ -131,18 +131,18 @@ function App() {
       .from("Users")
       .select("*")
       .eq("id", uuid);
-    var a;
+  
     if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
-      a = await supabase
+      await supabase
         .from("Users")
         .insert([{ LastSeen: `${Date.now()}` }])
-        .select();
+ 
     } else {
-      a = await supabase
+       await supabase
         .from("Users")
         .update([{ LastSeen: `${Date.now()}` }])
         .eq("id", uuid)
-        .select();
+  
     }
     localStorage.setItem("lastseenupdate", `${Date.now()}`);
     }

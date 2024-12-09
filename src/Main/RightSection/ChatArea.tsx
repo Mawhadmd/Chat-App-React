@@ -65,6 +65,7 @@ const ChatArea = () => {
   }, [Currentopenchatid]); 
 
   useEffect(() => {
+    setmessages(null)
     getData(); //gets messages in the current chat area
   }, [Currentopenchatid]); 
 
@@ -144,7 +145,7 @@ const ChatArea = () => {
           ))
         )
       ) : (
-        <div className="text-MainPinkishWhite h-full w-full text-2xl flex justify-center items-center">
+        <div className="text-white h-full w-full text-2xl flex justify-center items-center">
           Loading Message...
         </div>
       )}{" "}

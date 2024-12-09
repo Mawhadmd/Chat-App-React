@@ -130,7 +130,12 @@ const LeftSection = ({}) => {
                     <span>No Contacts</span>
                   )
                 ) : (
+                  <>
                   <span>Loading...</span>
+                  <div className="fixed inset-0 transition-all z-50 text-MainBlack flex items-center justify-center text-4xl bg-MainPinkishWhite">
+                    Loading chat
+                  </div>
+                  </>
                 )}
               </div>
             )}
