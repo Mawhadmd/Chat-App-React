@@ -34,14 +34,22 @@ const LeftSection = ({}) => {
     if (!!q1.data && !!q2.data) {
       for (let i = 0; i < q1.data?.length; i++) {
         let id = q1.data[i].User2;
-        let res = await supabase.auth.admin.getUserById(id);
+        let res = await fetch('http://localhost:8080/getuserbyid', {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({id: id})
+    }).then(res => res.json())
         let chatId = q1.data[i].chatId;
         arrayofusers.push({ res, chatId });
       }
       for (let i = 0; i < q2.data?.length; i++) {
         let id = q2.data[i].User1;
 
-        let res = await supabase.auth.admin.getUserById(id);
+        let res = await fetch('http://localhost:8080/getuserbyid', {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({id: id})
+        }).then(res => res.json())
         let chatId = q2.data[i].chatId;
         arrayofusers.push({ res, chatId });
       }

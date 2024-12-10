@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import { supabase } from "../Supabase";
 import { ChatContext, ReloadContactsCtxt } from "../App";
 
 const ChatArea = () => {
@@ -25,44 +24,75 @@ const ChatArea = () => {
         if (Currentopenchatid != "Global" && !!Currentopenchatid) {
           var chatid = null;
           if (Currentopenchatid == -1) {
-            var { data: data2, error: error2 } = await supabase
-              .from("Contacts")
-              .insert([
-                {
-                  User1: uuid,
-                  User2: Otheruserid,
-                },
-              ])
-              .select();
-            console.log(data2, error2, "Inserting contact");
-            setCurrentopenchatid(data2?.[0].chatId);
-            chatid = data2?.[0].chatId;
-            setquery("");
-            setReloadcontact((previous: boolean) => !previous);
+           await  fetch("http://localhost:8080/insertuser", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                uuid: uuid,
+                Otheruserid: Otheruserid,
+              }),
+            })
+              .then((response) => {
+                console.log(response);
+                if (!response.ok) {
+                  // Check if the response status is not in the range 200-299
+                  throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
+                }
+                return response.json();
+              })
+              .then((res) => {
+                setCurrentopenchatid(res?.[0].chatId);
+                chatid = res?.[0].chatId;
+                setquery("");
+                setReloadcontact((previous: boolean) => !previous);
+                console.log(res + "Response");
+              })
+              .catch((e) => console.log(e + "Error"));
           }
-          var { data, error } = await supabase // get users messages if exist
-            .from("PrivateMessages")
-            .insert([
-              {
-                Content: contentval,
-                chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
-                Receiver: Otheruserid,
-              },
-            ])
-            .select();
+    
+          await fetch("http://localhost:8080/Insertprivatemessages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              Content: contentval,
+              chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
+              Receiver: Otheruserid,
+              senderid: uuid,
+            }),
+          })
+            .then((response) => {
+              console.log(response);
+              if (!response.ok) {
+                // Check if the response status is not in the range 200-299
+                throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
+              }
+              return response.json();
+            })
+            .then((res) => console.log(res + "Response"))
+            .catch((e) => console.log(e + "Error"));
         } else {
-          var { data, error } = await supabase
-            .from("Messages")
-            .insert([
-              {
-                //sender id automatically in
-                Content: contentval,
-              },
-            ])
-            .select();
+          await fetch("http://localhost:8080/Insertglobalmessages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ contents: contentval, senderid: uuid }),
+          })
+            .then((response) => {
+              console.log(response);
+              if (!response.ok) {
+                // Check if the response status is not in the range 200-299
+                throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
+              }
+              return response.json();
+            })
+            .then((res) => console.log(res + "Response"))
+            .catch((e) => console.log(e + "Error"));
         }
-
-        console.log(data, error, "data,error for SetData");
       } else alert("Write something");
     }
   }

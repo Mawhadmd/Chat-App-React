@@ -16,14 +16,22 @@ const ChatArea = () => {
     Otheruserid,
   } = context;
   const { MobileMode } = useContext(SettingContext);
-  
+  useEffect(() => {
+    (async () => {
+      let res = await fetch('http://localhost:8080/getuserbyid', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: Otheruserid})
+      }).then(res => res.json())
+        setname(res.data.user?.user_metadata.name);
+        setpfp(res.data.user?.user_metadata.avatar_url);
+  })()
+  }, [Otheruserid]);
   async function getlastseen() {
    if(Currentopenchatid != "Global"){
     try {
 
-      let res = await supabase.auth.admin.getUserById(Otheruserid);
-      setname(res.data.user?.user_metadata.name);
-      setpfp(res.data.user?.user_metadata.avatar_url);
+
   
 
       let { data, error } = await supabase
@@ -99,7 +107,7 @@ const ChatArea = () => {
             <img
               alt="PFP"
               src={pfp}
-              className="cursor-pointer w-20 rounded-full"
+              className="h-14 w-14 cursor-pointer rounded-full"
             />
             <div>
               <span>{name}</span>

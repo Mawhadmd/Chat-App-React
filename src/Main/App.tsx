@@ -9,7 +9,7 @@ export const ReloadContactsCtxt = createContext<any>(null);
 
 function App() {
   const [lightmode, setlightmode] = useState<boolean>(
-    localStorage.getItem('islightmode') == '1'?  true: false
+    localStorage.getItem("islightmode") == "1" ? true : false
   );
   const [MobileMode, setMobileMode] = useState<boolean>(false);
   const [showsettings, setshowsettings] = useState<string>(
@@ -27,46 +27,44 @@ function App() {
   const [Otheruserid, setOtheruserid] = useState<string | undefined>(undefined);
   const timeuntilnextupdate = timeuntilnextlastseen;
   useEffect(() => {
+    const colors = {
+      "--MainBlack": "54, 55, 50",
+      "--MainBlue": "02, 195, 255",
+      "--MainSky": "83, 216, 251",
+      "--MainPinkishWhite": "220, 225, 233",
+      "--Mainpink": "212, 175, 185",
+      "--MainBlackfr": "0, 0, 0",
+    };
 
-   
-      const colors = {  
-        "--MainBlack": "54, 55, 50",
-        "--MainBlue": "02, 195, 255",
-        "--MainSky": "83, 216, 251",
-        "--MainPinkishWhite": "220, 225, 233",
-        "--Mainpink": "212, 175, 185",
-        "--MainBlackfr": "0, 0, 0"
-      };
-     
-      const rootStyle = document.documentElement.style;
+    const rootStyle = document.documentElement.style;
 
-    
-          if (!lightmode) {
-          
-            Object.entries(colors).forEach(([key, value]) => {
-              rootStyle.setProperty(key, value);
-            });
-            localStorage.setItem('islightmode','0')
-            setlightmode(false)
-          } else if(lightmode && getComputedStyle(document.documentElement).getPropertyValue("--MainBlack") == "54, 55, 50"){
-            
-            Object.keys(colors).forEach((key) => {
-              const currentValue = getComputedStyle(document.documentElement)
-                .getPropertyValue(key)
-                .trim();
-              const colorToInvert = currentValue;
-              const invertedColor = colorToInvert
-                .split(",")
-                .map((i: string) => 255 - Number(i.trim()))
-                .join(", ");
-              console.log(invertedColor, key)
-              rootStyle.setProperty(key, invertedColor);
-            });   
-             localStorage.setItem('islightmode','1')
-             setlightmode(true)
-          }
-        
-     
+    if (!lightmode) {
+      Object.entries(colors).forEach(([key, value]) => {
+        rootStyle.setProperty(key, value);
+      });
+      localStorage.setItem("islightmode", "0");
+      setlightmode(false);
+    } else if (
+      lightmode &&
+      getComputedStyle(document.documentElement).getPropertyValue(
+        "--MainBlack"
+      ) == "54, 55, 50"
+    ) {
+      Object.keys(colors).forEach((key) => {
+        const currentValue = getComputedStyle(document.documentElement)
+          .getPropertyValue(key)
+          .trim();
+        const colorToInvert = currentValue;
+        const invertedColor = colorToInvert
+          .split(",")
+          .map((i: string) => 255 - Number(i.trim()))
+          .join(", ");
+        console.log(invertedColor, key);
+        rootStyle.setProperty(key, invertedColor);
+      });
+      localStorage.setItem("islightmode", "1");
+      setlightmode(true);
+    }
   }, [lightmode]);
 
   async function getuuid() {
@@ -119,32 +117,55 @@ function App() {
     };
   }, []);
   useEffect(() => {
-    window.addEventListener('focus',insertlastseen)
+    window.addEventListener("focus", insertlastseen);
     return () => {
-      window.removeEventListener('focus',insertlastseen)
+      window.removeEventListener("focus", insertlastseen);
     };
   }, [uuid]);
   async function insertlastseen() {
-   console.log(document.hasFocus(),uuid, uuid && document.hasFocus())
     if (uuid && document.hasFocus()) {
       var userinUserscheck = await supabase
-      .from("Users")
-      .select("*")
-      .eq("id", uuid);
-  
-    if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
-      await supabase
         .from("Users")
-        .insert([{ LastSeen: `${Date.now()}` }])
- 
-    } else {
-       await supabase
-        .from("Users")
-        .update([{ LastSeen: `${Date.now()}` }])
-        .eq("id", uuid)
-  
-    }
-    localStorage.setItem("lastseenupdate", `${Date.now()}`);
+        .select("*")
+        .eq("id", uuid); //checks if user already has a spot and a lastseen, so just update
+
+      if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
+        try{
+       let res = await fetch("http://localhost:8080/insertlastseen", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mode: "insert",
+          }),
+        });
+        console.log(res.status, res)
+        let response = await res.json()
+        console.log(response)
+      }catch(e){
+        alert("Error occured while updating lastseen")
+      }
+      } else {
+        try{
+          let res = await fetch("http://localhost:8080/insertlastseen", {
+             method: "POST",
+             headers: {
+               "Content-Type": "application/json",
+             },
+             body: JSON.stringify({
+               mode: "update",
+               uuid: uuid
+             }),
+           });
+           console.log(res.status, res)
+           let response = await res.json()
+           console.log(response)
+         }catch(e){
+           console.error("Error occured while updating lastseen" + e)
+         }
+      }
+      localStorage.setItem("lastseenupdate", `${Date.now()}`);
     }
   }
   useEffect(() => {
@@ -224,7 +245,7 @@ function App() {
           Close
         </button>
       </div>
-      <SettingContext.Provider value={{ setshowsettings1, MobileMode }}>
+      <SettingContext.Provider value={{ setshowsettings1, MobileMode, lightmode }}>
         <ReloadContactsCtxt.Provider
           value={{ Reloadcontact, setReloadcontact }}
         >

@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { ChatContext } from "../App";
 import convertTime from "../util/convertTime";
 import getChatId from "../util/getChatId";
-import { supabase } from "../Supabase";
 
 interface UserMessage {
   name: string;
@@ -25,21 +24,26 @@ const Message = ({
   UserMessageMap,
   setUserMessageMap,
 }: Message) => {
+
+
   const [messagenamecolor, setmessagecolorname] = useState<
     string | undefined
   >();
-  
+
   const { Currentopenchatid, setCurrentopenchatid, setOtheruserid } =
     useContext(ChatContext);
 
+
   function getRandomColor(bgcolor: string) {
-    if (UserMessageMap.get(data.Sender)?.color != null)
+    if (UserMessageMap.get(data.Sender)?.color != null  )
       return UserMessageMap.get(data.Sender)!.color;
 
     var color = null;
     let contrast = -1;
+    var colorarray;
     let bgcolorarray = bgcolor.split(",").map((e) => Number(e));
-    while (contrast > 7 || contrast < 5) {
+    console.log(bgcolorarray, bgcolor, "bgcolorarray");
+    while (contrast < 7) {
       let letters = "0123456789ABCDEF";
       color = "#";
       for (var i = 0; i < 6; i++) {
@@ -47,11 +51,12 @@ const Message = ({
       }
 
       let colorshex = color.slice(1).split("");
-      let colorarray = [
+      colorarray = [
         Number(`0x${colorshex[0]}${colorshex[1]}`),
         Number(`0x${colorshex[2]}${colorshex[3]}`),
         Number(`0x${colorshex[4]}${colorshex[5]}`),
       ];
+
       contrast = calculateContrastRatio(bgcolorarray, colorarray);
     }
     UserMessageMap.set(data.Sender, {
@@ -85,14 +90,19 @@ const Message = ({
 
     // Calculate contrast ratio
     const contrastRatio = (lighter + 0.05) / (darker + 0.05);
-
+    console.log("between", color1, color2, l1, l2, lighter, darker);
     return Number(contrastRatio.toFixed(2));
   }
 
   async function setnewuserinmessage() {
-    var { data: payload, error } = await supabase.auth.admin.getUserById(
-      data.Sender
-    );
+    var { data: payload, error } = await fetch(
+      "http://localhost:8080/getuserbyid",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: data.Sender }),
+      }
+    ).then((res) => res.json());
     let newmap = new Map();
     newmap.set(data.Sender, {
       name: payload.user?.user_metadata.name,
@@ -105,11 +115,16 @@ const Message = ({
         newmap.forEach((value, key) => newMap.set(key, value));
         return newMap;
       });
+
     setmessagecolorname(
       getRandomColor(
-        getComputedStyle(document.documentElement).getPropertyValue(
-          "MainPinkishWhite"
-        )
+        data.Sender == uuid
+          ? getComputedStyle(document.documentElement).getPropertyValue(
+              "--MainBlackfr"
+            )
+          : getComputedStyle(document.documentElement).getPropertyValue(
+              "--MainPinkishWhite"
+            )
       )!
     );
     if (error) {
@@ -117,18 +132,27 @@ const Message = ({
     }
   }
   useEffect(() => {
-    if (Currentopenchatid == "Global" && UserMessageMap.get(data.Sender) == null) {
+    if (
+      Currentopenchatid == "Global" &&
+      UserMessageMap.get(data.Sender) == null
+    ) {
       setnewuserinmessage();
-    }else{
+    } else { 
       setmessagecolorname(
         getRandomColor(
-          getComputedStyle(document.documentElement).getPropertyValue(
-            "MainPinkishWhite"
-          )
+          data.Sender == uuid
+            ? getComputedStyle(document.documentElement).getPropertyValue(
+                "--MainBlackfr"
+              )
+            : getComputedStyle(document.documentElement).getPropertyValue(
+                "--MainPinkishWhite"
+              )
         )!
       );
     }
   }, []);
+
+
   return (
     <div key={i}>
       <div
@@ -149,9 +173,7 @@ const Message = ({
             {UserMessageMap.get(data.Sender)!.name}
           </span>
         ) : null}
-        <span className="p-2  w-full">
-          {data.Content.toLocaleString()}
-        </span>
+        <span className="p-2  w-full">{data.Content.toLocaleString()}</span>
         <span className="text-sm   ml-auto w-full">
           {convertTime(data.created_at)}
         </span>

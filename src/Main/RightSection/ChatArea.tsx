@@ -1,16 +1,18 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext } from "../App";
+import { ChatContext, SettingContext,  } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3"
 import Message from "./Message";
 import BGimage from "../../assets/blackbackground.png";
 
 const ChatArea = () => {
+  
   const [messages, setmessages] = useState<any[] | null>(null);
   const context = useContext(ChatContext);
   const { Currentopenchatid, uuid, setcontent } = context;
   const [UserMessageMap, setUserMessageMap] = useState(new Map());
   const ChatArea = useRef<HTMLDivElement>(null);
+  const { lightmode } = useContext(SettingContext);
   console.log("chatid", Currentopenchatid);
   useEffect(() => {
     if (Currentopenchatid == "Global") {
@@ -97,9 +99,11 @@ const ChatArea = () => {
       if (!!data) {
         for (let i = 0; i < data?.length; i++) {
           if (!UserMessageMap.has(data[i].Sender)) {
-            var { data: payload } = await supabase.auth.admin.getUserById(
-              data[i].Sender
-            );
+            var { data: payload } =await fetch('http://localhost:8080/getuserbyid', {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({id: data[i].Sender})
+            }).then(res => res.json())
 
             UserMessageMap.set(data[i].Sender, {
               name: payload.user?.user_metadata.name,
@@ -115,11 +119,17 @@ const ChatArea = () => {
     }
   }
 
-  useEffect(() => {
-    
-    ChatArea.current?.scrollTo(0, ChatArea.current.scrollHeight);
-  }, [messages]); 
+useEffect(() => {
+  setUserMessageMap((prevMap) => {
+    const newMap = new Map(prevMap);
+    newMap.forEach((value, key) => {
+      newMap.set(key, { ...value, color: 'update' });
+    });
+    return newMap;
+  });
+},[lightmode]);
 
+console.log(UserMessageMap)
   return (
     <div
       id="ChatArea"
@@ -135,7 +145,7 @@ const ChatArea = () => {
         ) : (
           messages?.map((data, i) => (
             <Message
-              key={i}
+              key={i + UserMessageMap.get(data.Sender).color}
               uuid={uuid}
               i={i}
               data={data}

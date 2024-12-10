@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "module": "ESNext",
         "lib": [
             "es5", "es6", "dom", "dom.iterable"
         ]
@@ -8,5 +9,8 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "ts-node": {
+    "esm": true
+  }
 }

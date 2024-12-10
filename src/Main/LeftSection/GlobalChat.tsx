@@ -3,57 +3,72 @@ import { supabase } from "../Supabase";
 import globe from "../../assets/global-communication_9512332.png";
 import { ChatContext } from "../App";
 import convertTime from "../util/convertTime";
- const GlobalChat = ({ setCurrentopenchatid }: any) => {
-    const [name, setname] = useState<string>('');
-    const [latestMessagetime, setlatestmessagetime] = useState<string>('');
-    var {Content:newmessage,setcontent} = useContext(ChatContext)
+const GlobalChat = ({ setCurrentopenchatid }: any) => {
+  const [name, setname] = useState<string>("");
+  const [latestMessagetime, setlatestmessagetime] = useState<string>("");
+  var { Content: newmessage, setcontent } = useContext(ChatContext);
 
-    async function getname(id: string) {
-        let name = await (await (supabase.auth.admin.getUserById(id))).data.user?.user_metadata.name
-        setname(name)
-    }
+  async function getname(id: string) {
+   try{
+    let name = await (
+      await fetch("http://localhost:8080/getuserbyid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id }),
+      }).then((res) => res.json())
+    ).data.user?.user_metadata.name;
+    setname(name);
+   }catch{
+    alert("Error 500, please reload or contact support")
+   }
+  }
 
-    async function fetchlatestmessage() {
-      let { data, error } = await supabase
-        .from("Messages")
-        .select("Content, Sender, created_at")
-        .order("created_at", { ascending: false })
-        .limit(1);
+  async function fetchlatestmessage() {
+    let { data, error } = await supabase
+      .from("Messages")
+      .select("Content, Sender, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1);
 
-        if (data) {
-        await getname(data[0].Sender)
-        console.log(data[0].created_at)
-        setlatestmessagetime(data[0].created_at)
-        setcontent({Content: data[0].Content})
+    if (data) {
+      await getname(data[0].Sender);
+      console.log(data[0].created_at);
+      setlatestmessagetime(data[0].created_at);
+      setcontent({ Content: data[0].Content });
       console.log(data, error, "data,error for messages latest in global chat");
     }
-}
-useEffect(() => {
-  fetchlatestmessage();
-}, []);
-useEffect(()=>{
-  if(newmessage.created_at)
-  setlatestmessagetime(newmessage.created_at)
-},[newmessage])
-  
-    return (
-      <div
-        onClick={() => {
-          setCurrentopenchatid("Global");
-          console.log("Set");
-        }}
-        className=" h-24 gap-2 flex items-center pl-5 text-MainPinkishWhite hover:bg-white/20 cursor-pointer border-MainBlue/20 border-[1px]"
-      >
-        <img src={globe} className="h-10 invert" alt="Globe" />
-        <div className="flex flex-col gap-2 w-full mx-1">
-          <span className="font-bold">Global Chat</span>
-          <div className="flex justify-between">
-          <span className=" text-sm text-MainPinkishWhite/60">{`${name}: ${newmessage?.Content?.length>30? newmessage?.Content?.slice(0,30) + '...': newmessage?.Content}`}</span>
-          <span className=" text-sm text-MainPinkishWhite text-nowrap">At {convertTime(latestMessagetime)}</span>
-          </div>
+  }
+  useEffect(() => {
+    fetchlatestmessage();
+  }, []);
+  useEffect(() => {
+    if (newmessage.created_at) setlatestmessagetime(newmessage.created_at);
+  }, [newmessage]);
+
+  return (
+    <div
+      onClick={() => {
+        setCurrentopenchatid("Global");
+        console.log("Set");
+      }}
+      className=" h-24 gap-2 flex items-center pl-5 text-MainPinkishWhite hover:bg-white/20 cursor-pointer border-MainBlue/20 border-[1px]"
+    >
+      <img src={globe} className="h-10 invert" alt="Globe" />
+      <div className="flex flex-col gap-2 w-full mx-1">
+        <span className="font-bold">Global Chat</span>
+        <div className="flex justify-between">
+          <span className=" text-sm text-MainPinkishWhite/60">{`${name}: ${
+            newmessage?.Content?.length > 30
+              ? newmessage?.Content?.slice(0, 30) + "..."
+              : newmessage?.Content
+          }`}</span>
+          <span className=" text-sm text-MainPinkishWhite text-nowrap">
+            At {convertTime(latestMessagetime)}
+          </span>
         </div>
       </div>
-    );
-  };
- 
-  export default GlobalChat
+    </div>
+  );
+};
+
+export default GlobalChat;

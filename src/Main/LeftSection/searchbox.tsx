@@ -24,15 +24,21 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
 
   async function runquery() {
     console.log(query);
-    let res = (await supabase.auth.admin.listUsers()).data.users.filter(
-      (e) =>
+    let res = (await fetch('/getuserslist', {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+    }).then(res => res.json()))
+    
+    
+    res.data.users.filter(
+      (e:any) =>
         e.id.slice(0, 5) == query ||
         e.user_metadata.name.toLowerCase().includes(query.toLowerCase())
         && e.id != uuid
         
     );
     const result = await Promise.all(
-      res.map(async (user) => {
+      res.map(async (user:any) => {
         let id = await getChatId(user.id, uuid);
         return { user, chatid: id };
       })
