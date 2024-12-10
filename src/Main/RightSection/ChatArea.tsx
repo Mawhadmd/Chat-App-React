@@ -1,12 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext, SettingContext,  } from "../App";
-import audio from "../../assets/WhatsappMessage.mp3"
+import { ChatContext, SettingContext } from "../App";
+import audio from "../../assets/WhatsappMessage.mp3";
 import Message from "./Message";
 import BGimage from "../../assets/blackbackground.png";
 
 const ChatArea = () => {
-  
   const [messages, setmessages] = useState<any[] | null>(null);
   const context = useContext(ChatContext);
   const { Currentopenchatid, uuid, setcontent } = context;
@@ -28,7 +27,7 @@ const ChatArea = () => {
               ...(PreviousMessages || []),
             ]);
             setcontent(payload.new);
-            (()=>new Audio(audio).play())()
+            (() => new Audio(audio).play())();
           }
         )
         .subscribe();
@@ -64,77 +63,152 @@ const ChatArea = () => {
     } else {
       setmessages([]);
     }
-  }, [Currentopenchatid]); 
+  }, [Currentopenchatid]);
 
   useEffect(() => {
-    setmessages(null)
+    setmessages(null);
     getData(); //gets messages in the current chat area
-  }, [Currentopenchatid]); 
-
-  async function getData() {
-    var data, error;
+  }, [Currentopenchatid]);
+  async function getmessages() {
+    var data, error, query;
     let isglobal = Currentopenchatid == "Global";
-    if (Currentopenchatid != undefined) {
-      if (isglobal) {
-        let query = await supabase
-          .from("Messages")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(30);
-        data = query.data;
-        error = query.error;
-      } else {
-        let { data: dt, error: err } = await supabase
-          .from("PrivateMessages")
-          .select("*")
-          .eq("chatId", Currentopenchatid)
-          .limit(30)
-          .order("created_at", { ascending: false });
-
-        if (dt) data = dt;
-        if (err) error = err;
-      }
-
-      let UserMessageMap = new Map();
-      if (!!data) {
-        for (let i = 0; i < data?.length; i++) {
-          if (!UserMessageMap.has(data[i].Sender)) {
-            var { data: payload } =await fetch('http://localhost:8080/getuserbyid', {
-              method: "POST",
-              headers: {"Content-Type": "application/json"},
-              body: JSON.stringify({id: data[i].Sender})
-            }).then(res => res.json())
-
-            UserMessageMap.set(data[i].Sender, {
-              name: payload.user?.user_metadata.name,
-              id: payload.user?.id,
-              color: null,
-            });
-          }
-        }
-        setUserMessageMap(UserMessageMap);
-        setmessages(data);
-      }
-      console.log(data, error, "data, error for Getdata");
+    if (isglobal) {
+      query = await supabase
+        .from("Messages")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(30);
+    } else {
+      query = await supabase
+        .from("PrivateMessages")
+        .select("*")
+        .eq("chatId", Currentopenchatid)
+        .limit(30)
+        .order("created_at", { ascending: false });
     }
+    data = query.data;
+    error = query.error;
+    return { data, error };
   }
 
-useEffect(() => {
-  setUserMessageMap((prevMap) => {
-    const newMap = new Map(prevMap);
-    newMap.forEach((value, key) => {
-      newMap.set(key, { ...value, color: 'update' });
-    });
-    return newMap;
-  });
-},[lightmode]);
+  async function getData() {
+    if (Currentopenchatid != undefined) {
+      const { data, error } = await getmessages();
 
-console.log(UserMessageMap)
+      Setdatatomap(data, error);
+    }
+  }
+  async function Setdatatomap(data: any[] | null, error: any) {
+    let UserMessageMap = new Map();
+    if (!!data) {
+      for (let i = 0; i < data?.length; i++) {
+        if (!UserMessageMap.has(data[i].Sender)) {
+          var { data: payload } = await fetch(
+            "http://localhost:8080/getuserbyid",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: data[i].Sender }),
+            }
+          ).then((res) => res.json());
+          UserMessageMap.set(data[i].Sender, {
+            name: payload.user?.user_metadata.name,
+            id: payload.user?.id,
+            color: getRandomColor(
+              data[i].Sender == uuid
+                ? getComputedStyle(document.documentElement).getPropertyValue(
+                     "--MainBlue"
+                  )
+                : getComputedStyle(document.documentElement).getPropertyValue(
+                   "--MainBlackfr"
+                  )
+            ),
+          });
+        }
+      }
+      setUserMessageMap(UserMessageMap);
+      setmessages(data);
+    }else{
+      alert('Error,check console')
+      console.log(error)
+    }
+  }
+  function getRandomColor(bgcolor: string) {
+    var color = null;
+    let contrast = -1;
+    var colorarray;
+    let bgcolorarray = bgcolor.split(",").map((e) => Number(e));
+    while (contrast <= 4) {
+      let letters = "0123456789ABCDEF";
+      color = "#";
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+
+      let colorshex = color.slice(1).split("");
+      colorarray = [
+        Number(`0x${colorshex[0]}${colorshex[1]}`),
+        Number(`0x${colorshex[2]}${colorshex[3]}`),
+        Number(`0x${colorshex[4]}${colorshex[5]}`),
+      ];
+
+      contrast = calculateContrastRatio(bgcolorarray, colorarray);
+    }
+
+    return color;
+  }
+  function calculateContrastRatio(
+    color1: Array<Number>,
+    color2: Array<Number>
+  ) {
+    // Calculate relative luminance
+    function getLuminance(color: Array<Number>) {
+      let [r, g, b] = color.map((c: any) => {
+        c /= 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    // Calculate luminance for both colors
+    const l1 = getLuminance(color1);
+    const l2 = getLuminance(color2);
+
+    // Determine lighter and darker luminance
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+
+    // Calculate contrast ratio
+    const contrastRatio = (lighter + 0.05) / (darker + 0.05);
+    return Number(contrastRatio.toFixed(2));
+  }
+  useEffect(() => {
+    setUserMessageMap((prevMap) => {
+      const newMap = new Map(prevMap);
+      newMap.forEach((value, key) => {
+        newMap.set(key, {
+          ...value,
+          color: getRandomColor(
+            key == uuid
+              ? getComputedStyle(document.documentElement).getPropertyValue(
+                  "--MainSky"
+                )
+              : getComputedStyle(document.documentElement).getPropertyValue(
+                  "--MainBlackfr"
+                )
+          ),
+        });
+      });
+      return newMap;
+    });
+  }, [lightmode]);
+
+  console.log(UserMessageMap);
   return (
     <div
       id="ChatArea"
       ref={ChatArea}
-      style={{backgroundImage: `url(${BGimage})`}}
+      style={{ backgroundImage: `url(${BGimage})` }}
       className=" scroll-smooth overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
       {messages ? (
@@ -145,12 +219,13 @@ console.log(UserMessageMap)
         ) : (
           messages?.map((data, i) => (
             <Message
-              key={i + UserMessageMap.get(data.Sender).color}
+              key={uuid + String(i)}
               uuid={uuid}
               i={i}
               data={data}
               UserMessageMap={UserMessageMap}
               setUserMessageMap={setUserMessageMap}
+              getRandomColor={getRandomColor}
             />
           ))
         )
