@@ -58,10 +58,8 @@ const ChatArea = () => {
           setlastseen(`${Math.floor(diffSeconds / 60)} minute(s) ago`);
         } else if (now.toDateString() === lastSeenDate.toDateString()) {
           setlastseen("Today at "+ convertTime(String(lastSeenDate)));
-        } else if (diffSeconds < 7 * 24 * 3600) {
-          setlastseen("This week");
         } else {
-          setlastseen(lastSeenDate.toLocaleDateString()); // Fallback to full date
+          setlastseen(lastSeenDate.toLocaleDateString() + " " + convertTime(String(lastSeenDate))); // Fallback to full date
         }
       }
     } catch (e) {
@@ -99,7 +97,7 @@ const ChatArea = () => {
   return (
     <div
       id="CurrentChat"
-      className=" text-MainPinkishWhite shadow-[0px_5px_12px_rgba(0,0,0,0.589)] z-10 min-h-16 h-[10%] bg-MainBlack w-full  gap-2 content-center flex px-1 justify-between items-center "
+      className=" text-LightModeMain shadow-[0px_5px_12px_rgba(0,0,0,0.589)] z-10 min-h-16 h-[10%] bg-Main w-full  gap-2 content-center flex px-1 justify-between items-center "
     >
       {Currentopenchatid != "Global" ? (
         <>
@@ -118,7 +116,7 @@ const ChatArea = () => {
         </>
       ) : (
         <>
-          <div className="w-fit h-full gap-2 flex items-center text-MainPinkishWhite hover:bg-white/20 cursor-pointer">
+          <div className="w-fit h-full gap-2 flex items-center text-LightModeMain hover:bg-white/20 cursor-pointer">
             <img src={globe} className="h-10 invert" alt="Globe" />
             <span>Global Chat</span>
           </div>
@@ -128,7 +126,7 @@ const ChatArea = () => {
         <div>
           <button
             onClick={GoBack}
-            className="text-MainBlack p-4 bg-MainPinkishWhite font-bold rounded-full ml-auto"
+            className="text-Main p-4 bg-LightModeMain font-bold rounded-full ml-auto"
           >
             Back
           </button>
