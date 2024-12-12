@@ -17,9 +17,10 @@ app.use(express.json());
 app.use(cors({ origin: "http://localhost:3001" }));
 
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL || "",
-  process.env.VITE_SUPABASE_KEY || "" // Service Role Key
+  process.env.SUPABASE_URL || "",
+  process.env.SUPABASE_KEY || "" // Service Role Key
 );
+
 
 app.post("/Insertglobalmessages", async (req, res) => {
   const { contents, senderid } = req.body;
