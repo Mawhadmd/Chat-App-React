@@ -125,7 +125,7 @@ function App() {
 
       if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
         try {
-          let res = await fetch("http://localhost:8080/insertlastseen", {
+          let res = await fetch("https://chat-app-react-server-qizz.onrender.com/insertlastseen", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -143,7 +143,7 @@ function App() {
         }
       } else {
         try {
-          let res = await fetch("http://localhost:8080/insertlastseen", {
+          let res = await fetch("https://chat-app-react-server-qizz.onrender.com/insertlastseen", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

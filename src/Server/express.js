@@ -5,16 +5,9 @@ import cors from "cors";
 dotenv.config();
 dotenv.config({ path: `.env.local`, override: true });
 const app = express();
-app.use((req, res, next) => {
-  const allowedOrigin = "http://localhost:3001";
-  console.log(req.headers.origin, 'Accessed');
-  // if (req.headers.origin !== allowedOrigin) {
-  //   return res.status(403).send('Forbidden');
-  // }
-  next();
-});
+
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:3001" }));
+app.use(cors({ origin: ['http://localhost:3001', 'https://chatty001a.netlify.app'] }));
 
 const supabase = createClient(
   process.env.SUPABASE_URL || "",

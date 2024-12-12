@@ -11,7 +11,7 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
   async function getname(id: string) {
    try{
     let name = await (
-      await fetch("http://localhost:8080/getuserbyid", {
+      await fetch("https://chat-app-react-server-qizz.onrender.com/getuserbyid", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id }),

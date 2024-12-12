@@ -21,7 +21,7 @@ const ChatArea = () => {
   
   async function setnewuserinmessage(senderid:string) {
     var { data: payload, error } = await fetch(
-      "http://localhost:8080/getuserbyid",
+      "https://chat-app-react-server-qizz.onrender.com/getuserbyid",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,7 +144,7 @@ const ChatArea = () => {
       for (let i = 0; i < data?.length; i++) {
         if (!UserMessageMap.has(data[i].Sender)) {
           var { data: payload } = await fetch(
-            "http://localhost:8080/getuserbyid",
+            "https://chat-app-react-server-qizz.onrender.com/getuserbyid",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

@@ -24,7 +24,7 @@ const ChatArea = () => {
         if (Currentopenchatid != "Global" && !!Currentopenchatid) {
           var chatid = null;
           if (Currentopenchatid == -1) {
-           await  fetch("http://localhost:8080/insertuser", {
+           await  fetch("https://chat-app-react-server-qizz.onrender.com/insertuser", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -52,7 +52,7 @@ const ChatArea = () => {
               .catch((e) => console.log(e + "Error"));
           }
     
-          await fetch("http://localhost:8080/Insertprivatemessages", {
+          await fetch("https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -75,7 +75,7 @@ const ChatArea = () => {
             .then((res) => console.log(res + "Response"))
             .catch((e) => console.log(e + "Error"));
         } else {
-          await fetch("http://localhost:8080/Insertglobalmessages", {
+          await fetch("https://chat-app-react-server-qizz.onrender.com/Insertglobalmessages", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

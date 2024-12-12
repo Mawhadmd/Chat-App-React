@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
-  useRef,
+
 } from "react";
 import pfp from "../../assets/grayuserpfp.png";
 import { supabase } from "../Supabase";

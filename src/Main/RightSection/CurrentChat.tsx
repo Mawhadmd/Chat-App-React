@@ -44,7 +44,7 @@ const ChatArea = () => {
     //set name and pfp of a user if not global
     if (Currentopenchatid != "Global") {
       (async () => {
-        let res = await fetch("http://localhost:8080/getuserbyid", {
+        let res = await fetch("https://chat-app-react-server-qizz.onrender.com/getuserbyid", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: Otheruserid }),
