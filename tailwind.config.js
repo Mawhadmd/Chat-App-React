@@ -4,12 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        MainBlack: "rgba(var(--MainBlack))",
-        MainSky: "rgba(var(--MainBlue))",
-        MainBlue: " rgba(var(--MainSky))",
-        MainPinkishWhite: "rgba(var(--MainPinkishWhite))",
-        Mainpink: "rgba(var(--Mainpink))",
+        Main: "rgba(var(--Main))",
+        actionColor: "rgba(var(--actionColor))",
+        Secondary: "rgba(var(--Secondary))",
         MainBlackfr: "rgba(var(--MainBlackfr))",
+        MainText: "rgba(var(--MainText))",
       },
     },
   },

@@ -71,19 +71,19 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
           alt="pfp"
           className="rounded-full cursor-pointer"
         />
-        <span className="absolute -bottom-12 bg-MainBlackfr/80 text-MainPinkishWhite 
+        <span className="absolute -bottom-12 bg-MainBlackfr/80 text-MainText 
         pink w-fit h-fit p-2 
         pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100
          group-hover:translate-y-0 translate-y-5 transition-all  z-50">
           Settings
         </span>
       </div>
-      <div className=" w-full h-20 bg-MainBlack flex items-center justify-center">
+      <div className=" w-full h-20 bg-Main flex items-center justify-center">
         <input
           value={query}
           onChange={(e) => setquery(e.target.value)}
           type="text"
-          className="focus:ring-MainSky focus:ring-2 transition-all outline-none p-2 w-11/12
+          className="focus:ring-actionColor focus:ring-2 transition-all outline-none p-2 w-11/12
            mx-auto h-10 placeholder:p-1 placeholder:text-black rounded-lg drop-shadow-xl"
           placeholder="Search For a contact By ID"
         />

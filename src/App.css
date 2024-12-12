@@ -9,7 +9,7 @@
   font-family: 'Open Sans', sans-serif;
   font-weight: 400;
   transition: all 150ms;
-  color: var(--MainBlack);
+  color: var(--Main);
   text-rendering: optimizeLegibility;
 }
 body {
@@ -20,16 +20,17 @@ body {
   display: flex;
 }
 :root {
-  --MainBlack: 54, 55, 50;
-  --MainBlue: 102, 195, 255;
-  --MainSky: 83, 216, 251;
-  --MainPinkishWhite: 220, 225, 233;
-  --Mainpink: 212, 175, 185;
-  --MainBlackfr: 0 ,0 ,0;
+  --Main: 15,17,8;
+  --MainText: 202, 216 ,222;
+  --Secondary: 36,25,9;
+  --actionColor: 0,246,237;
+  --MainBlackfr: 0, 0, 0;
+  /* colors are set in app.jsx */
 }
 
 
 #RightSection {
+  background: linear-gradient(var(--Main), var(--Secondary));
     transition: all 150ms;
 }
 /* @media screen and (width<800px) {

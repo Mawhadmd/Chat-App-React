@@ -88,7 +88,7 @@ app.post("/insertlastseen", async (req, res) => {
   if (mode == "insert") {
     var ressupa = await supabase
       .from("Users")
-      .insert([{ LastSeen: `${Date.now()}` }]).select()
+      .insert([{ LastSeen: `${Date.now()}`, id: uuid }]).select()
   } else if (mode == "update") {
     var ressupa = await supabase
       .from("Users")

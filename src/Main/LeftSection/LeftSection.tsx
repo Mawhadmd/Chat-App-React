@@ -78,7 +78,7 @@ const LeftSection = ({}) => {
     <>
       <section
         id="LeftSection"
-        className={`flex flex-col bg-MainBlack ${
+        className={`flex flex-col bg-Main ${
           MobileMode ? "w-full" : "w-[500px] min-w-[400px]"
         }
         h-screen relative z-20 transition-all`}
@@ -97,7 +97,7 @@ const LeftSection = ({}) => {
                 SearchResults.length != 0 ? (
                   <>
                     {" "}
-                    <div className="h-20 text-2xl content-center mx-auto text-MainPinkishWhite">
+                    <div className="h-20 text-2xl content-center mx-auto text-MainText">
                       Search Results
                     </div>
                     {SearchResults.map(({ user, chatid }, i) => {
@@ -112,17 +112,17 @@ const LeftSection = ({}) => {
                     })}
                   </>
                 ) : (
-                  <div className="mt-5 mx-auto text-2xl text-MainPinkishWhite">
+                  <div className="mt-5 mx-auto text-2xl text-MainText">
                     No Results
                   </div>
                 )
               ) : (
-                <div className="mt-5 mx-auto text-2xl text-MainPinkishWhite">
+                <div className="mt-5 mx-auto text-2xl text-MainText">
                   Loading...
                 </div>
               )
             ) : (
-              <div className=" h-fit gap-2 mt-1 flex flex-col items-center justify-center text-MainPinkishWhite text-2xl">
+              <div className=" h-fit  mt-1 flex flex-col items-center justify-center text-MainText text-2xl">
                 {contacts != undefined ? (
                   contacts.length > 0 ? (
                     contacts.map(({ res, chatId }, i) => {
@@ -140,7 +140,7 @@ const LeftSection = ({}) => {
                 ) : (
                   <>
                   <span>Loading...</span>
-                  <div className="fixed inset-0 transition-all z-50 text-MainBlack flex items-center justify-center text-4xl bg-MainPinkishWhite">
+                  <div className="fixed inset-0 transition-all z-50 text-MainText flex items-center justify-center text-4xl bg-Main">
                     Loading chat
                   </div>
                   </>
@@ -151,18 +151,18 @@ const LeftSection = ({}) => {
         ) : (
           <button
             id="login"
-            className="transition-all duration-300 hover:bg-MainSky bg-MainPinkishWhite gap-4 flex justify-center items-center shadow-[-4px_4px_5px_rgba(62,74,100,0.589)] mt-11 p-3 w-fit mx-auto rounded-2xl "
+            className="transition-all duration-300 hover:bg-actionColor bg-Main gap-4 flex justify-center items-center shadow-[-4px_4px_5px_rgba(62,74,100,0.589)] mt-11 p-3 w-fit mx-auto rounded-2xl "
             onClick={handlelogin}
           >
             <img src={googleicon} alt="icon" className="w-10 h-full" />
-            <span className="text-MainBlack font-bold">Sign In</span>
+            <span className="text-MainText font-bold">Sign In</span>
           </button>
         )}
 
         <div className={`${!logged ? "hidden" : "static"}`}>
           <button
             onClick={Logout}
-            className="flex absolute bottom-2 left-2 hover:bg-MainSky/80 bg-MainBlue w-20 h-10 justify-center items-center rounded-3xl"
+            className="flex absolute bottom-2 left-2 hover:bg-actionColor/80 text-white hover:text-black bg-Secondary w-20 h-10 justify-center items-center rounded-3xl"
           >
             Logout
           </button>

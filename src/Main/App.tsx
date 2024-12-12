@@ -20,47 +20,41 @@ function App() {
   const [Content, setcontent] = useState<string>("");
   const [logged, setLogged] = useState(false);
   const [uuid, setuuid] = useState<string | undefined>();
-  const timeuntilnextlastseen = 10 * 1000;
+  const timeuntilnextlastseen = 180 * 1000;
   const [Currentopenchatid, setCurrentopenchatid] = useState<
     string | undefined
   >(undefined);
   const [Otheruserid, setOtheruserid] = useState<string | undefined>(undefined);
-  const timeuntilnextupdate = timeuntilnextlastseen;
   useEffect(() => {
-    const colors = {
-      "--MainBlack": "54, 55, 50",
-      "--MainBlue": "02, 195, 255",
-      "--MainSky": "83, 216, 251",
-      "--MainPinkishWhite": "220, 225, 233",
-      "--Mainpink": "212, 175, 185",
+    const Darkcolors = {
+      "--Main": "15,17,8", // main dark
+      "--MainText": "202, 216 ,222", // main dark text
+      "--Secondary": "36,25,9", //sec dark
+      "--actionColor": "0,246,237", //action
       "--MainBlackfr": "0, 0, 0",
     };
-
+    const lightcolors = {
+      "--actionColor": "0,200,200", //action
+      "--Main": "202, 216 ,222", // main light
+      "--MainText": "15,17,8", // main light text
+      "--Secondary": "100,88,83", // sec light
+      "--MainBlackfr": "255,255,255",
+    };
     const rootStyle = document.documentElement.style;
 
     if (!lightmode) {
-      Object.entries(colors).forEach(([key, value]) => {
+      Object.entries(Darkcolors).forEach(([key, value]) => {
         rootStyle.setProperty(key, value);
       });
       localStorage.setItem("islightmode", "0");
       setlightmode(false);
     } else if (
       lightmode &&
-      getComputedStyle(document.documentElement).getPropertyValue(
-        "--MainBlack"
-      ) == "54, 55, 50"
+      getComputedStyle(document.documentElement).getPropertyValue("--Main") ==
+        "15,17,8"
     ) {
-      Object.keys(colors).forEach((key) => {
-        const currentValue = getComputedStyle(document.documentElement)
-          .getPropertyValue(key)
-          .trim();
-        const colorToInvert = currentValue;
-        const invertedColor = colorToInvert
-          .split(",")
-          .map((i: string) => 255 - Number(i.trim()))
-          .join(", ");
-        console.log(invertedColor, key);
-        rootStyle.setProperty(key, invertedColor);
+      Object.entries(lightcolors).forEach(([key, value]) => {
+        rootStyle.setProperty(key, value);
       });
       localStorage.setItem("islightmode", "1");
       setlightmode(true);
@@ -130,54 +124,56 @@ function App() {
         .eq("id", uuid); //checks if user already has a spot and a lastseen, so just update
 
       if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
-        try{
-       let res = await fetch("http://localhost:8080/insertlastseen", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mode: "insert",
-          }),
-        });
-        console.log(res.status, res)
-        let response = await res.json()
-        console.log(response)
-      }catch(e){
-        alert("Error occured while updating lastseen")
-      }
-      } else {
-        try{
+        try {
           let res = await fetch("http://localhost:8080/insertlastseen", {
-             method: "POST",
-             headers: {
-               "Content-Type": "application/json",
-             },
-             body: JSON.stringify({
-               mode: "update",
-               uuid: uuid
-             }),
-           });
-           console.log(res.status, res)
-           let response = await res.json()
-           console.log(response)
-         }catch(e){
-           console.error("Error occured while updating lastseen" + e)
-         }
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              mode: "insert",
+              uuid: uuid,
+            }),
+          });
+          console.log(res.status, res);
+          let response = await res.json();
+          console.log(response);
+        } catch (e) {
+          alert("Error occured while updating lastseen");
+        }
+      } else {
+        try {
+          let res = await fetch("http://localhost:8080/insertlastseen", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              mode: "update",
+              uuid: uuid,
+            }),
+          });
+          console.log(res.status, res);
+          let response = await res.json();
+          console.log(response);
+        } catch (e) {
+          console.error("Error occured while updating lastseen" + e);
+        }
       }
       localStorage.setItem("lastseenupdate", `${Date.now()}`);
     }
   }
   useEffect(() => {
+    insertlastseen();
     let interva = setInterval(() => {
       let lastseen = localStorage.getItem("lastseenupdate");
       if (lastseen) {
-        if (Date.now() - Number(lastseen) > timeuntilnextupdate)
+        if (Date.now() - Number(lastseen) > timeuntilnextlastseen)
           insertlastseen();
       } else {
         insertlastseen();
       }
-    }, timeuntilnextlastseen);
+    }, timeuntilnextlastseen / 2);
     return () => {
       clearInterval(interva);
     };
@@ -199,24 +195,24 @@ function App() {
     <>
       <div
         onClick={() => setshowsettings1()}
-        className={`flex items-center justify-center gap-5 p-5  fixed inset-0 bg-MainBlack rounded-md z-[99] transition-all 
+        className={`flex items-center justify-center gap-5 p-5  fixed inset-0 bg-Main rounded-md z-[99] transition-all 
           ${showsettings}`}
       >
         <div
           onClick={(e) => {
             e.stopPropagation();
           }}
-          className="relative max-md:flex-1 p-3 rounded-xl w-[40%] h-full bg-Mainpink flex flex-col items-center shadow-[0_0_10px_MainBlack] gap-5 pt-10 "
+          className="relative max-md:flex-1 p-3 rounded-xl w-[40%] h-full bg-Secondary flex flex-col items-center shadow-[0_0_10px_MainBlack] gap-5 pt-10 "
         >
           <a
             href="mailto:mawhadmd@gmail.com"
-            className="max-md:w-fit p-5 bg-MainBlue rounded-xl text-MainBlack w-[50%] h-16 hover:bg-MainPinkishWhite"
+            className="max-md:w-fit p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main"
           >
             <p className="text-center">FeedBack</p>
           </a>
           <a
             href="mailto:mawhadmd@gmail.com"
-            className=" max-md:w-fit p-5 bg-MainBlue rounded-xl text-MainBlack w-[50%] h-16 hover:bg-MainPinkishWhite"
+            className=" max-md:w-fit p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main"
           >
             <p className="text-center">Suggestion</p>
           </a>
@@ -228,24 +224,26 @@ function App() {
           {lightmode ? (
             <button
               onClick={changelightmode}
-              className="p-2 bg-MainBlack text-MainPinkishWhite"
+              className="p-2 bg-Main text-MainText"
             >
               Dark Mode
             </button>
           ) : (
             <button
               onClick={changelightmode}
-              className="bg-MainBlack text-MainPinkishWhite p-2"
+              className="bg-Main text-MainText p-2"
             >
               Light Mode
             </button>
           )}
         </div>
-        <button className="rounded-xl  text-MainBlack mb-auto p-4 bg-Mainpink hover:bg-MainPinkishWhite">
+        <button className="rounded-xl  text-MainText mb-auto p-4 bg-Secondary hover:bg-Main">
           Close
         </button>
       </div>
-      <SettingContext.Provider value={{ setshowsettings1, MobileMode, lightmode }}>
+      <SettingContext.Provider
+        value={{ setshowsettings1, MobileMode, lightmode }}
+      >
         <ReloadContactsCtxt.Provider
           value={{ Reloadcontact, setReloadcontact }}
         >

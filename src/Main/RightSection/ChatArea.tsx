@@ -4,15 +4,54 @@ import { ChatContext, SettingContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3";
 import Message from "./Message";
 import BGimage from "../../assets/blackbackground.png";
-
+import { Usermapscontext } from "./RightSection";
+interface UserMessage {
+  name: string;
+  id: string;
+  color: string | null;
+}
 const ChatArea = () => {
   const [messages, setmessages] = useState<any[] | null>(null);
   const context = useContext(ChatContext);
   const { Currentopenchatid, uuid, setcontent } = context;
-  const [UserMessageMap, setUserMessageMap] = useState(new Map());
+  const {UserMessageMap, setUserMessageMap} = useContext(Usermapscontext)
   const ChatArea = useRef<HTMLDivElement>(null);
   const { lightmode } = useContext(SettingContext);
   console.log("chatid", Currentopenchatid);
+  
+  async function setnewuserinmessage(senderid:string) {
+    var { data: payload, error } = await fetch(
+      "http://localhost:8080/getuserbyid",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id:senderid }),
+      }
+    ).then((res) => res.json());
+    let newmap = new Map();
+    newmap.set(senderid, {
+      name: payload.user?.user_metadata.name,
+      id: payload.user?.id,
+      color: getRandomColor(
+        senderid == uuid
+          ? getComputedStyle(document.documentElement).getPropertyValue(
+              "--Secondary"
+            )
+          : getComputedStyle(document.documentElement).getPropertyValue(
+              "--actionColor"
+            )
+      ),
+    });
+    if (payload)
+      setUserMessageMap((prev: Map<string, UserMessage>) => {
+        const newMap = new Map(prev);
+        newmap.forEach((value, key) => newMap.set(key, value));
+        return newMap;
+      });
+    if (error) {
+      console.log(error, 'error while processing (getting id of) new user in the message');
+    }
+  }
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const channels = supabase
@@ -22,6 +61,8 @@ const ChatArea = () => {
           { event: "*", schema: "public", table: "Messages" },
           (payload: any) => {
             console.log("Change received!", messages, payload);
+            if(!UserMessageMap.get(payload.new.Sender))
+              setnewuserinmessage(payload.new.Sender)
             setmessages((PreviousMessages) => [
               payload.new,
               ...(PreviousMessages || []),
@@ -94,7 +135,6 @@ const ChatArea = () => {
   async function getData() {
     if (Currentopenchatid != undefined) {
       const { data, error } = await getmessages();
-
       Setdatatomap(data, error);
     }
   }
@@ -117,10 +157,10 @@ const ChatArea = () => {
             color: getRandomColor(
               data[i].Sender == uuid
                 ? getComputedStyle(document.documentElement).getPropertyValue(
-                     "--MainBlue"
+                     "--Secondary"
                   )
                 : getComputedStyle(document.documentElement).getPropertyValue(
-                   "--MainBlackfr"
+                   "--actionColor"
                   )
             ),
           });
@@ -138,7 +178,7 @@ const ChatArea = () => {
     let contrast = -1;
     var colorarray;
     let bgcolorarray = bgcolor.split(",").map((e) => Number(e));
-    while (contrast <= 4) {
+    while (contrast <= 6) {
       let letters = "0123456789ABCDEF";
       color = "#";
       for (var i = 0; i < 6; i++) {
@@ -183,18 +223,20 @@ const ChatArea = () => {
     return Number(contrastRatio.toFixed(2));
   }
   useEffect(() => {
-    setUserMessageMap((prevMap) => {
+    setUserMessageMap((prevMap:  Map<string, UserMessage>) => {
       const newMap = new Map(prevMap);
+      if(newMap.size == 0)
+       
       newMap.forEach((value, key) => {
         newMap.set(key, {
           ...value,
           color: getRandomColor(
             key == uuid
               ? getComputedStyle(document.documentElement).getPropertyValue(
-                  "--MainSky"
+                  "--Secondary"
                 )
               : getComputedStyle(document.documentElement).getPropertyValue(
-                  "--MainBlackfr"
+                  "--actionColor"
                 )
           ),
         });
@@ -213,7 +255,7 @@ const ChatArea = () => {
     >
       {messages ? (
         messages?.length == 0 ? (
-          <div className="text-MainPinkishWhite h-full w-full text-2xl flex justify-center items-center">
+          <div className="text-MainText h-full w-full text-2xl flex justify-center items-center">
             Start Messaging!
           </div>
         ) : (
@@ -226,6 +268,7 @@ const ChatArea = () => {
               UserMessageMap={UserMessageMap}
               setUserMessageMap={setUserMessageMap}
               getRandomColor={getRandomColor}
+              
             />
           ))
         )

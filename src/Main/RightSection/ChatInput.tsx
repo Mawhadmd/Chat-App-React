@@ -106,10 +106,10 @@ const ChatArea = () => {
   return (
     <div
       id="ChatInput"
-      className="relative gap-3 transition-all  bg-MainBlack flex items-center  h-[10%]  w-full content-center px-5 "
+      className="relative gap-3 transition-all  bg-Main flex items-center  h-[10%]  w-full content-center px-5 "
     >
       {contentisfull && (
-        <div className=" absolute w-32 pointer-events-none bg-MainBlack text-MainBlue text-center p-1 rounded-lg  top-[-120%] right-6 z-20">
+        <div className=" absolute w-32 pointer-events-none bg-Main text-Secondary text-center p-1 rounded-lg  top-[-120%] right-6 z-20">
           You can't have over 300 characters in here
         </div>
       )}
@@ -123,15 +123,15 @@ const ChatArea = () => {
         value={content}
         type="text"
         placeholder="Text Here"
-        className={`w-[95%] shadow-[-5px_5px_15px_1px_rgba(0,0,0,0.589)] transition-all rounded-3xl p-4 focus:!ring-4 focus:p-3 bg-MainBlackfr/60 text-Mainpink ${
-          !contentisfull ? "focus:ring-MainBlue" : "focus:ring-red-500"
+        className={`w-[95%] shadow-[-5px_5px_15px_1px_rgba(0,0,0,0.589)] transition-all placeholder:text-Main rounded-3xl p-4 focus:!ring-4 focus:p-3 bg-MainText text-Main ${
+          !contentisfull ? "focus:ring-Secondary" : "focus:ring-red-500"
         } focus:outline-none`}
       />
       <button
         onClick={() => {
           SetData();
         }}
-        className={`w-[5%] min-w-fit hover:bg-MainPinkishWhite transition-all duration-500 bg-Mainpink rounded-full p-4`}
+        className={`w-[5%] min-w-fit hover:bg-actionColor hover:text-black text-white transition-all duration-500 bg-Secondary rounded-full p-4`}
       >
         Send
       </button>

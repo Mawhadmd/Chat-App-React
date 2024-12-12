@@ -123,7 +123,7 @@ const Contacts: React.FC<ContactsProps> = ({
       onClick={() => {
         getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
       }}
-      className="text-MainPinkishWhite items-center  w-full mx-auto h-20 bg-MainBlack border-MainBlue/20 border-spacing-2 border-[1px]
+      className="text-MainText items-center  w-full mx-auto h-20 bg-Main border-Secondary/20 border-spacing-2 border-[1px]
 border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
       <div className="w-16 h-16 ml-1">
@@ -145,7 +145,7 @@ border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-al
                 ? latestMessage.slice(0, 38) + "..."
                 : latestMessage
             }`}</span>
-            <span className="text-sm text-MainPinkishWhite text-nowrap">
+            <span className="text-sm text-MainText text-nowrap">
               At {latestMessagetime}
             </span>
           </div>

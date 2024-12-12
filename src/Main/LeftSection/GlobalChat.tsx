@@ -51,18 +51,18 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
         setCurrentopenchatid("Global");
         console.log("Set");
       }}
-      className=" h-24 gap-2 flex items-center pl-5 text-MainPinkishWhite hover:bg-white/20 cursor-pointer border-MainBlue/20 border-[1px]"
+      className=" h-24 gap-2 flex items-center pl-5 text-MainText hover:bg-white/20 cursor-pointer border-Secondary/20 border-[1px]"
     >
       <img src={globe} className="h-10 invert" alt="Globe" />
       <div className="flex flex-col gap-2 w-full mx-1">
         <span className="font-bold">Global Chat</span>
         <div className="flex justify-between">
-          <span className=" text-sm text-MainPinkishWhite/60">{`${name}: ${
+          <span className=" text-sm text-MainText/60">{`${name}: ${
             newmessage?.Content?.length > 30
               ? newmessage?.Content?.slice(0, 30) + "..."
               : newmessage?.Content
           }`}</span>
-          <span className=" text-sm text-MainPinkishWhite text-nowrap">
+          <span className=" text-sm text-MainText text-nowrap">
             At {convertTime(latestMessagetime)}
           </span>
         </div>
