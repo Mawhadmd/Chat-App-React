@@ -133,6 +133,7 @@ function App() {
             body: JSON.stringify({
               mode: "insert",
               uuid: uuid,
+              accessToken: (await supabase.auth.getSession()).data.session?.access_token
             }),
           });
           console.log(res.status, res);
@@ -151,6 +152,7 @@ function App() {
             body: JSON.stringify({
               mode: "update",
               uuid: uuid,
+              accessToken: (await supabase.auth.getSession()).data.session?.access_token
             }),
           });
           console.log(res.status, res);

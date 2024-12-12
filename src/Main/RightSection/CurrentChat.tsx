@@ -47,7 +47,7 @@ const ChatArea = () => {
         let res = await fetch("https://chat-app-react-server-qizz.onrender.com/getuserbyid", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: Otheruserid }),
+          body: JSON.stringify({ id: Otheruserid,accessToken: (await supabase.auth.getSession()).data.session?.access_token }),
         }).then((res) => res.json());
         setname(res.data.user?.user_metadata.name);
         setpfp(res.data.user?.user_metadata.avatar_url);

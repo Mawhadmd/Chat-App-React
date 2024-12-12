@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { ChatContext, ReloadContactsCtxt } from "../App";
+import { supabase } from "../Supabase";
 
 const ChatArea = () => {
   const context = useContext(ChatContext);
@@ -31,6 +32,7 @@ const ChatArea = () => {
               },
               body: JSON.stringify({
                 uuid: uuid,
+                accessToken: (await supabase.auth.getSession()).data.session?.access_token,
                 Otheruserid: Otheruserid,
               }),
             })
@@ -62,6 +64,7 @@ const ChatArea = () => {
               chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
               Receiver: Otheruserid,
               senderid: uuid,
+              accessToken: (await supabase.auth.getSession()).data.session?.access_token,
             }),
           })
             .then((response) => {
@@ -80,7 +83,7 @@ const ChatArea = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ contents: contentval, senderid: uuid }),
+            body: JSON.stringify({ contents: contentval, senderid: uuid,accessToken: (await supabase.auth.getSession()).data.session?.access_token }),
           })
             .then((response) => {
               console.log(response);

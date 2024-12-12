@@ -25,7 +25,7 @@ const ChatArea = () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id:senderid }),
+        body: JSON.stringify({ id:senderid,accessToken: (await supabase.auth.getSession()).data.session?.access_token}),
       }
     ).then((res) => res.json());
     let newmap = new Map();
@@ -148,7 +148,7 @@ const ChatArea = () => {
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id: data[i].Sender }),
+              body: JSON.stringify({ id: data[i].Sender, accessToken: (await supabase.auth.getSession()).data.session?.access_token }),
             }
           ).then((res) => res.json());
           UserMessageMap.set(data[i].Sender, {
