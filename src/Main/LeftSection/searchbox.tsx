@@ -23,7 +23,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
   }, []);
 
   async function runquery() {
-    console.log(query);
+
     let res = (await fetch('/getuserslist', {
       method: "POST",
       headers: {"Content-Type": "application/json"},

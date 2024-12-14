@@ -40,7 +40,7 @@ const Contacts: React.FC<ContactsProps> = ({
   const userId = user.id;
   const name = user.user_metadata.name;
   const customPfp = user.user_metadata.avatar_url;
-  console.log(chatId, "chatid for", userId, uuid);
+
 
   const sortLatestMessage = useCallback(
     (data: any) => {
@@ -64,14 +64,13 @@ const Contacts: React.FC<ContactsProps> = ({
   //all this functions run only if its not search
   const getLatestMessage = useCallback(async () => {
     if (chatId != "-1") {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("PrivateMessages")
         .select("Content, Sender, created_at")
         .eq("chatId", chatId)
         .order("created_at", { ascending: false })
         .limit(1);
 
-      console.log(data, error, "data, error, latest messages");
       sortLatestMessage(data);
     }
   }, [Currentopenchatid]);
@@ -96,7 +95,6 @@ const Contacts: React.FC<ContactsProps> = ({
             filter: `chatId=eq.${chatId}`,
           },
           (payload) => {
-            console.log("Change received in contacts!", payload.new);
             if (chatId == payload.new.chatId) {
               sortLatestMessage([
                 {

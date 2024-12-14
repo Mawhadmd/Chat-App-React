@@ -37,7 +37,6 @@ const ChatArea = () => {
               }),
             })
               .then((response) => {
-                console.log(response);
                 if (!response.ok) {
                   // Check if the response status is not in the range 200-299
                   throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
@@ -49,9 +48,9 @@ const ChatArea = () => {
                 chatid = res?.[0].chatId;
                 setquery("");
                 setReloadcontact((previous: boolean) => !previous);
-                console.log(res + "Response");
+
               })
-              .catch((e) => console.log(e + "Error"));
+              .catch((e) => console.log(e + "Error while inserting a user"));
           }
     
           await fetch("https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages", {
@@ -68,15 +67,15 @@ const ChatArea = () => {
             }),
           })
             .then((response) => {
-              console.log(response);
+              
               if (!response.ok) {
                 // Check if the response status is not in the range 200-299
                 throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
               }
               return response.json();
             })
-            .then((res) => console.log(res + "Response"))
-            .catch((e) => console.log(e + "Error"));
+            .then((res) => console.log(res + "Inseting pvt message done"))
+            .catch((e) => console.log(e + "Error Inseting pvt message"));
         } else {
           await fetch("https://chat-app-react-server-qizz.onrender.com/Insertglobalmessages", {
             method: "POST",
@@ -86,15 +85,14 @@ const ChatArea = () => {
             body: JSON.stringify({ contents: contentval, senderid: uuid,accessToken: (await supabase.auth.getSession()).data.session?.access_token }),
           })
             .then((response) => {
-              console.log(response);
               if (!response.ok) {
                 // Check if the response status is not in the range 200-299
                 throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
               }
               return response.json();
             })
-            .then((res) => console.log(res + "Response"))
-            .catch((e) => console.log(e + "Error"));
+            .then((res) => console.log(res + "Response Inseting global message"))
+            .catch((e) => console.log(e + "Error Inseting global message"));
         }
       } else alert("Write something");
     }

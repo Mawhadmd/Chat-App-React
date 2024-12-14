@@ -6,6 +6,7 @@ const getChatId = async (
   setOtheruserid: any = undefined,
   setCurrentopenchatid: any = undefined
 ) => {
+  console.log('getting chat id')
   if (uuid == userId) {
     alert("You can't talk to yourself");
     return;
@@ -18,7 +19,9 @@ const getChatId = async (
         `and(User1.eq.${userId},User2.eq.${uuid}),and(User2.eq.${userId},User1.eq.${uuid})`
       )
       .limit(1);
-    console.log(error, data, "error data for getting only the id");
+      if(error){
+        console.log('Error while getting chatid')
+      }
     if (data && data?.length > 0) return data?.[0].chatId;
     else return -1;
   }
@@ -31,7 +34,6 @@ const getChatId = async (
         `and(User1.eq.${userId},User2.eq.${uuid}),and(User2.eq.${userId},User1.eq.${uuid})`
       )
       .limit(1);
-    console.log(data, error, "For gettingchatid");
     if (error) throw error;
     setOtheruserid(userId);
     if (data && data[0] && data.length != 0)

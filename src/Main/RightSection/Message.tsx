@@ -39,8 +39,8 @@ const Message = ({
        
       className={`p-1 pl-2 text-xl text-MainText flex break-words flex-col w-fit h-fit max-w-[50vw]  ${
         String(data.Sender) != String(uuid)
-          ? " bg-actionColor text-black m-2 ml-auto  rounded-t-lg rounded-bl-lg"
-          : "bg-Secondary text-white m-2  rounded-e-lg rounded-t-lg  "
+          ? " bg-actionColor border-MainText  border-solid border-b-[1px] text-black m-2 ml-auto  rounded-t-lg rounded-bl-lg"
+          : "bg-Secondary border-actionColor  border-solid border-b-[1px] text-white m-2  rounded-e-lg rounded-t-lg  "
       }`}
     >
       {Currentopenchatid == "Global" ? (

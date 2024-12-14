@@ -11,9 +11,6 @@ function getRandomColor(bgcolor) {
    
     let colorshex = color.slice(1).split('');
     let colorarray = [Number(`0x${colorshex[0]}${colorshex[1]}`),Number(`0x${colorshex[2]}${colorshex[3]}`),Number(`0x${colorshex[4]}${colorshex[5]}`)]
-    console.log(colorarray)
-    console.log(contrast)
-    console.log(color)
     contrast = calculateContrastRatio(bgcolorarray,colorarray)
   }
 
@@ -45,5 +42,4 @@ function getRandomColor(bgcolor) {
 
     return Number(contrastRatio.toFixed(2));
   }
-
- console.log( getRandomColor("220, 225, 233"))
+ 

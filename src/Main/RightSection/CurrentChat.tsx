@@ -61,7 +61,6 @@ const ChatArea = () => {
       try {
         var lastseen, error;
         if (thenewpayload == null) {
-          console.log("initial");
           let { data, error: e } = await supabase
             .from("Users")
             .select("LastSeen")
@@ -106,14 +105,14 @@ const ChatArea = () => {
      try {
 
       let users = Array.from(UserMessageMap.keys())
-      console.log(users,'usershere')
+      console.log(users,'usershere in the global chat')
       let { data, error } = await supabase
       .from("Users")
       .select("LastSeen")
       .in('id', users)
       .gte('LastSeen', Date.now() - 180 * 1000)
       if(data)
-        {console.log(data,'data of lastseen here')
+        {
         setlastseenglobal(String(data.length))}
       else
         throw(JSON.stringify(error))
@@ -138,7 +137,6 @@ const ChatArea = () => {
             filter: `id=eq.${Otheruserid}`,
           },
           (payload) => {
-            console.log("Change received!", payload);
             getlastseen(payload.new);
           }
         )

@@ -28,7 +28,10 @@ body {
   /* colors are set in app.jsx */
 }
 
-
+::selection {
+  background-color: rgb(var(--MainText));
+  color: rgb(var(--Main));
+}
 #RightSection {
   background: linear-gradient(var(--Main), var(--Secondary));
     transition: all 150ms;

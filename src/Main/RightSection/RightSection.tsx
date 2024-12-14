@@ -4,11 +4,15 @@ import ChatArea from "./ChatArea";
 import { ChatContext } from "../App";
 import { useContext, useState,createContext } from "react";
 
+
 export const Usermapscontext = createContext<any>(null)
 const RightSection = () => {
   const [UserMessageMap, setUserMessageMap] = useState(new Map());
   const context = useContext(ChatContext);
   const { logged, Currentopenchatid} = context;
+
+
+
   return (
     logged && !!Currentopenchatid? 
       (    

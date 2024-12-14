@@ -61,6 +61,8 @@ function App() {
     }
   }, [lightmode]);
 
+
+
   async function getuuid() {
     let user = await supabase.auth.getUser();
     let uuid = user.data.user?.id;
@@ -98,9 +100,10 @@ function App() {
     getuuid(); // get uuid of the current user logged in
   }, []);
 
+
+
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(event, session, "Event, Session");
       if (["INITIAL_SESSION", "SIGNED_IN"].includes(event) && session != null)
         setLogged(true);
       if (event === "SIGNED_OUT") setLogged(false);
@@ -125,39 +128,43 @@ function App() {
 
       if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
         try {
-          let res = await fetch("https://chat-app-react-server-qizz.onrender.com/insertlastseen", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              mode: "insert",
-              uuid: uuid,
-              accessToken: (await supabase.auth.getSession()).data.session?.access_token
-            }),
-          });
-          console.log(res.status, res);
-          let response = await res.json();
-          console.log(response);
+          await fetch(
+            "https://chat-app-react-server-qizz.onrender.com/insertlastseen",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                mode: "insert",
+                uuid: uuid,
+                accessToken: (
+                  await supabase.auth.getSession()
+                ).data.session?.access_token,
+              }),
+            }
+          );
         } catch (e) {
           alert("Error occured while updating lastseen");
         }
       } else {
         try {
-          let res = await fetch("https://chat-app-react-server-qizz.onrender.com/insertlastseen", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              mode: "update",
-              uuid: uuid,
-              accessToken: (await supabase.auth.getSession()).data.session?.access_token
-            }),
-          });
-          console.log(res.status, res);
-          let response = await res.json();
-          console.log(response);
+           await fetch(
+            "https://chat-app-react-server-qizz.onrender.com/insertlastseen",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                mode: "update",
+                uuid: uuid,
+                accessToken: (
+                  await supabase.auth.getSession()
+                ).data.session?.access_token,
+              }),
+            }
+          );
         } catch (e) {
           console.error("Error occured while updating lastseen" + e);
         }

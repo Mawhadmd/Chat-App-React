@@ -54,10 +54,7 @@ const LeftSection = ({}) => {
         arrayofusers.push({ res, chatId });
       }
     }
-    console.log(arrayofusers, "Array of contacts");
     setcontacts(arrayofusers);
-
-    console.log(data, error, "data,error getting contacts");
   }
 
   useEffect(() => {

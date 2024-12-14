@@ -18,8 +18,8 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
       }).then((res) => res.json())
     ).data.user?.user_metadata.name;
     setname(name);
-   }catch{
-    alert("Error 500, please reload or contact support")
+   }catch(Error){
+    alert("Error 500, please reload or contact support" + Error)
    }
   }
 
@@ -32,10 +32,9 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
 
     if (data) {
       await getname(data[0].Sender);
-      console.log(data[0].created_at);
       setlatestmessagetime(data[0].created_at);
       setcontent({ Content: data[0].Content });
-      console.log(data, error, "data,error for messages latest in global chat");
+ 
     }
   }
   useEffect(() => {
@@ -49,7 +48,6 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
     <div
       onClick={() => {
         setCurrentopenchatid("Global");
-        console.log("Set");
       }}
       className=" h-24 gap-2 flex items-center pl-5 text-MainText hover:bg-white/20 cursor-pointer border-Secondary/20 border-[1px]"
     >

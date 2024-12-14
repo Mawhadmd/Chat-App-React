@@ -14,18 +14,22 @@ const ChatArea = () => {
   const [messages, setmessages] = useState<any[] | null>(null);
   const context = useContext(ChatContext);
   const { Currentopenchatid, uuid, setcontent } = context;
-  const {UserMessageMap, setUserMessageMap} = useContext(Usermapscontext)
+  const { UserMessageMap, setUserMessageMap } = useContext(Usermapscontext);
   const ChatArea = useRef<HTMLDivElement>(null);
   const { lightmode } = useContext(SettingContext);
-  console.log("chatid", Currentopenchatid);
-  
-  async function setnewuserinmessage(senderid:string) {
+
+  async function setnewuserinmessage(senderid: string) {
     var { data: payload, error } = await fetch(
       "https://chat-app-react-server-qizz.onrender.com/getuserbyid",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id:senderid,accessToken: (await supabase.auth.getSession()).data.session?.access_token}),
+        body: JSON.stringify({
+          id: senderid,
+          accessToken: (
+            await supabase.auth.getSession()
+          ).data.session?.access_token,
+        }),
       }
     ).then((res) => res.json());
     let newmap = new Map();
@@ -49,9 +53,38 @@ const ChatArea = () => {
         return newMap;
       });
     if (error) {
-      console.log(error, 'error while processing (getting id of) new user in the message');
+      console.log(
+        error,
+        "error while processing (getting id of) new user in the message"
+      );
     }
   }
+  useEffect(() => {
+    if(uuid){
+      const roomOne = supabase.channel(`channel${Currentopenchatid}`)
+      roomOne
+        .on('presence', { event: 'sync' }, () => {
+          const newState:any = roomOne.presenceState()
+          Object.keys(newState).forEach((key) => {
+            console.log(newState[key][0].userid);
+          });
+          console.log('sync', newState)
+        })
+        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+          console.log('join', key, newPresences)
+        })
+        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+          console.log('leave', key, leftPresences)
+        })
+        .subscribe((status)=>{console.log(status)})
+        roomOne.track({userid: uuid, lastactive: Date.now()})
+        return () => {
+          roomOne.unsubscribe()
+        };
+    
+    }
+    }, [uuid]); //online prescense supabase listener websocket
+    
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const channels = supabase
@@ -60,9 +93,8 @@ const ChatArea = () => {
           "postgres_changes",
           { event: "*", schema: "public", table: "Messages" },
           (payload: any) => {
-            console.log("Change received!", messages, payload);
-            if(!UserMessageMap.get(payload.new.Sender))
-              setnewuserinmessage(payload.new.Sender)
+            if (!UserMessageMap.get(payload.new.Sender))
+              setnewuserinmessage(payload.new.Sender);
             setmessages((PreviousMessages) => [
               payload.new,
               ...(PreviousMessages || []),
@@ -88,7 +120,6 @@ const ChatArea = () => {
             filter: `chatId=eq.${Currentopenchatid}`,
           },
           (payload: any) => {
-            console.log("Change received in chatarea!", messages, payload);
             setmessages((prevMessages) =>
               Array.isArray(prevMessages)
                 ? [payload.new, ...prevMessages]
@@ -148,7 +179,12 @@ const ChatArea = () => {
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id: data[i].Sender, accessToken: (await supabase.auth.getSession()).data.session?.access_token }),
+              body: JSON.stringify({
+                id: data[i].Sender,
+                accessToken: (
+                  await supabase.auth.getSession()
+                ).data.session?.access_token,
+              }),
             }
           ).then((res) => res.json());
           UserMessageMap.set(data[i].Sender, {
@@ -157,10 +193,10 @@ const ChatArea = () => {
             color: getRandomColor(
               data[i].Sender == uuid
                 ? getComputedStyle(document.documentElement).getPropertyValue(
-                     "--Secondary"
+                    "--Secondary"
                   )
                 : getComputedStyle(document.documentElement).getPropertyValue(
-                   "--actionColor"
+                    "--actionColor"
                   )
             ),
           });
@@ -168,9 +204,9 @@ const ChatArea = () => {
       }
       setUserMessageMap(UserMessageMap);
       setmessages(data);
-    }else{
-      alert('Error,check console')
-      console.log(error)
+    } else {
+      alert("Error,check console");
+      console.log(error);
     }
   }
   function getRandomColor(bgcolor: string) {
@@ -223,29 +259,27 @@ const ChatArea = () => {
     return Number(contrastRatio.toFixed(2));
   }
   useEffect(() => {
-    setUserMessageMap((prevMap:  Map<string, UserMessage>) => {
+    setUserMessageMap((prevMap: Map<string, UserMessage>) => {
       const newMap = new Map(prevMap);
-      if(newMap.size == 0)
-       
-      newMap.forEach((value, key) => {
-        newMap.set(key, {
-          ...value,
-          color: getRandomColor(
-            key == uuid
-              ? getComputedStyle(document.documentElement).getPropertyValue(
-                  "--Secondary"
-                )
-              : getComputedStyle(document.documentElement).getPropertyValue(
-                  "--actionColor"
-                )
-          ),
+      if (newMap.size == 0)
+        newMap.forEach((value, key) => {
+          newMap.set(key, {
+            ...value,
+            color: getRandomColor(
+              key == uuid
+                ? getComputedStyle(document.documentElement).getPropertyValue(
+                    "--Secondary"
+                  )
+                : getComputedStyle(document.documentElement).getPropertyValue(
+                    "--actionColor"
+                  )
+            ),
+          });
         });
-      });
       return newMap;
     });
   }, [lightmode]);
 
-  console.log(UserMessageMap);
   return (
     <div
       id="ChatArea"
@@ -268,7 +302,6 @@ const ChatArea = () => {
               UserMessageMap={UserMessageMap}
               setUserMessageMap={setUserMessageMap}
               getRandomColor={getRandomColor}
-              
             />
           ))
         )

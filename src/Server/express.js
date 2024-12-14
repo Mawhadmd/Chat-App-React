@@ -8,12 +8,14 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: ['http://localhost:3001', 'https://chatty001a.netlify.app'] }));
-
+var Usersids = new Map()
 const supabase = createClient(
   process.env.SUPABASE_URL || "",
   process.env.SUPABASE_KEY || "" // Service Role Key
 );
-
+setInterval(() => {
+  Usersids.clear()
+}, 1000 * 60 * 60 * 24);
 const validateTokenMiddleware = async (req, res, next) => {
 
   const {accessToken} = req.body; 
@@ -56,7 +58,7 @@ app.post("/Insertglobalmessages", async (req, res) => {
 });
 
 app.post("/Insertprivatemessages", async (req, res) => {
-  console.log(JSON.stringify(req.body));
+  console.log(JSON.stringify(req.body))
   const { Content, chatId, Receiver, senderid } = req.body;
   console.log("Insert message private");
   var { data, error } = await supabase
@@ -110,10 +112,16 @@ app.post("/insertlastseen", async (req, res) => {
 });
 
 app.post("/getuserbyid", async (req, res) => {
-const {id} = req.body
+  const {id} = req.body
+  if(Usersids.get(id)){
+    console.log('getting user by id exists', id)
+    return res.status(200).json(Usersids.get(id))
+  }
+  console.log('getting user by id', id)
 let User = await supabase.auth.admin.getUserById(id)
 if (User){
-  return res.status(200).json(User)
+  Usersids.set(id,User)
+  return res.status(202).json(User)
 }else{
   return res.status(400).json("Need ID")
 }
