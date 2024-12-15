@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { ChatContext } from "../App";
 import convertTime from "../util/convertTime";
 import getChatId from "../util/getChatId";
@@ -26,11 +26,6 @@ const Message = ({
 }: Message) => {
   const { Currentopenchatid, setCurrentopenchatid, setOtheruserid } =
     useContext(ChatContext);
-
-
-  useEffect(() => {
-    data.Content = 'fuck'
-  }, []);
 
   return (
     <div key={i}>

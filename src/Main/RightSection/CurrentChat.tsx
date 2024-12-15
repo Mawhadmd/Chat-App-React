@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import convertTime from "../util/convertTime";
 import defaultpfp from "../../assets/grayuserpfp.png";
+import { getuserbyid } from "../util/getuserbyid";
 const ChatArea = () => {
   const context = useContext(ChatContext);
   const [lastseen, setlastseen] = useState<string>("");
@@ -51,6 +52,7 @@ const ChatArea = () => {
     let NumberOfPeopleTypingInGlobal: any[] = [];
     channelB
       .on("broadcast", { event: `typing${Currentopenchatid}` }, (payload) => {
+        if(payload.payload.user==uuid){
         if (Currentopenchatid == "Global") {
           const index = NumberOfPeopleTypingInGlobal.indexOf(payload.payload.user);
 
@@ -68,7 +70,7 @@ const ChatArea = () => {
           
         } else {
           setistyping(payload.payload.istyping);
-        }
+        }}
       })
       .subscribe();
     return () => {
@@ -79,19 +81,7 @@ const ChatArea = () => {
     //set name and pfp of a user if not global
     if (Currentopenchatid != "Global") {
       (async () => {
-        let res = await fetch(
-          "https://chat-app-react-server-qizz.onrender.com/getuserbyid",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: Otheruserid,
-              accessToken: (
-                await supabase.auth.getSession()
-              ).data.session?.access_token,
-            }),
-          }
-        ).then((res) => res.json());
+         let res = await getuserbyid(Otheruserid)
         setname(res.data.user?.user_metadata.name);
         setpfp(res.data.user?.user_metadata.avatar_url);
         setloading(false); // i put it here because this is the palce that requires the most time
@@ -127,13 +117,13 @@ const ChatArea = () => {
         );
 
         if (diffSeconds < 60) {
-          setlastseen("A few moments ago");
+          setlastseen("Last Seen: A few moments ago");
         } else if (diffSeconds < 3600) {
-          setlastseen(`${Math.floor(diffSeconds / 60)} minute(s) ago`);
+          setlastseen(`Last Seen: ${Math.floor(diffSeconds / 60)} minute(s) ago`);
         } else if (now.toDateString() === lastSeenDate.toDateString()) {
-          setlastseen("Today at " + convertTime(String(lastSeenDate)));
+          setlastseen("Last Seen: Today at " + convertTime(String(lastSeenDate)));
         } else {
-          setlastseen(
+          setlastseen("Last Seen: "+
             lastSeenDate.toLocaleDateString() +
               " " +
               convertTime(String(lastSeenDate))
@@ -204,9 +194,9 @@ const ChatArea = () => {
               <br />
               {!istyping ? (
                 <span>
-                  Last Seen:{" "}
+                  
                   {onlineusers && onlineusers.includes(Otheruserid)
-                    ? "is online"
+                    ? "Online"
                     : lastseen}
                 </span>
               ) : (

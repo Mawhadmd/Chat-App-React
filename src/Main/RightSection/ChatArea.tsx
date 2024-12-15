@@ -1,17 +1,17 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext, SettingContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3";
 import Message from "./Message";
 import BGimage from "../../assets/blackbackground.png";
 import { Usermapscontext } from "./RightSection";
+import { getuserbyid } from "../util/getuserbyid";
 interface UserMessage {
   name: string;
   id: string;
   color: string | null;
 }
-const ChatArea = () => {
-  const [messages, setmessages] = useState<any[] | null>(null);
+const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
   const context = useContext(ChatContext);
   const { Currentopenchatid, uuid, setcontent } = context;
   const { UserMessageMap, setUserMessageMap } = useContext(Usermapscontext);
@@ -19,19 +19,7 @@ const ChatArea = () => {
   const { lightmode } = useContext(SettingContext);
 
   async function setnewuserinmessage(senderid: string) {
-    var { data: payload, error } = await fetch(
-      "https://chat-app-react-server-qizz.onrender.com/getuserbyid",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: senderid,
-          accessToken: (
-            await supabase.auth.getSession()
-          ).data.session?.access_token,
-        }),
-      }
-    ).then((res) => res.json());
+    var { data: payload, error } =  await getuserbyid(senderid)
     let newmap = new Map();
     newmap.set(senderid, {
       name: payload.user?.user_metadata.name,
@@ -60,7 +48,7 @@ const ChatArea = () => {
     }
   }
 
-    
+ 
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const channels = supabase
@@ -71,7 +59,8 @@ const ChatArea = () => {
           (payload: any) => {
             if (!UserMessageMap.get(payload.new.Sender))
               setnewuserinmessage(payload.new.Sender);
-            setmessages((PreviousMessages) => [
+            if(payload.new.Sender!=uuid) // doesn't fetch the message for this user
+            setmessages((PreviousMessages:any) => [
               payload.new,
               ...(PreviousMessages || []),
             ]);
@@ -96,7 +85,8 @@ const ChatArea = () => {
             filter: `chatId=eq.${Currentopenchatid}`,
           },
           (payload: any) => {
-            setmessages((prevMessages) =>
+            if(payload.new.Sender!=uuid)
+            setmessages((prevMessages:any) =>
               Array.isArray(prevMessages)
                 ? [payload.new, ...prevMessages]
                 : [payload.new]
@@ -111,7 +101,7 @@ const ChatArea = () => {
     } else {
       setmessages([]);
     }
-  }, [Currentopenchatid]);
+  }, [Currentopenchatid]); //listen to new messages
 
   useEffect(() => {
     setmessages(null);
@@ -150,19 +140,7 @@ const ChatArea = () => {
     if (!!data) {
       for (let i = 0; i < data?.length; i++) {
         if (!UserMessageMap.has(data[i].Sender)) {
-          var { data: payload } = await fetch(
-            "https://chat-app-react-server-qizz.onrender.com/getuserbyid",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                id: data[i].Sender,
-                accessToken: (
-                  await supabase.auth.getSession()
-                ).data.session?.access_token,
-              }),
-            }
-          ).then((res) => res.json());
+          var { data: payload } = await getuserbyid(data[0].Sender)
           UserMessageMap.set(data[i].Sender, {
             name: payload.user?.user_metadata.name,
             id: payload.user?.id,
@@ -269,7 +247,7 @@ const ChatArea = () => {
             Start Messaging!
           </div>
         ) : (
-          messages?.map((data, i) => (
+          messages?.map((data:any, i:any) => (
             <Message
               key={uuid + String(i)}
               uuid={uuid}

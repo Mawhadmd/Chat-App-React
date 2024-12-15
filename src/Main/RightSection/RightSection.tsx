@@ -4,14 +4,18 @@ import ChatArea from "./ChatArea";
 import { ChatContext } from "../App";
 import { useContext, useState,createContext } from "react";
 
-
+interface UserMessage {
+  name: string;
+  id: string;
+  color: string | null;
+}
 export const Usermapscontext = createContext<any>(null)
 
 const RightSection = () => {
   const [UserMessageMap, setUserMessageMap] = useState(new Map());
   const context = useContext(ChatContext);
   const { logged, Currentopenchatid} = context;
-
+  const [messages, setmessages] = useState<UserMessage[] | null>(null);
  
 
 
@@ -22,9 +26,9 @@ const RightSection = () => {
 
           <Usermapscontext.Provider value={{UserMessageMap, setUserMessageMap}} >
         <CurrentChat></CurrentChat>
-        <ChatArea></ChatArea>
+        <ChatArea messages={messages} setmessages={setmessages}></ChatArea>
         </Usermapscontext.Provider>
-        <ChatInput></ChatInput>     
+        <ChatInput  setmessages={setmessages}></ChatInput>     
 
        </section>
       ):

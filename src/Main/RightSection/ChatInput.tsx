@@ -1,10 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ChatContext, ReloadContactsCtxt } from "../App";
 import { supabase } from "../Supabase";
-import { RealtimeChannel } from "@supabase/supabase-js";
 import { getname } from "../util/getnamebyid";
 
-const ChatArea = () => {
+const ChatArea = ({setmessages}:{setmessages:any}) => {
   const context = useContext(ChatContext);
   const {
     setCurrentopenchatid,
@@ -19,12 +18,21 @@ const ChatArea = () => {
   >("");
   const [contentisfull, setcontentisfull] = useState<boolean>(false);
   const [istyping, setistyping] = useState<boolean>(false);
-
+  const username = useMemo(async () => {await getname(uuid)}, [Otheruserid])
   async function SetData() {
     if (contentisfull) return;
     let contentval = content;
     setinputcontent("");
+   
     if (contentval != "") {
+      setmessages((PreviousMessages:any) => [
+        {
+          Sender: uuid,
+          created_at: Date.now(),
+          Content: contentval
+        },
+        ...(PreviousMessages || []),
+      ]);
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
         var chatid = null;
         if (Currentopenchatid == -1) {
@@ -132,11 +140,7 @@ const ChatArea = () => {
   }, [content]);
 
   useEffect(() => {
-    const channelB = supabase.channel("istyping", {
-      config: {
-        broadcast: { self: true },
-      },
-    });
+    const channelB = supabase.channel("istyping");
     console.log("run");
 
     async function sendMessage(isTyping: any) {
@@ -145,7 +149,7 @@ const ChatArea = () => {
         let ack = await channelB.send({
           type: "broadcast",
           event: `typing${Currentopenchatid}`,
-          payload: { user: await getname(uuid), istyping: isTyping },
+          payload: { user: username, istyping: isTyping },
         });
         console.log(ack);
       } catch (err) {

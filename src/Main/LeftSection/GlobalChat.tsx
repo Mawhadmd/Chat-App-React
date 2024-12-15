@@ -12,7 +12,7 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
 
 
   async function fetchlatestmessage() {
-    let { data, error } = await supabase
+    let { data } = await supabase
       .from("Messages")
       .select("Content, Sender, created_at")
       .order("created_at", { ascending: false })

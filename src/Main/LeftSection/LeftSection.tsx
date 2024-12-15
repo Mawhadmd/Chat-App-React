@@ -5,6 +5,7 @@ import { ChatContext, ReloadContactsCtxt, SettingContext } from "../App";
 import Contacts from "./Contacts";
 import GlobalChat from "./GlobalChat";
 import googleicon from "../../assets/googleicon.png";
+import { getuserbyid } from "../util/getuserbyid";
 
 const LeftSection = ({}) => {
   const { setCurrentopenchatid, query, setquery, logged, uuid } =
@@ -15,7 +16,6 @@ const LeftSection = ({}) => {
   const [SearchResults, setSearchResults] = useState([]);
 
   async function getcontacts() {
-    var data, error;
     let q1 = await supabase
       .from("Contacts")
       .select("User2, chatId")
@@ -27,29 +27,19 @@ const LeftSection = ({}) => {
       .eq("User2", uuid);
 
     if (q1.error && q2.error)
-      error = q1.error.details + "errors2:" + q2.error.details;
+      console.error(q1.error.details + "errors2:" + q2.error.details)
     let arrayofusers: any[] = [];
-
-
     if (!!q1.data && !!q2.data) {
       for (let i = 0; i < q1.data?.length; i++) {
         let id = q1.data[i].User2;
-        let res = await fetch('https://chat-app-react-server-qizz.onrender.com/getuserbyid', {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({id: id,accessToken: (await supabase.auth.getSession()).data.session?.access_token})
-    }).then(res => res.json())
+        let res = await getuserbyid(id)
         let chatId = q1.data[i].chatId;
         arrayofusers.push({ res, chatId });
       }
       for (let i = 0; i < q2.data?.length; i++) {
         let id = q2.data[i].User1;
 
-        let res = await fetch('https://chat-app-react-server-qizz.onrender.com/getuserbyid', {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({id: id, accessToken: (await supabase.auth.getSession()).data.session?.access_token})
-        }).then(res => res.json())
+        let res = await getuserbyid(id)
         let chatId = q2.data[i].chatId;
         arrayofusers.push({ res, chatId });
       }

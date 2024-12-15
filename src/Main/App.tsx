@@ -1,4 +1,4 @@
-import { useState, createContext, useEffect, useRef } from "react";
+import { useState, createContext, useEffect } from "react";
 import LeftSection from "./LeftSection/LeftSection";
 import RightSection from "./RightSection/RightSection";
 import { supabase } from "./Supabase";
@@ -119,7 +119,6 @@ function App() {
   async function getuuid() {
     let user = await supabase.auth.getUser();
     let uuid = user.data.user?.id;
-
     setuuid(uuid);
   }
   function changelightmode() {
