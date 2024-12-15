@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { ChatContext, ReloadContactsCtxt } from "../App";
 import { supabase } from "../Supabase";
+import { RealtimeChannel } from "@supabase/supabase-js";
+import { getname } from "../util/getnamebyid";
 
 const ChatArea = () => {
   const context = useContext(ChatContext);
@@ -16,44 +18,51 @@ const ChatArea = () => {
     string | readonly string[] | undefined
   >("");
   const [contentisfull, setcontentisfull] = useState<boolean>(false);
+  const [istyping, setistyping] = useState<boolean>(false);
 
   async function SetData() {
-    if (!contentisfull) {
-      let contentval = content;
-      setinputcontent("");
-      if (contentval != "") {
-        if (Currentopenchatid != "Global" && !!Currentopenchatid) {
-          var chatid = null;
-          if (Currentopenchatid == -1) {
-           await  fetch("https://chat-app-react-server-qizz.onrender.com/insertuser", {
+    if (contentisfull) return;
+    let contentval = content;
+    setinputcontent("");
+    if (contentval != "") {
+      if (Currentopenchatid != "Global" && !!Currentopenchatid) {
+        var chatid = null;
+        if (Currentopenchatid == -1) {
+          await fetch(
+            "https://chat-app-react-server-qizz.onrender.com/insertuser",
+            {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
                 uuid: uuid,
-                accessToken: (await supabase.auth.getSession()).data.session?.access_token,
+                accessToken: (
+                  await supabase.auth.getSession()
+                ).data.session?.access_token,
                 Otheruserid: Otheruserid,
               }),
+            }
+          )
+            .then((response) => {
+              if (!response.ok) {
+                // Check if the response status is not in the range 200-299
+                throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
+              }
+              return response.json();
             })
-              .then((response) => {
-                if (!response.ok) {
-                  // Check if the response status is not in the range 200-299
-                  throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
-                }
-                return response.json();
-              })
-              .then((res) => {
-                setCurrentopenchatid(res?.[0].chatId);
-                chatid = res?.[0].chatId;
-                setquery("");
-                setReloadcontact((previous: boolean) => !previous);
+            .then((res) => {
+              setCurrentopenchatid(res?.[0].chatId);
+              chatid = res?.[0].chatId;
+              setquery("");
+              setReloadcontact((previous: boolean) => !previous);
+            })
+            .catch((e) => console.log(e + "Error while inserting a user"));
+        }
 
-              })
-              .catch((e) => console.log(e + "Error while inserting a user"));
-          }
-    
-          await fetch("https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages", {
+        await fetch(
+          "https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages",
+          {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -63,40 +72,96 @@ const ChatArea = () => {
               chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
               Receiver: Otheruserid,
               senderid: uuid,
-              accessToken: (await supabase.auth.getSession()).data.session?.access_token,
+              accessToken: (
+                await supabase.auth.getSession()
+              ).data.session?.access_token,
             }),
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              // Check if the response status is not in the range 200-299
+              throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
+            }
+            return response.json();
           })
-            .then((response) => {
-              
-              if (!response.ok) {
-                // Check if the response status is not in the range 200-299
-                throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
-              }
-              return response.json();
-            })
-            .then((res) => console.log(res + "Inseting pvt message done"))
-            .catch((e) => console.log(e + "Error Inseting pvt message"));
-        } else {
-          await fetch("https://chat-app-react-server-qizz.onrender.com/Insertglobalmessages", {
+          .then((res) => console.log(res + "Inseting pvt message done"))
+          .catch((e) => console.log(e + "Error Inseting pvt message"));
+      } else {
+        await fetch(
+          "https://chat-app-react-server-qizz.onrender.com/Insertglobalmessages",
+          {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ contents: contentval, senderid: uuid,accessToken: (await supabase.auth.getSession()).data.session?.access_token }),
+            body: JSON.stringify({
+              contents: contentval,
+              senderid: uuid,
+              accessToken: (
+                await supabase.auth.getSession()
+              ).data.session?.access_token,
+            }),
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              // Check if the response status is not in the range 200-299
+              throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
+            }
+            return response.json();
           })
-            .then((response) => {
-              if (!response.ok) {
-                // Check if the response status is not in the range 200-299
-                throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
-              }
-              return response.json();
-            })
-            .then((res) => console.log(res + "Response Inseting global message"))
-            .catch((e) => console.log(e + "Error Inseting global message"));
-        }
-      } else alert("Write something");
-    }
+          .then((res) => console.log(res + "Response Inseting global message"))
+          .catch((e) => console.log(e + " Error Inserting global message"));
+      }
+    } else alert("Write something");
   }
+
+  useEffect(() => {
+    if (!content?.length) {
+      setistyping(false);
+    } else {
+      setistyping(true);
+      window.onblur = () => {
+        setistyping(false);
+      };
+      window.onfocus = () => {
+        setistyping(true);
+      };
+    }
+  }, [content]);
+
+  useEffect(() => {
+    const channelB = supabase.channel("istyping", {
+      config: {
+        broadcast: { self: true },
+      },
+    });
+    console.log("run");
+
+    async function sendMessage(isTyping: any) {
+      console.log("Sending message...");
+      try {
+        let ack = await channelB.send({
+          type: "broadcast",
+          event: `typing${Currentopenchatid}`,
+          payload: { user: await getname(uuid), istyping: isTyping },
+        });
+        console.log(ack);
+      } catch (err) {
+        console.error("Failed to send message:", err);
+      }
+    }
+
+    if (istyping) {
+      sendMessage(true);
+    } else {
+      sendMessage(false);
+    }
+    return () => {
+         supabase.removeChannel(channelB);
+    };
+  }, [Currentopenchatid, istyping]);
 
   useEffect(() => {
     if (!!content || content == "")
@@ -104,6 +169,7 @@ const ChatArea = () => {
         setcontentisfull(true);
       } else setcontentisfull(false);
   }, [content]);
+
   return (
     <div
       id="ChatInput"

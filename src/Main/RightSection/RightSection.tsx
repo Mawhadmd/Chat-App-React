@@ -6,22 +6,26 @@ import { useContext, useState,createContext } from "react";
 
 
 export const Usermapscontext = createContext<any>(null)
+
 const RightSection = () => {
   const [UserMessageMap, setUserMessageMap] = useState(new Map());
   const context = useContext(ChatContext);
   const { logged, Currentopenchatid} = context;
 
+ 
 
 
   return (
     logged && !!Currentopenchatid? 
       (    
         <section id="RightSection" className="flex flex-col h-dvh w-full max-h-dvh" >
+
           <Usermapscontext.Provider value={{UserMessageMap, setUserMessageMap}} >
         <CurrentChat></CurrentChat>
         <ChatArea></ChatArea>
         </Usermapscontext.Provider>
         <ChatInput></ChatInput>     
+
        </section>
       ):
       (

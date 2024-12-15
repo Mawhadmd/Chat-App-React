@@ -1,56 +1,100 @@
 // import pfp from "../../assets/grayuserpfp.png";
 import globe from "../../assets/global-communication_9512332.png";
-import { ChatContext, SettingContext } from "../App";
+import { ChatContext, Onlineusersctxt, SettingContext } from "../App";
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import convertTime from "../util/convertTime";
-import { Usermapscontext } from "./RightSection";
-interface UserMessage {
-  name: string;
-  id: string;
-  color: string | null;
-}
+import defaultpfp from "../../assets/grayuserpfp.png";
 const ChatArea = () => {
   const context = useContext(ChatContext);
   const [lastseen, setlastseen] = useState<string>("");
   const [lastseenglobal, setlastseenglobal] = useState<string>("");
-  const { UserMessageMap }: { UserMessageMap: Map<string, UserMessage> } =
-    useContext(Usermapscontext);
+  const [loading, setloading] = useState<boolean>();
   const [name, setname] = useState<string>("");
   const [pfp, setpfp] = useState<string>("");
+  const [istyping, setistyping] = useState<boolean>();
+  const [whoistyping, setwhoistyping] = useState<string[] | null>(null);
   const {
     Currentopenchatid,
     setOtheruserid,
     setCurrentopenchatid,
     Otheruserid,
+    uuid
   } = context;
   const { MobileMode } = useContext(SettingContext);
-
-
+  const { onlineusers } = useContext(Onlineusersctxt);
   useEffect(() => {
     if (Currentopenchatid == "Global") {
-      getlastseen(null)
-      //supabase realtime channel doesn't support multiple channels therefore i can't 
-      // do a realtime change of active in global chat since this will consume much resources
-      // interval works fine
-      let interval = setInterval(() => {
-        getlastseen(null)
-      }, 60000);
-      return () => {clearInterval(interval); };
-    }
-  }, [UserMessageMap]);
+      const usersinglobalroom = supabase.channel("onlineinglobal");
+      usersinglobalroom
+        .on("presence", { event: "sync" }, () => {
+          const presenceState = usersinglobalroom.presenceState();
+          const userSet = new Set();
+          Object.values(presenceState).forEach((value:any) => {
+            userSet.add(value[0].user); 
+          });
+          const userCount = userSet.size; 
 
+          setlastseenglobal(
+            String(userCount)
+          );
+        })
+        .subscribe()
+        .track({ user: uuid });
+      return () => {
+        supabase.removeChannel(usersinglobalroom);
+      };
+    }
+  }, []); //gets the numbers of users online by tracking them on a websocket
+  useEffect(() => {
+    const channelB = supabase.channel("istyping");
+    let NumberOfPeopleTypingInGlobal: any[] = [];
+    channelB
+      .on("broadcast", { event: `typing${Currentopenchatid}` }, (payload) => {
+        if (Currentopenchatid == "Global") {
+          const index = NumberOfPeopleTypingInGlobal.indexOf(payload.payload.user);
+
+          if (payload.payload.istyping) {
+            if (index === -1) {
+              NumberOfPeopleTypingInGlobal.push(payload.payload.user);
+            }
+          } else {
+            if (index > -1) {
+              NumberOfPeopleTypingInGlobal.splice(index, 1);
+            }
+          }
+          setistyping(NumberOfPeopleTypingInGlobal.length > 0);
+          setwhoistyping([...NumberOfPeopleTypingInGlobal]);
+          
+        } else {
+          setistyping(payload.payload.istyping);
+        }
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channelB);
+    };
+  }, [Currentopenchatid]); //checks if the user is typing or not
   useEffect(() => {
     //set name and pfp of a user if not global
     if (Currentopenchatid != "Global") {
       (async () => {
-        let res = await fetch("https://chat-app-react-server-qizz.onrender.com/getuserbyid", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: Otheruserid,accessToken: (await supabase.auth.getSession()).data.session?.access_token }),
-        }).then((res) => res.json());
+        let res = await fetch(
+          "https://chat-app-react-server-qizz.onrender.com/getuserbyid",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: Otheruserid,
+              accessToken: (
+                await supabase.auth.getSession()
+              ).data.session?.access_token,
+            }),
+          }
+        ).then((res) => res.json());
         setname(res.data.user?.user_metadata.name);
         setpfp(res.data.user?.user_metadata.avatar_url);
+        setloading(false); // i put it here because this is the palce that requires the most time
       })();
     }
   }, [Otheruserid]);
@@ -82,10 +126,7 @@ const ChatArea = () => {
           (Number(now) - Number(lastSeenDate)) / 1000
         );
 
-        if (diffSeconds < 190) {
-          //this is time between every update of lastseen in database
-          setlastseen("Online");
-        } else if (diffSeconds < 600) {
+        if (diffSeconds < 60) {
           setlastseen("A few moments ago");
         } else if (diffSeconds < 3600) {
           setlastseen(`${Math.floor(diffSeconds / 60)} minute(s) ago`);
@@ -101,30 +142,12 @@ const ChatArea = () => {
       } catch (e) {
         setlastseen("Unknown");
       }
-    }else{
-     try {
-
-      let users = Array.from(UserMessageMap.keys())
-      console.log(users,'usershere in the global chat')
-      let { data, error } = await supabase
-      .from("Users")
-      .select("LastSeen")
-      .in('id', users)
-      .gte('LastSeen', Date.now() - 180 * 1000)
-      if(data)
-        {
-        setlastseenglobal(String(data.length))}
-      else
-        throw(JSON.stringify(error))
-     } catch (error) {
-      console.log('Error getting online users' + JSON.stringify(error))
-        setlastseenglobal('Unknown')
-     }
     }
   }
 
   useEffect(() => {
     //call getlastseen on intervals or time
+
     if (Currentopenchatid != "Global") {
       const channels = supabase
         .channel("Get-LastSeen")
@@ -141,13 +164,15 @@ const ChatArea = () => {
           }
         )
         .subscribe();
+      setloading(true);
+
       getlastseen(null);
       let interval = setInterval(() => {
         getlastseen(null);
       }, 60000);
       return () => {
         channels.unsubscribe();
-        clearInterval(interval)
+        clearInterval(interval);
       };
     }
   }, [Otheruserid]);
@@ -156,7 +181,7 @@ const ChatArea = () => {
     setCurrentopenchatid(undefined);
     setOtheruserid(undefined);
   }
-  return (
+  return !loading ? (
     <div
       id="CurrentChat"
       className=" text-LightModeMain shadow-[0px_5px_12px_rgba(0,0,0,0.589)] z-10 min-h-16 h-[10%] bg-Main w-full  gap-2 content-center flex px-1 justify-between items-center "
@@ -168,25 +193,58 @@ const ChatArea = () => {
               alt="PFP"
               src={pfp}
               className="h-14 w-14 cursor-pointer rounded-full"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
+                target.onerror = null; // Prevent infinite loop
+                target.src = defaultpfp; // Fallback to 'pfp'
+              }}
             />
             <div>
               <span>{name}</span>
               <br />
-              {<span>Last Seen: {lastseen}</span>}
+              {!istyping ? (
+                <span>
+                  Last Seen:{" "}
+                  {onlineusers && onlineusers.includes(Otheruserid)
+                    ? "is online"
+                    : lastseen}
+                </span>
+              ) : (
+                <span>bro is typing...</span>
+              )}
             </div>
           </div>
         </>
       ) : (
-        <>
+     
           <div className="w-fit h-full gap-2 flex items-center text-LightModeMain hover:bg-white/20 cursor-pointer">
             <img src={globe} className="h-10 invert" alt="Globe" />
             <div>
               <span>Global Chat</span>
               <br />
-              {Number(lastseenglobal) <= 1? <span>You're lonely here</span>: <span>{lastseenglobal} Online</span>}
+              <div className="flex flex-col items-start">
+  {istyping && whoistyping? (
+    <span>
+      <span>{lastseenglobal} Online and </span>
+      <span>
+        {whoistyping.length === 1
+          ? `${whoistyping[0]} is typing...`
+          : whoistyping.length > 3
+          ? `${whoistyping.length} users typing`
+          : `${whoistyping.join(', ')} are typing...`}
+      </span>
+    </span>
+  ) : Number(lastseenglobal) <= 1 ? (
+    <span>You're lonely here</span>
+  ) : (
+    <span>{lastseenglobal} Online</span>
+  )}
+</div>
+
+
             </div>
           </div>
-        </>
+
       )}
       {MobileMode && (
         <div>
@@ -198,6 +256,13 @@ const ChatArea = () => {
           </button>
         </div>
       )}
+    </div>
+  ) : (
+    <div
+      id="CurrentChat"
+      className=" text-LightModeMain shadow-[0px_5px_12px_rgba(0,0,0,0.589)] z-10 min-h-16 h-[10%] bg-Main w-full  gap-2 content-center flex px-1 justify-between items-center "
+    >
+      Loading
     </div>
   );
 };

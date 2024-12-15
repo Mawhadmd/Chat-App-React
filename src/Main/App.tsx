@@ -1,4 +1,4 @@
-import { useState, createContext, useEffect } from "react";
+import { useState, createContext, useEffect, useRef } from "react";
 import LeftSection from "./LeftSection/LeftSection";
 import RightSection from "./RightSection/RightSection";
 import { supabase } from "./Supabase";
@@ -6,6 +6,7 @@ import { supabase } from "./Supabase";
 export const SettingContext = createContext<any>(null);
 export const ChatContext = createContext<any>(null);
 export const ReloadContactsCtxt = createContext<any>(null);
+export const Onlineusersctxt = createContext<any>(null);
 
 function App() {
   const [lightmode, setlightmode] = useState<boolean>(
@@ -20,6 +21,7 @@ function App() {
   const [Content, setcontent] = useState<string>("");
   const [logged, setLogged] = useState(false);
   const [uuid, setuuid] = useState<string | undefined>();
+  const [onlineusers, setonlineusers] = useState<any>(null);
   const timeuntilnextlastseen = 180 * 1000;
   const [Currentopenchatid, setCurrentopenchatid] = useState<
     string | undefined
@@ -60,8 +62,59 @@ function App() {
       setlightmode(true);
     }
   }, [lightmode]);
+  useEffect(() => {
+    if (!uuid) return;
 
+    async function getContacts() {
+      let q1 = supabase.from("Contacts").select("User2").eq("User1", uuid);
 
+      let q2 = supabase.from("Contacts").select("User1").eq("User2", uuid);
+
+      // Wait for both queries to resolve
+      let [contacts1, contacts2] = await Promise.all([q1, q2]);
+
+      if (!contacts1.data || !contacts2.data) {
+        alert("Couldn't get contacts for online status");
+        return [];
+      }
+
+      return [
+        ...contacts1.data.map((contact) => contact.User2),
+        ...contacts2.data.map((contact) => contact.User1),
+      ];
+    }
+    var onlineroom: any;
+    // Call getContacts directly instead of using an async immediately
+    getContacts().then((contacts) => {
+      onlineroom = supabase.channel("onlineusers");
+
+      const trackPresence = async () => {
+        onlineroom
+          .on("presence", { event: "sync" }, () => {
+            let onlinecontacts = Object.values(
+              onlineroom.presenceState()
+            ).filter((val: any) => {
+              return contacts.includes(val[0].user);
+            });
+            console.log(onlinecontacts, "online contacts");
+            if (onlinecontacts.length > 0) {
+              setonlineusers(onlinecontacts.map((val: any) => val[0].user));
+            } else {
+              setonlineusers(null);
+            }
+          })
+          .subscribe();
+
+        await onlineroom.track({ user: uuid });
+      };
+
+      trackPresence();
+    });
+
+    return () => {
+      supabase.removeChannel(onlineroom);
+    };
+  }, [uuid]);
 
   async function getuuid() {
     let user = await supabase.auth.getUser();
@@ -99,8 +152,6 @@ function App() {
   useEffect(() => {
     getuuid(); // get uuid of the current user logged in
   }, []);
-
-
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -149,7 +200,7 @@ function App() {
         }
       } else {
         try {
-           await fetch(
+          await fetch(
             "https://chat-app-react-server-qizz.onrender.com/insertlastseen",
             {
               method: "POST",
@@ -253,38 +304,41 @@ function App() {
       <SettingContext.Provider
         value={{ setshowsettings1, MobileMode, lightmode }}
       >
-        <ReloadContactsCtxt.Provider
-          value={{ Reloadcontact, setReloadcontact }}
-        >
-          <ChatContext.Provider
-            value={{
-              setCurrentopenchatid,
-              Currentopenchatid,
-              setOtheruserid,
-              Otheruserid,
-              logged,
-              uuid,
-              setcontent,
-              Content,
-              query,
-              setquery,
-            }}
+        <Onlineusersctxt.Provider value={{ onlineusers }}>
+          <ReloadContactsCtxt.Provider
+            value={{ Reloadcontact, setReloadcontact }}
           >
-            {/* If its not mobile show, and is not in a chat show leftsection */}
-            {/* If its not mobile show, and is not in a chat show leftsection */}
-            {MobileMode ? (
-              <>
-                {!Currentopenchatid && <LeftSection />}
-                {Currentopenchatid && <RightSection />}
-              </>
-            ) : (
-              <>
-                <LeftSection />
-                <RightSection />
-              </>
-            )}
-          </ChatContext.Provider>
-        </ReloadContactsCtxt.Provider>
+            <ChatContext.Provider
+              value={{
+                setCurrentopenchatid,
+                Currentopenchatid,
+                onlineusers,
+                setOtheruserid,
+                Otheruserid,
+                logged,
+                uuid,
+                setcontent,
+                Content,
+                query,
+                setquery,
+              }}
+            >
+              {/* If its not mobile show, and is not in a chat show leftsection */}
+              {/* If its not mobile show, and is not in a chat show leftsection */}
+              {MobileMode ? (
+                <>
+                  {!Currentopenchatid && <LeftSection />}
+                  {Currentopenchatid && <RightSection />}
+                </>
+              ) : (
+                <>
+                  <LeftSection />
+                  <RightSection />
+                </>
+              )}
+            </ChatContext.Provider>
+          </ReloadContactsCtxt.Provider>
+        </Onlineusersctxt.Provider>
       </SettingContext.Provider>
     </>
   );

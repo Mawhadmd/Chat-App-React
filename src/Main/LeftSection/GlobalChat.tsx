@@ -3,25 +3,13 @@ import { supabase } from "../Supabase";
 import globe from "../../assets/global-communication_9512332.png";
 import { ChatContext } from "../App";
 import convertTime from "../util/convertTime";
+import { getname } from "../util/getnamebyid";
 const GlobalChat = ({ setCurrentopenchatid }: any) => {
   const [name, setname] = useState<string>("");
   const [latestMessagetime, setlatestmessagetime] = useState<string>("");
   var { Content: newmessage, setcontent } = useContext(ChatContext);
 
-  async function getname(id: string) {
-   try{
-    let name = await (
-      await fetch("https://chat-app-react-server-qizz.onrender.com/getuserbyid", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: id, accessToken: (await supabase.auth.getSession()).data.session?.access_token}),
-      }).then((res) => res.json())
-    ).data.user?.user_metadata.name;
-    setname(name);
-   }catch(Error){
-    alert("Error 500, please reload or contact support" + Error)
-   }
-  }
+
 
   async function fetchlatestmessage() {
     let { data, error } = await supabase
@@ -31,7 +19,7 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
       .limit(1);
 
     if (data) {
-      await getname(data[0].Sender);
+      getname(data[0].Sender).then((name)=>setname(name)).catch((e)=>{console.log('couldn\'t get name ' + e)});
       setlatestmessagetime(data[0].created_at);
       setcontent({ Content: data[0].Content });
  

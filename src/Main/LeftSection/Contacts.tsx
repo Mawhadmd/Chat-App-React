@@ -3,11 +3,12 @@ import React, {
   useEffect,
   useState,
   useCallback,
+ 
 
 } from "react";
 import pfp from "../../assets/grayuserpfp.png";
 import { supabase } from "../Supabase";
-import { ChatContext } from "../App";
+import { ChatContext, Onlineusersctxt } from "../App";
 import convertTime from "../util/convertTime";
 import getChatId from "../util/getChatId";
 
@@ -37,6 +38,7 @@ const Contacts: React.FC<ContactsProps> = ({
   const [inyourcontacts, setinyourcontacts] = useState<boolean>(false);
   const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
     useContext(ChatContext);
+  const {onlineusers}= useContext(Onlineusersctxt)
   const userId = user.id;
   const name = user.user_metadata.name;
   const customPfp = user.user_metadata.avatar_url;
@@ -114,7 +116,7 @@ const Contacts: React.FC<ContactsProps> = ({
     }
   }, [Currentopenchatid, userId, issearch]);
 
-  //to here
+  //to here]
 
   return (
     <div
@@ -124,12 +126,21 @@ const Contacts: React.FC<ContactsProps> = ({
       className="text-MainText items-center  w-full mx-auto h-20 bg-Main border-Secondary/20 border-spacing-2 border-[1px]
 border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
-      <div className="w-16 h-16 ml-1">
-        <img
-          src={customPfp || pfp}
-          alt="Profile Picture"
-          className="w-20 rounded-full"
-        />
+      <div className="relative justify-center items-center flex w-16 h-16 ml-1">
+      <img
+  src={customPfp || pfp}
+  alt="Profile Picture"
+  className="w-20 rounded-full"
+  onError={(e) => {
+    const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
+    target.onerror = null; // Prevent infinite loop
+    target.src = pfp; // Fallback to 'pfp'
+  }}
+/>
+
+
+        {onlineusers && onlineusers.includes(userId) && <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>}
+    
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
         <span className="text-xl font-bold whitespace-nowrap">

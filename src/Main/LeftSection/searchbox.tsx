@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext, SettingContext } from "../App";
+import pfp from "../../assets/grayuserpfp.png"
 import getChatId from "../util/getChatId";
 const Searchbox = ({ setquery, query, setSearchResults }: any) => {
   const [userPfp, setUserPfp] = useState<string | undefined>("");
@@ -69,7 +70,13 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
           onClick={()=>setshowsettings1()}
           src={userPfp}
           alt="pfp"
-          className="rounded-full cursor-pointer"
+          className="rounded-full cursor-pointer w-20"
+          onError={(e) => {
+         
+            const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
+            target.onerror = null; // Prevent infinite loop
+            target.src = pfp; // Fallback to 'pfp'
+          }}
         />
         <span className="absolute -bottom-12 bg-MainBlackfr/80 text-MainText 
         pink w-fit h-fit p-2 

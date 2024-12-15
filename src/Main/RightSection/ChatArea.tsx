@@ -59,31 +59,7 @@ const ChatArea = () => {
       );
     }
   }
-  useEffect(() => {
-    if(uuid){
-      const roomOne = supabase.channel(`channel${Currentopenchatid}`)
-      roomOne
-        .on('presence', { event: 'sync' }, () => {
-          const newState:any = roomOne.presenceState()
-          Object.keys(newState).forEach((key) => {
-            console.log(newState[key][0].userid);
-          });
-          console.log('sync', newState)
-        })
-        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-          console.log('join', key, newPresences)
-        })
-        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-          console.log('leave', key, leftPresences)
-        })
-        .subscribe((status)=>{console.log(status)})
-        roomOne.track({userid: uuid, lastactive: Date.now()})
-        return () => {
-          roomOne.unsubscribe()
-        };
-    
-    }
-    }, [uuid]); //online prescense supabase listener websocket
+
     
   useEffect(() => {
     if (Currentopenchatid == "Global") {
