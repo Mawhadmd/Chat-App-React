@@ -12,7 +12,6 @@ export async function getuserbyid(id: string) {
 
   let cache = getCookie(id);
   if (cache) {
-    console.log(cache)
     const cachedData = JSON.parse(cache);
    
     return cachedData;

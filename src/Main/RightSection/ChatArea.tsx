@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext, SettingContext } from "../App";
+import { ChatContext, ReloadContactsCtxt, SettingContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3";
 import Message from "./Message";
 import BGimage from "../../assets/blackbackground.png";
@@ -11,7 +11,13 @@ interface UserMessage {
   id: string;
   color: string | null;
 }
-const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
+const ChatArea = ({
+  messages,
+  setmessages,
+}: {
+  messages: any;
+  setmessages: any;
+}) => {
   const context = useContext(ChatContext);
   const { Currentopenchatid, uuid, setcontent } = context;
   const { UserMessageMap, setUserMessageMap } = useContext(Usermapscontext);
@@ -19,7 +25,8 @@ const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
   const { lightmode } = useContext(SettingContext);
 
   async function setnewuserinmessage(senderid: string) {
-    var { data: payload, error } =  await getuserbyid(senderid)
+    console.log("setting new user");
+    var { data: payload, error } = await getuserbyid(senderid);
     let newmap = new Map();
     newmap.set(senderid, {
       name: payload.user?.user_metadata.name,
@@ -48,7 +55,6 @@ const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
     }
   }
 
- 
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const channels = supabase
@@ -59,11 +65,12 @@ const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
           (payload: any) => {
             if (!UserMessageMap.get(payload.new.Sender))
               setnewuserinmessage(payload.new.Sender);
-            if(payload.new.Sender!=uuid) // doesn't fetch the message for this user
-            setmessages((PreviousMessages:any) => [
-              payload.new,
-              ...(PreviousMessages || []),
-            ]);
+            if (payload.new.Sender != uuid)
+              // doesn't fetch the message for this user
+              setmessages((PreviousMessages: any) => [
+                payload.new,
+                ...(PreviousMessages || []),
+              ]);
             setcontent(payload.new);
             (() => new Audio(audio).play())();
           }
@@ -85,12 +92,12 @@ const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
             filter: `chatId=eq.${Currentopenchatid}`,
           },
           (payload: any) => {
-            if(payload.new.Sender!=uuid)
-            setmessages((prevMessages:any) =>
-              Array.isArray(prevMessages)
-                ? [payload.new, ...prevMessages]
-                : [payload.new]
-            );
+            if (payload.new.Sender != uuid)
+              setmessages((prevMessages: any) =>
+                Array.isArray(prevMessages)
+                  ? [payload.new, ...prevMessages]
+                  : [payload.new]
+              );
           }
         )
         .subscribe();
@@ -104,8 +111,12 @@ const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
   }, [Currentopenchatid]); //listen to new messages
 
   useEffect(() => {
-    setmessages(null);
-    getData(); //gets messages in the current chat area
+    if (Currentopenchatid != -1) {
+      setmessages(null);
+      getData(); //gets messages in the current chat area
+    } else {
+      setmessages([]);
+    }
   }, [Currentopenchatid]);
   async function getmessages() {
     var data, error, query;
@@ -132,34 +143,40 @@ const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
   async function getData() {
     if (Currentopenchatid != undefined) {
       const { data, error } = await getmessages();
+      console.log(data, error);
       Setdatatomap(data, error);
     }
   }
   async function Setdatatomap(data: any[] | null, error: any) {
     let UserMessageMap = new Map();
+
     if (!!data) {
+      let UsersSet = new Set();
       for (let i = 0; i < data?.length; i++) {
-        if (!UserMessageMap.has(data[i].Sender)) {
-          var { data: payload } = await getuserbyid(data[0].Sender)
-          UserMessageMap.set(data[i].Sender, {
-            name: payload.user?.user_metadata.name,
-            id: payload.user?.id,
-            color: getRandomColor(
-              data[i].Sender == uuid
-                ? getComputedStyle(document.documentElement).getPropertyValue(
-                    "--Secondary"
-                  )
-                : getComputedStyle(document.documentElement).getPropertyValue(
-                    "--actionColor"
-                  )
-            ),
-          });
-        }
+        UsersSet.add(data[i]);
+      }
+
+      let UsersSetarr: any[] = Array.from(UsersSet);
+      for (let i = 0; i < UsersSetarr.length; i++) {
+        var { data: payload } = await getuserbyid(UsersSetarr[i].Sender);
+        UserMessageMap.set(UsersSetarr[i].Sender, {
+          name: payload.user?.user_metadata.name,
+          id: payload.user?.id,
+          color: getRandomColor(
+            UsersSetarr[i].Sender == uuid
+              ? getComputedStyle(document.documentElement).getPropertyValue(
+                  "--Secondary"
+                )
+              : getComputedStyle(document.documentElement).getPropertyValue(
+                  "--actionColor"
+                )
+          ),
+        });
       }
       setUserMessageMap(UserMessageMap);
       setmessages(data);
     } else {
-      alert("Error,check console");
+      alert("Error setting map messages,check console");
       console.log(error);
     }
   }
@@ -247,7 +264,7 @@ const ChatArea = ({messages, setmessages}:{messages:any, setmessages:any}) => {
             Start Messaging!
           </div>
         ) : (
-          messages?.map((data:any, i:any) => (
+          messages?.map((data: any, i: any) => (
             <Message
               key={uuid + String(i)}
               uuid={uuid}

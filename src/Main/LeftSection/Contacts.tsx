@@ -1,11 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
- 
-
-} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import pfp from "../../assets/grayuserpfp.png";
 import { supabase } from "../Supabase";
 import { ChatContext, Onlineusersctxt } from "../App";
@@ -38,51 +31,55 @@ const Contacts: React.FC<ContactsProps> = ({
   const [inyourcontacts, setinyourcontacts] = useState<boolean>(false);
   const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
     useContext(ChatContext);
-  const {onlineusers}= useContext(Onlineusersctxt)
+  const { onlineusers } = useContext(Onlineusersctxt);
   const userId = user.id;
   const name = user.user_metadata.name;
   const customPfp = user.user_metadata.avatar_url;
 
-
-  const sortLatestMessage = useCallback(
-    (data: any) => {
+  const sortLatestMessage = (data: any) => {
+    if (data && data[0]) {
       let time = convertTime(data[0].created_at);
       setLatestMessagetime(time);
-      if (data && data[0]) {
-        const message =
-          data[0].Sender === uuid
-            ? `You: ${data[0].Content}`
-            : `${name}: ${data[0].Content}`;
-        setLatestMessage(message);
-      }
-    },
-    [uuid, name]
-  );
+      const message =
+        data[0].Sender === uuid
+          ? `You: ${data[0].Content}`
+          : `${name}: ${data[0].Content}`;
+      setLatestMessage(message);
+    }
+  };
+
   useEffect(() => {
     if (issearch && chatId != "-1") {
       setinyourcontacts(true);
     }
   }, []);
-  //all this functions run only if its not search
-  const getLatestMessage = useCallback(async () => {
-    if (chatId != "-1") {
-      const { data } = await supabase
-        .from("PrivateMessages")
-        .select("Content, Sender, created_at")
-        .eq("chatId", chatId)
-        .order("created_at", { ascending: false })
-        .limit(1);
 
+  //all this functions run only if its not search
+  const getLatestMessage = async () => {
+    if (chatId != "-1") {
+      //
+      var data;
+      var tries = 0;
+      while (!data) {
+        ({ data } = await supabase
+          .from("PrivateMessages")
+          .select("Content, Sender, created_at")
+          .eq("chatId", chatId)
+          .order("created_at", { ascending: false })
+          .limit(1));
+        tries++;
+        if (tries == 5) break;
+      }
       sortLatestMessage(data);
     }
-  }, [Currentopenchatid]);
+  };
 
   useEffect(() => {
     if (chatId != "-1") {
       //-1 means the user is not in your contacts
       getLatestMessage();
     }
-  }, []);
+  }, [chatId]);
 
   useEffect(() => {
     if (!issearch && userId && Currentopenchatid) {
@@ -127,20 +124,20 @@ const Contacts: React.FC<ContactsProps> = ({
 border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
       <div className="relative justify-center items-center flex w-16 h-16 ml-1">
-      <img
-  src={customPfp || pfp}
-  alt="Profile Picture"
-  className="w-20 rounded-full"
-  onError={(e) => {
-    const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
-    target.onerror = null; // Prevent infinite loop
-    target.src = pfp; // Fallback to 'pfp'
-  }}
-/>
+        <img
+          src={customPfp || pfp}
+          alt="Profile Picture"
+          className="w-20 rounded-full"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
+            target.onerror = null; // Prevent infinite loop
+            target.src = pfp; // Fallback to 'pfp'
+          }}
+        />
 
-
-        {onlineusers && onlineusers.includes(userId) && <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>}
-    
+        {onlineusers && onlineusers.includes(userId) && (
+          <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>
+        )}
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
         <span className="text-xl font-bold whitespace-nowrap">
@@ -161,7 +158,7 @@ border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-al
         )}
       </div>
       {inyourcontacts && (
-        <div className="bg-green-600 flex items-center text-center justify-center rounded-xl w-fit h-fit p-1 text-sm">
+        <div className="bg-green-600 flex items-center text-center justify-center rounded-xl h-full p-1 text-sm w-28">
           This guy is in your contacts
         </div>
       )}

@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext, SettingContext } from "../App";
-import pfp from "../../assets/grayuserpfp.png"
+import pfp from "../../assets/grayuserpfp.png";
 import getChatId from "../util/getChatId";
 const Searchbox = ({ setquery, query, setSearchResults }: any) => {
   const [userPfp, setUserPfp] = useState<string | undefined>("");
-  const {uuid} = useContext(ChatContext)
-  const {setshowsettings1} = useContext(SettingContext)
+  const { uuid } = useContext(ChatContext);
+  const { setshowsettings1 } = useContext(SettingContext);
 
   async function fetchPfp() {
     supabase.auth
@@ -24,64 +24,66 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
   }, []);
 
   async function runquery() {
-
-    let res = (await fetch('/getuserslist', {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-    }).then(res => res.json()))
-    
-    
-    res.data.users.filter(
-      (e:any) =>
+    let res = await fetch(
+      "https://chat-app-react-server-qizz.onrender.com/getuserslist",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken: (
+            await supabase.auth.getSession()
+          ).data.session?.access_token,
+        }),
+      }
+    ).then((res) => res.json());
+    let users:any[] = res.data.users
+    let filteredusers = users.filter(
+      (e: any) =>
         e.id.slice(0, 5) == query ||
-        e.user_metadata.name.toLowerCase().includes(query.toLowerCase())
-        && e.id != uuid
-        
+        (e.user_metadata.name.toLowerCase().includes(query.toLowerCase()) &&
+          e.id != uuid)
     );
+ 
     const result = await Promise.all(
-      res.map(async (user:any) => {
+      filteredusers.map(async (user: any) => {
         let id = await getChatId(user.id, uuid);
         return { user, chatid: id };
       })
     );
     setSearchResults(result);
-    console.log(res, 'Search results of the search');
   }
 
-
   useEffect(() => {
-    var tout: any
+    var tout: any;
     if (!!query) {
-    setSearchResults()
-     tout = setTimeout(() => {
-     
+      setSearchResults();
+      tout = setTimeout(() => {
         runquery();
-       
-      }, 1000);
+      }, 400);
     }
     return () => clearTimeout(tout);
   }, [query]);
-
 
   return (
     <div className="h-24 min-w-[650px]min-h-16 flex items-center justify-center px-3">
       <div className=" relative group ">
         <img
-          onClick={()=>setshowsettings1()}
+          onClick={() => setshowsettings1()}
           src={userPfp}
           alt="pfp"
           className="rounded-full cursor-pointer w-20"
           onError={(e) => {
-         
             const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
             target.onerror = null; // Prevent infinite loop
             target.src = pfp; // Fallback to 'pfp'
           }}
         />
-        <span className="absolute -bottom-12 bg-MainBlackfr/80 text-MainText 
+        <span
+          className="absolute -bottom-12 bg-MainBlackfr/80 text-MainText 
         pink w-fit h-fit p-2 
         pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100
-         group-hover:translate-y-0 translate-y-5 transition-all  z-50">
+         group-hover:translate-y-0 translate-y-5 transition-all  z-50"
+        >
           Settings
         </span>
       </div>
@@ -91,7 +93,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
           onChange={(e) => setquery(e.target.value)}
           type="text"
           className="focus:ring-actionColor focus:ring-2 transition-all outline-none p-2 w-11/12
-           mx-auto h-10 placeholder:p-1 placeholder:text-black rounded-lg drop-shadow-xl"
+           mx-auto h-10 placeholder:p-1 placeholder:text-Main text-Main bg-MainText rounded-lg drop-shadow-xl"
           placeholder="Search For a contact By ID"
         />
       </div>

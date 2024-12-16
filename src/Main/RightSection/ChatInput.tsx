@@ -3,7 +3,7 @@ import { ChatContext, ReloadContactsCtxt } from "../App";
 import { supabase } from "../Supabase";
 import { getname } from "../util/getnamebyid";
 
-const ChatArea = ({setmessages}:{setmessages:any}) => {
+const ChatArea = ({ setmessages }: { setmessages: any }) => {
   const context = useContext(ChatContext);
   const {
     setCurrentopenchatid,
@@ -17,24 +17,36 @@ const ChatArea = ({setmessages}:{setmessages:any}) => {
     string | readonly string[] | undefined
   >("");
   const [contentisfull, setcontentisfull] = useState<boolean>(false);
+  
   const [istyping, setistyping] = useState<boolean>(false);
-  const username = useMemo(async () => {await getname(uuid)}, [Otheruserid])
+  const username = useMemo(async () => {
+    await getname(uuid);
+  }, [Otheruserid]);
+
+ async function Messageisin(chatid:any){
+   setReloadcontact((previous: boolean) => !previous);
+  setCurrentopenchatid(chatid);
+  setquery("");
+ }
+
   async function SetData() {
     if (contentisfull) return;
     let contentval = content;
     setinputcontent("");
-   
+
     if (contentval != "") {
-      setmessages((PreviousMessages:any) => [
-        {
-          Sender: uuid,
-          created_at: Date.now(),
-          Content: contentval
-        },
-        ...(PreviousMessages || []),
-      ]);
+      if(Currentopenchatid != -1){
+        setmessages((PreviousMessages: any) => [
+          {
+            Sender: uuid,
+            created_at: Date.now(),
+            Content: contentval,
+          },
+          ...(PreviousMessages || []),
+        ]);
+      }
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
-        var chatid = null;
+        var chatid: string | number | null = null;
         if (Currentopenchatid == -1) {
           await fetch(
             "https://chat-app-react-server-qizz.onrender.com/insertuser",
@@ -60,41 +72,44 @@ const ChatArea = ({setmessages}:{setmessages:any}) => {
               return response.json();
             })
             .then((res) => {
-              setCurrentopenchatid(res?.[0].chatId);
-              chatid = res?.[0].chatId;
-              setquery("");
-              setReloadcontact((previous: boolean) => !previous);
+               chatid = res?.[0].chatId
             })
             .catch((e) => console.log(e + "Error while inserting a user"));
         }
-
-        await fetch(
-          "https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              Content: contentval,
-              chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
-              Receiver: Otheruserid,
-              senderid: uuid,
-              accessToken: (
-                await supabase.auth.getSession()
-              ).data.session?.access_token,
-            }),
-          }
-        )
-          .then((response) => {
-            if (!response.ok) {
-              // Check if the response status is not in the range 200-299
-              throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
+  
+        async function insertmessage(){
+          await fetch(
+            "https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                Content: contentval,
+                chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
+                Receiver: Otheruserid,
+                senderid: uuid,
+                accessToken: (
+                  await supabase.auth.getSession()
+                ).data.session?.access_token,
+              }),
             }
-            return response.json();
-          })
-          .then((res) => console.log(res + "Inseting pvt message done"))
-          .catch((e) => console.log(e + "Error Inseting pvt message"));
+          )
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              console.log('insert successful')
+              if(Currentopenchatid == -1){
+                Messageisin(chatid)
+              }
+            })
+            .catch((e) => console.log(e + " Error inserting private message"));
+          
+        }
+
+        insertmessage()
       } else {
         await fetch(
           "https://chat-app-react-server-qizz.onrender.com/Insertglobalmessages",
@@ -123,9 +138,12 @@ const ChatArea = ({setmessages}:{setmessages:any}) => {
           .catch((e) => console.log(e + " Error Inserting global message"));
       }
     } else alert("Write something");
+
+ 
   }
 
   useEffect(() => {
+   if(Currentopenchatid != -1){
     if (!content?.length) {
       setistyping(false);
     } else {
@@ -137,6 +155,7 @@ const ChatArea = ({setmessages}:{setmessages:any}) => {
         setistyping(true);
       };
     }
+   }
   }, [content]);
 
   useEffect(() => {
@@ -163,7 +182,7 @@ const ChatArea = ({setmessages}:{setmessages:any}) => {
       sendMessage(false);
     }
     return () => {
-         supabase.removeChannel(channelB);
+      supabase.removeChannel(channelB);
     };
   }, [Currentopenchatid, istyping]);
 

@@ -44,6 +44,7 @@ const LeftSection = ({}) => {
         arrayofusers.push({ res, chatId });
       }
     }
+    console.log(arrayofusers)
     setcontacts(arrayofusers);
   }
 
@@ -112,10 +113,10 @@ const LeftSection = ({}) => {
               <div className=" h-fit  mt-1 flex flex-col items-center justify-center text-MainText text-2xl">
                 {contacts != undefined ? (
                   contacts.length > 0 ? (
-                    contacts.map(({ res, chatId }, i) => {
+                    contacts.map(({ res, chatId }) => {
                       return (
                         <Contacts
-                          key={i}
+                          key={chatId}
                           chatId={chatId}
                           user={res?.data.user}
                         ></Contacts>
