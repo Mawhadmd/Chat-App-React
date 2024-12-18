@@ -27,24 +27,24 @@ const LeftSection = ({}) => {
       .eq("User2", uuid);
 
     if (q1.error && q2.error)
-      console.error(q1.error.details + "errors2:" + q2.error.details)
+      console.error(q1.error.details + "errors2:" + q2.error.details);
     let arrayofusers: any[] = [];
     if (!!q1.data && !!q2.data) {
       for (let i = 0; i < q1.data?.length; i++) {
         let id = q1.data[i].User2;
-        let res = await getuserbyid(id)
+        let res = await getuserbyid(id);
         let chatId = q1.data[i].chatId;
         arrayofusers.push({ res, chatId });
       }
       for (let i = 0; i < q2.data?.length; i++) {
         let id = q2.data[i].User1;
 
-        let res = await getuserbyid(id)
+        let res = await getuserbyid(id);
         let chatId = q2.data[i].chatId;
         arrayofusers.push({ res, chatId });
       }
     }
-    console.log(arrayofusers)
+
     setcontacts(arrayofusers);
   }
 
@@ -66,10 +66,10 @@ const LeftSection = ({}) => {
     <>
       <section
         id="LeftSection"
-        className={`flex flex-col bg-Main ${
+        className={`flex flex-col bg-Main h-screen relative z-20 transition-all ${
           MobileMode ? "w-full" : "w-[500px] min-w-[400px]"
         }
-        h-screen relative z-20 transition-all`}
+        `}
       >
         {logged ? (
           <>
@@ -127,10 +127,10 @@ const LeftSection = ({}) => {
                   )
                 ) : (
                   <>
-                  <span>Loading...</span>
-                  <div className="fixed inset-0 transition-all z-50 text-MainText flex items-center justify-center text-4xl bg-Main">
-                    Loading chat
-                  </div>
+                    <span>Loading...</span>
+                    <div className="fixed inset-0 transition-all z-50 text-MainText flex items-center justify-center text-4xl bg-Main">
+                      Loading chat
+                    </div>
                   </>
                 )}
               </div>

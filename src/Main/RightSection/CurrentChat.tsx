@@ -20,10 +20,10 @@ const ChatArea = () => {
     setOtheruserid,
     setCurrentopenchatid,
     Otheruserid,
-    uuid
+    uuid,
   } = context;
   const { MobileMode } = useContext(SettingContext);
-  const { onlineusers } = useContext(Onlineusersctxt);
+  const { onlineusers }: { onlineusers: any[] } = useContext(Onlineusersctxt);
   useEffect(() => {
     if (Currentopenchatid == "Global") {
       const usersinglobalroom = supabase.channel("onlineinglobal");
@@ -31,14 +31,12 @@ const ChatArea = () => {
         .on("presence", { event: "sync" }, () => {
           const presenceState = usersinglobalroom.presenceState();
           const userSet = new Set();
-          Object.values(presenceState).forEach((value:any) => {
-            userSet.add(value[0].user); 
+          Object.values(presenceState).forEach((value: any) => {
+            userSet.add(value[0].user);
           });
-          const userCount = userSet.size; 
+          const userCount = userSet.size;
 
-          setlastseenglobal(
-            String(userCount)
-          );
+          setlastseenglobal(String(userCount));
         })
         .subscribe()
         .track({ user: uuid });
@@ -52,25 +50,30 @@ const ChatArea = () => {
     let NumberOfPeopleTypingInGlobal: any[] = [];
     channelB
       .on("broadcast", { event: `typing${Currentopenchatid}` }, (payload) => {
-        if(payload.payload.user==uuid){
-        if (Currentopenchatid == "Global") {
-          const index = NumberOfPeopleTypingInGlobal.indexOf(payload.payload.user);
+        let payloadUser = payload.payload.user;
+        let payloadIstyping = payload.payload.istyping;
+        let payloadId = payload.payload.id;
+        if (payloadId != uuid) {
+          if (Currentopenchatid == "Global") {
+            const index = NumberOfPeopleTypingInGlobal.indexOf(payloadUser);
 
-          if (payload.payload.istyping) {
-            if (index === -1) {
-              NumberOfPeopleTypingInGlobal.push(payload.payload.user);
+            if (payloadIstyping) {
+              if (index === -1) {
+                //if doesn't exist in the typing array
+                NumberOfPeopleTypingInGlobal.push(payloadUser);
+              }
+            } else {
+              if (index > -1) {
+                //removing the guy, he exists
+                NumberOfPeopleTypingInGlobal.splice(index, 1);
+              }
             }
+            setistyping(NumberOfPeopleTypingInGlobal.length > 0);
+            setwhoistyping([...NumberOfPeopleTypingInGlobal]);
           } else {
-            if (index > -1) {
-              NumberOfPeopleTypingInGlobal.splice(index, 1);
-            }
+            setistyping(payloadIstyping);
           }
-          setistyping(NumberOfPeopleTypingInGlobal.length > 0);
-          setwhoistyping([...NumberOfPeopleTypingInGlobal]);
-          
-        } else {
-          setistyping(payload.payload.istyping);
-        }}
+        }
       })
       .subscribe();
     return () => {
@@ -81,7 +84,7 @@ const ChatArea = () => {
     //set name and pfp of a user if not global
     if (Currentopenchatid != "Global") {
       (async () => {
-         let res = await getuserbyid(Otheruserid)
+        let res = await getuserbyid(Otheruserid);
         setname(res.data.user?.user_metadata.name);
         setpfp(res.data.user?.user_metadata.avatar_url);
         setloading(false); // i put it here because this is the palce that requires the most time
@@ -119,12 +122,17 @@ const ChatArea = () => {
         if (diffSeconds < 60) {
           setlastseen("Last Seen: A few moments ago");
         } else if (diffSeconds < 3600) {
-          setlastseen(`Last Seen: ${Math.floor(diffSeconds / 60)} minute(s) ago`);
+          setlastseen(
+            `Last Seen: ${Math.floor(diffSeconds / 60)} minute(s) ago`
+          );
         } else if (now.toDateString() === lastSeenDate.toDateString()) {
-          setlastseen("Last Seen: Today at " + convertTime(String(lastSeenDate)));
+          setlastseen(
+            "Last Seen: Today at " + convertTime(String(lastSeenDate))
+          );
         } else {
-          setlastseen("Last Seen: "+
-            lastSeenDate.toLocaleDateString() +
+          setlastseen(
+            "Last Seen: " +
+              lastSeenDate.toLocaleDateString() +
               " " +
               convertTime(String(lastSeenDate))
           ); // Fallback to full date
@@ -171,6 +179,7 @@ const ChatArea = () => {
     setCurrentopenchatid(undefined);
     setOtheruserid(undefined);
   }
+  console.log(istyping);
   return !loading ? (
     <div
       id="CurrentChat"
@@ -179,24 +188,39 @@ const ChatArea = () => {
       {Currentopenchatid != "Global" ? (
         <>
           <div className="flex justify-center items-center gap-3">
-            <img
-              alt="PFP"
-              src={pfp}
-              className="h-14 w-14 cursor-pointer rounded-full"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
-                target.onerror = null; // Prevent infinite loop
-                target.src = defaultpfp; // Fallback to 'pfp'
-              }}
-            />
+            <div className="relative">
+              <img
+                alt="PFP"
+                src={pfp}
+                className="h-14 w-14 cursor-pointer rounded-full"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
+                  target.onerror = null; // Prevent infinite loop
+                  target.src = defaultpfp; // Fallback to 'pfp'
+                }}
+              />
+              {onlineusers &&
+                onlineusers.some((u: any) => u.user === Otheruserid) &&
+                (onlineusers[
+                  onlineusers.findIndex((obj) => obj.user == Otheruserid)
+                ].status == "Online" ? (
+                  <span className="absolute w-4 h-4 right-0 top-[70%] rounded-full bg-green-500"></span>
+                ) : (
+                  <span className="absolute w-4 h-4 right-0 top-[70%] rounded-full bg-yellow-500"></span>
+                ))}
+            </div>
             <div>
               <span>{name}</span>
               <br />
               {!istyping ? (
                 <span>
-                  
-                  {onlineusers && onlineusers.includes(Otheruserid)
-                    ? "Online"
+                  {onlineusers &&
+                  onlineusers.some((u: any) => u.user === Otheruserid)
+                    ? onlineusers[
+                        onlineusers.findIndex((obj) => obj.user == Otheruserid)
+                      ].status == "Online"
+                      ? "Online"
+                      : "Away"
                     : lastseen}
                 </span>
               ) : (
@@ -206,35 +230,31 @@ const ChatArea = () => {
           </div>
         </>
       ) : (
-     
-          <div className="w-fit h-full gap-2 flex items-center text-LightModeMain hover:bg-white/20 cursor-pointer">
-            <img src={globe} className="h-10 invert" alt="Globe" />
-            <div>
-              <span>Global Chat</span>
-              <br />
-              <div className="flex flex-col items-start">
-  {istyping && whoistyping? (
-    <span>
-      <span>{lastseenglobal} Online and </span>
-      <span>
-        {whoistyping.length === 1
-          ? `${whoistyping[0]} is typing...`
-          : whoistyping.length > 3
-          ? `${whoistyping.length} users typing`
-          : `${whoistyping.join(', ')} are typing...`}
-      </span>
-    </span>
-  ) : Number(lastseenglobal) <= 1 ? (
-    <span>You're lonely here</span>
-  ) : (
-    <span>{lastseenglobal} Online</span>
-  )}
-</div>
-
-
+        <div className="w-fit h-full gap-2 flex items-center text-LightModeMain  cursor-pointer">
+          <img src={globe} className="h-10 invert" alt="Globe" />
+          <div>
+            <span>Global Chat</span>
+            <br />
+            <div className="flex flex-col items-start">
+              {istyping && whoistyping ? (
+                <span>
+                  <span>{lastseenglobal} Online and </span>
+                  <span>
+                    {whoistyping.length === 1
+                      ? `${whoistyping[0]} is typing...`
+                      : whoistyping.length > 3
+                      ? `${whoistyping.length} users typing`
+                      : `${whoistyping.join(", ")} are typing...`}
+                  </span>
+                </span>
+              ) : Number(lastseenglobal) <= 1 ? (
+                <span>You're lonely here</span>
+              ) : (
+                <span>{lastseenglobal} Online</span>
+              )}
             </div>
           </div>
-
+        </div>
       )}
       {MobileMode && (
         <div>

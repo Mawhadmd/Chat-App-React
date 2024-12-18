@@ -31,7 +31,7 @@ const Contacts: React.FC<ContactsProps> = ({
   const [inyourcontacts, setinyourcontacts] = useState<boolean>(false);
   const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
     useContext(ChatContext);
-  const { onlineusers } = useContext(Onlineusersctxt);
+  const { onlineusers }: { onlineusers: any[] } = useContext(Onlineusersctxt);
   const userId = user.id;
   const name = user.user_metadata.name;
   const customPfp = user.user_metadata.avatar_url;
@@ -120,7 +120,7 @@ const Contacts: React.FC<ContactsProps> = ({
       onClick={() => {
         getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
       }}
-      className="text-MainText items-center  w-full mx-auto h-20 bg-Main border-Secondary/20 border-spacing-2 border-[1px]
+      className="text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
 border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
       <div className="relative justify-center items-center flex w-16 h-16 ml-1">
@@ -135,9 +135,14 @@ border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-al
           }}
         />
 
-        {onlineusers && onlineusers.includes(userId) && (
-          <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>
-        )}
+        {onlineusers &&
+          onlineusers.some((u: any) => u.user === userId) &&
+          (onlineusers[onlineusers.findIndex((obj) => obj.user == userId)]
+            .status == "Online" ? (
+            <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>
+          ) : (
+            <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-yellow-500"></span>
+          ))}
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
         <span className="text-xl font-bold whitespace-nowrap">

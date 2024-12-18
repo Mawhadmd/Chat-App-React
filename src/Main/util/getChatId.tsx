@@ -7,6 +7,7 @@ const getChatId = async (
   setCurrentopenchatid: any = undefined
 ) => {
   console.log('getting chat id')
+  
   if (uuid == userId) {
     alert("You can't talk to yourself");
     return;
@@ -43,6 +44,8 @@ const getChatId = async (
     console.error("Error getting chat ID:", error);
     alert("Couldn't get the chat. Please try again later or contact support.");
   }
+
+
 };
 
 export default getChatId;

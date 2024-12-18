@@ -96,16 +96,23 @@ function App() {
             ).filter((val: any) => {
               return contacts.includes(val[0].user);
             });
-            console.log(onlinecontacts, "online contacts");
+            // console.log(onlinecontacts, "online contacts", String(onlinecontacts.reduce((acc:any)=> 1 + acc, 0)));
+           
             if (onlinecontacts.length > 0) {
-              setonlineusers(onlinecontacts.map((val: any) => val[0].user));
+              setonlineusers(onlinecontacts.map((val: any) => ({user: val[0].user, status:val[0].status})));
             } else {
               setonlineusers(null);
             }
           })
           .subscribe();
+          
+          if(document.hasFocus())
+          await onlineroom.track({ user: uuid, status: 'Online' });
+          else
+          await onlineroom.track({ user: uuid, status: 'Away' });
+          window.onfocus = async () => {await onlineroom.track({ user: uuid, status: 'Online' });}
+          window.onblur = async () => {await onlineroom.track({ user: uuid, status: 'Away' });}
 
-        await onlineroom.track({ user: uuid });
       };
 
       trackPresence();

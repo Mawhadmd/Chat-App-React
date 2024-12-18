@@ -20,7 +20,6 @@ interface Message {
 
 const Message = ({
   data,
-  i,
   uuid,
   UserMessageMap,
 }: Message) => {
@@ -28,7 +27,7 @@ const Message = ({
     useContext(ChatContext);
 
   return (
-    <div key={i}>
+    <div>
       {!!UserMessageMap.get(data.Sender) && 
       <div
        

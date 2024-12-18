@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext, ReloadContactsCtxt, SettingContext } from "../App";
+import { ChatContext, SettingContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3";
 import Message from "./Message";
 import BGimage from "../../assets/blackbackground.png";
@@ -256,7 +256,7 @@ const ChatArea = ({
       id="ChatArea"
       ref={ChatArea}
       style={{ backgroundImage: `url(${BGimage})` }}
-      className=" scroll-smooth overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
+      className="overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
       {messages ? (
         messages?.length == 0 ? (
@@ -266,7 +266,7 @@ const ChatArea = ({
         ) : (
           messages?.map((data: any, i: any) => (
             <Message
-              key={uuid + String(i)}
+              key={data.id} //maybe get the database key
               uuid={uuid}
               i={i}
               data={data}

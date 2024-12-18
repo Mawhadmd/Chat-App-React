@@ -3,6 +3,7 @@ import { ChatContext, ReloadContactsCtxt } from "../App";
 import { supabase } from "../Supabase";
 import { getname } from "../util/getnamebyid";
 
+
 const ChatArea = ({ setmessages }: { setmessages: any }) => {
   const context = useContext(ChatContext);
   const {
@@ -17,18 +18,18 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
     string | readonly string[] | undefined
   >("");
   const [contentisfull, setcontentisfull] = useState<boolean>(false);
-  
+  const [username, setusername] = useState<boolean>(false);
   const [istyping, setistyping] = useState<boolean>(false);
-  const username = useMemo(async () => {
-    await getname(uuid);
-  }, [Otheruserid]);
 
  async function Messageisin(chatid:any){
    setReloadcontact((previous: boolean) => !previous);
   setCurrentopenchatid(chatid);
   setquery("");
  }
+useEffect(() => {
+  (async () => {let u = await getname(uuid);  setusername(u)})()
 
+}, []);
   async function SetData() {
     if (contentisfull) return;
     let contentval = content;
@@ -127,13 +128,6 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
             }),
           }
         )
-          .then((response) => {
-            if (!response.ok) {
-              // Check if the response status is not in the range 200-299
-              throw new Error(`HTTP error! Status: ${response.status}`); // Throw an error with the status code
-            }
-            return response.json();
-          })
           .then((res) => console.log(res + "Response Inseting global message"))
           .catch((e) => console.log(e + " Error Inserting global message"));
       }
@@ -161,16 +155,15 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
   useEffect(() => {
     const channelB = supabase.channel("istyping");
     console.log("run");
-
+ 
     async function sendMessage(isTyping: any) {
       console.log("Sending message...");
       try {
-        let ack = await channelB.send({
+         await channelB.send({
           type: "broadcast",
           event: `typing${Currentopenchatid}`,
-          payload: { user: username, istyping: isTyping },
+          payload: { user: username, id:uuid, istyping: isTyping },
         });
-        console.log(ack);
       } catch (err) {
         console.error("Failed to send message:", err);
       }
