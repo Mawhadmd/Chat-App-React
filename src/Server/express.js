@@ -7,39 +7,39 @@ dotenv.config({ path: `.env.local`, override: true });
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: ['http://localhost:3001', 'https://chatty001a.netlify.app'] }));
-var Usersids = new Map()
+app.use(
+  cors({ origin: ["http://localhost:3001", "https://chatty001a.netlify.app"] })
+);
+var Usersids = new Map();
 const supabase = createClient(
   process.env.SUPABASE_URL || "",
   process.env.SUPABASE_KEY || "" // Service Role Key
 );
 setInterval(() => {
-  Usersids.clear()
+  Usersids.clear();
 }, 1000 * 60 * 60 * 24);
 const validateTokenMiddleware = async (req, res, next) => {
-
-  const {accessToken} = req.body; 
+  const { accessToken } = req.body;
 
   if (!accessToken) {
-    return res.status(401).json({ error: 'Access token is missing' });
+    return res.status(401).json({ error: "Access token is missing" });
   }
   try {
     const { data, error } = await supabase.auth.getUser(accessToken);
 
-
     if (error || !data) {
-      return res.status(401).json({ error: 'Invalid or expired token' });
+      return res.status(401).json({ error: "Invalid or expired token" });
     }
 
     req.user = data;
     next();
   } catch (err) {
-    console.error('Token validation error:', err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Token validation error:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-app.use(validateTokenMiddleware)
+app.use(validateTokenMiddleware);
 
 app.post("/Insertglobalmessages", async (req, res) => {
   const { contents, senderid } = req.body;
@@ -58,7 +58,7 @@ app.post("/Insertglobalmessages", async (req, res) => {
 });
 
 app.post("/Insertprivatemessages", async (req, res) => {
-  console.log(JSON.stringify(req.body))
+  console.log(JSON.stringify(req.body));
   const { Content, chatId, Receiver, senderid } = req.body;
   console.log("Insert message private");
   var { data, error } = await supabase
@@ -72,7 +72,6 @@ app.post("/Insertprivatemessages", async (req, res) => {
       },
     ])
     .select();
-
 
   if (data) return res.status(201).send("Insert successful");
   else return res.status(404).json("Bad Request" + error);
@@ -90,49 +89,43 @@ app.post("/insertuser", async (req, res) => {
     ])
     .select();
 
-
   if (data) return res.status(201).json(data);
   else return res.status(404).json("Bad Request" + error);
 });
-app.post("/insertlastseen", async (req, res) => {
-  const { mode, uuid } = req.body;
-  if (mode == "insert") {
+app.post("/upsertlastseen", async (req, res) => {
+  const { uuid } = req.body;
+
     var ressupa = await supabase
       .from("Users")
-      .insert([{ LastSeen: `${Date.now()}`, id: uuid }]).select()
-  } else if (mode == "update") {
-    var ressupa = await supabase
-      .from("Users")
-      .update([{ LastSeen: `${Date.now()}` }])
-      .eq("id", uuid).select();
-  } else return res.status(400).send("mode not valid");
+      .upsert([{ LastSeen: `${Date.now()}`, id: uuid }])
+      .select();
 
   if (ressupa.data) return res.status(201).json(ressupa.data);
   else return res.status(404).json(ressupa.error);
 });
 
 app.post("/getuserbyid", async (req, res) => {
-  const {id} = req.body
-  if(Usersids.get(id)){
-    console.log('getting user by id exists', id)
-    return res.status(200).json(Usersids.get(id))
+  const { id } = req.body;
+  if (Usersids.get(id)) {
+    console.log("getting user by id exists", id);
+    return res.status(200).json(Usersids.get(id));
   }
-  console.log('getting user by id', id)
-let User = await supabase.auth.admin.getUserById(id)
-if (User){
-  Usersids.set(id,User)
-  return res.status(202).json(User)
-}else{
-  return res.status(400).json("Need ID")
-}
+  console.log("getting user by id", id);
+  let User = await supabase.auth.admin.getUserById(id);
+  if (User) {
+    Usersids.set(id, User);
+    return res.status(202).json(User);
+  } else {
+    return res.status(400).json("Need ID");
+  }
 });
 app.post("/getuserslist", async (req, res) => {
-let Users = await supabase.auth.admin.listUsers()
-if (Users){
-  return res.status(200).json(Users)
-}else{
-  return res.status(400).json("Need ID")
-}
+  let Users = await supabase.auth.admin.listUsers();
+  if (Users) {
+    return res.status(200).json(Users);
+  } else {
+    return res.status(400).json("Need ID");
+  }
 });
 app.listen(process.env.PORT, () => {
   console.log("Listening on", process.env.PORT);
