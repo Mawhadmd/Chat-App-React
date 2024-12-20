@@ -42,13 +42,14 @@ const validateTokenMiddleware = async (req, res, next) => {
 app.use(validateTokenMiddleware);
 
 app.post("/Insertglobalmessages", async (req, res) => {
-  const { contents, senderid } = req.body;
+  const { contents, senderid, Timeofthemessage } = req.body;
   var { data, error } = await supabase
     .from("Messages")
     .insert([
       {
         Sender: senderid,
         Content: contents,
+        created_at: Timeofthemessage,
       },
     ])
     .select();
@@ -59,7 +60,7 @@ app.post("/Insertglobalmessages", async (req, res) => {
 
 app.post("/Insertprivatemessages", async (req, res) => {
   console.log(JSON.stringify(req.body));
-  const { Content, chatId, Receiver, senderid } = req.body;
+  const { Content, chatId, Receiver, senderid, Timeofthemessage: Timeofthemessage,} = req.body;
   console.log("Insert message private");
   var { data, error } = await supabase
     .from("PrivateMessages")
@@ -69,6 +70,7 @@ app.post("/Insertprivatemessages", async (req, res) => {
         chatId: chatId,
         Receiver: Receiver,
         Sender: senderid,
+        created_at: Timeofthemessage,
       },
     ])
     .select();
