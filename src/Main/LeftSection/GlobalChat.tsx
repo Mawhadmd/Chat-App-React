@@ -1,39 +1,45 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../Supabase";
 import globe from "../../assets/global-communication_9512332.png";
-import { ChatContext } from "../App";
 import convertTime from "../util/convertTime";
 import { getname } from "../util/getnamebyid";
 const GlobalChat = ({ setCurrentopenchatid }: any) => {
   const [name, setname] = useState<string>("");
-  const [latestMessagetime, setlatestmessagetime] = useState<string>("");
-  var { Content: newmessage, setcontent } = useContext(ChatContext);
+  const [ValuesOfLatestMessage, setValuesOfLatestMessage] = useState<any | undefined>();
 
-
-
-  async function fetchlatestmessage() {
-    let { data } = await supabase
-      .from("Messages")
-      .select("Content, Sender, created_at")
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    if (data) {
-      getname(data[0].Sender).then((name)=>setname(name)).catch((e)=>{console.log('couldn\'t get name ' + e)});
-      setlatestmessagetime(data[0].created_at);
-      setcontent({ Content: data[0].Content });
- 
+useEffect(() => {
+  const channels = supabase
+  .channel("Changes-in-GlobalChat")
+  .on(
+    "postgres_changes",
+    { event: "INSERT", schema: "public", table: "Messages" },
+    (payload) => {
+      setValuesOfLatestMessage(payload.new);
     }
-  }
-  useEffect(() => {
+  )
+  .subscribe();
+  return () => {
+    channels.unsubscribe()
+  };
+}, []); //listens to database changes and sets the latest message
+ 
+  useEffect(() => { // initialize the latest message
+    async function fetchlatestmessage() {
+      let { data } = await supabase
+        .from("Messages")
+        .select("Content, Sender, created_at")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (data) {
+        getname(data[0].Sender).then((name)=>setname(name)).catch((e)=>{console.log('couldn\'t get name ' + e)});
+        setValuesOfLatestMessage({ Content: data[0].Content, created_at: data[0].created_at });
+      }
+    }
     fetchlatestmessage();
   }, []);
-  useEffect(() => {
-    if (newmessage.created_at) setlatestmessagetime(newmessage.created_at);
-  }, [newmessage]);
 
   return (
-    <div
+    !!ValuesOfLatestMessage && ValuesOfLatestMessage.created_at && <div
       onClick={() => {
         setCurrentopenchatid("Global");
       }}
@@ -44,12 +50,12 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
         <span className="font-bold">Global Chat</span>
         <div className="flex justify-between">
           <span className=" text-sm text-MainText/60">{`${name}: ${
-            newmessage?.Content?.length > 30
-              ? newmessage?.Content?.slice(0, 30) + "..."
-              : newmessage?.Content
+            ValuesOfLatestMessage.Content?.length > 30
+              ? ValuesOfLatestMessage.Content?.slice(0, 30) + "..."
+              : ValuesOfLatestMessage.Content
           }`}</span>
           <span className=" text-sm text-MainText text-nowrap">
-            At {convertTime(latestMessagetime)}
+            At {convertTime(ValuesOfLatestMessage.created_at)}
           </span>
         </div>
       </div>

@@ -94,12 +94,10 @@ app.post("/insertuser", async (req, res) => {
 });
 app.post("/upsertlastseen", async (req, res) => {
   const { uuid } = req.body;
-
     var ressupa = await supabase
       .from("Users")
       .upsert([{ LastSeen: `${Date.now()}`, id: uuid }])
       .select();
-
   if (ressupa.data) return res.status(201).json(ressupa.data);
   else return res.status(404).json(ressupa.error);
 });

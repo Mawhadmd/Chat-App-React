@@ -179,10 +179,9 @@ const ChatArea = () => {
     setCurrentopenchatid(undefined);
     setOtheruserid(undefined);
   }
-  console.log(istyping);
   return !loading ? (
     <div
-      id="CurrentChat"
+      id="CurrentHeader"
       className=" text-LightModeMain shadow-[0px_5px_12px_rgba(0,0,0,0.589)] z-10 min-h-16 h-[10%] bg-Main w-full  gap-2 content-center flex px-1 justify-between items-center "
     >
       {Currentopenchatid != "Global" ? (
@@ -269,7 +268,7 @@ const ChatArea = () => {
     </div>
   ) : (
     <div
-      id="CurrentChat"
+      id="CurrentHeader"
       className=" text-LightModeMain shadow-[0px_5px_12px_rgba(0,0,0,0.589)] z-10 min-h-16 h-[10%] bg-Main w-full  gap-2 content-center flex px-1 justify-between items-center "
     >
       Loading

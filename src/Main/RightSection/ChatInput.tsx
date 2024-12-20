@@ -1,8 +1,7 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ChatContext, ReloadContactsCtxt } from "../App";
 import { supabase } from "../Supabase";
 import { getname } from "../util/getnamebyid";
-
 
 const ChatArea = ({ setmessages }: { setmessages: any }) => {
   const context = useContext(ChatContext);
@@ -21,26 +20,28 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
   const [username, setusername] = useState<boolean>(false);
   const [istyping, setistyping] = useState<boolean>(false);
 
- async function Messageisin(chatid:any){
-   setReloadcontact((previous: boolean) => !previous);
-  setCurrentopenchatid(chatid);
-  setquery("");
- }
-useEffect(() => {
-  (async () => {let u = await getname(uuid);  setusername(u)})()
-
-}, []);
+  async function Messageisin(chatid: any) {
+    setReloadcontact((previous: boolean) => !previous);
+    setCurrentopenchatid(chatid);
+    setquery("");
+  }
+  useEffect(() => {
+    (async () => {
+      let u = await getname(uuid);
+      setusername(u);
+    })();
+  }, []);
   async function SetData() {
     if (contentisfull) return;
     let contentval = content;
     setinputcontent("");
 
     if (contentval != "") {
-      if(Currentopenchatid != -1){
+      if (Currentopenchatid != -1) {
         setmessages((PreviousMessages: any) => [
           {
             Sender: uuid,
-            created_at: Date.now(),
+            created_at: new Date().toLocaleDateString(),
             Content: contentval,
           },
           ...(PreviousMessages || []),
@@ -73,12 +74,12 @@ useEffect(() => {
               return response.json();
             })
             .then((res) => {
-               chatid = res?.[0].chatId
+              chatid = res?.[0].chatId;
             })
             .catch((e) => console.log(e + "Error while inserting a user"));
         }
-  
-        async function insertmessage(){
+
+        async function insertmessage() {
           await fetch(
             "https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages",
             {
@@ -101,16 +102,15 @@ useEffect(() => {
               if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
               }
-              console.log('insert successful')
-              if(Currentopenchatid == -1){
-                Messageisin(chatid)
+              console.log("insert successful");
+              if (Currentopenchatid == -1) {
+                Messageisin(chatid);
               }
             })
             .catch((e) => console.log(e + " Error inserting private message"));
-          
         }
 
-        insertmessage()
+        insertmessage();
       } else {
         await fetch(
           "https://chat-app-react-server-qizz.onrender.com/Insertglobalmessages",
@@ -132,37 +132,35 @@ useEffect(() => {
           .catch((e) => console.log(e + " Error Inserting global message"));
       }
     } else alert("Write something");
-
- 
   }
 
   useEffect(() => {
-   if(Currentopenchatid != -1){
-    if (!content?.length) {
-      setistyping(false);
-    } else {
-      setistyping(true);
-      window.onblur = () => {
+    if (Currentopenchatid != -1) {
+      if (!content?.length) {
         setistyping(false);
-      };
-      window.onfocus = () => {
+      } else {
         setistyping(true);
-      };
+        window.onblur = () => {
+          setistyping(false);
+        };
+        window.onfocus = () => {
+          setistyping(true);
+        };
+      }
     }
-   }
   }, [content]);
 
   useEffect(() => {
     const channelB = supabase.channel("istyping");
     console.log("run");
- 
+
     async function sendMessage(isTyping: any) {
       console.log("Sending message...");
       try {
-         await channelB.send({
+        await channelB.send({
           type: "broadcast",
           event: `typing${Currentopenchatid}`,
-          payload: { user: username, id:uuid, istyping: isTyping },
+          payload: { user: username, id: uuid, istyping: isTyping },
         });
       } catch (err) {
         console.error("Failed to send message:", err);

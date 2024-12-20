@@ -1,4 +1,4 @@
-import { useState, createContext, useEffect } from "react";
+import { useState, createContext, useEffect, useCallback } from "react";
 import LeftSection from "./LeftSection/LeftSection";
 import RightSection from "./RightSection/RightSection";
 import { supabase } from "./Supabase";
@@ -17,16 +17,18 @@ function App() {
     "hidden translate-y-[100vh]"
   );
   const [Reloadcontact, setReloadcontact] = useState<boolean>();
-  const [query, setquery] = useState<string>("");
-  const [Content, setcontent] = useState<string>("");
   const [logged, setLogged] = useState(false);
   const [uuid, setuuid] = useState<string | undefined>();
   const [onlineusers, setonlineusers] = useState<any>(null);
-  const timeuntilnextlastseen = 180 * 1000;
+  const timeuntilnextlastseen = 120 * 1000;
   const [Currentopenchatid, setCurrentopenchatid] = useState<
     string | undefined
   >(undefined);
   const [Otheruserid, setOtheruserid] = useState<string | undefined>(undefined);
+  const changelightmode = useCallback(() => {
+    setlightmode((prev) => !prev);
+  }, [setlightmode]);
+
   useEffect(() => {
     const Darkcolors = {
       "--Main": "15,17,8", // main dark
@@ -61,23 +63,19 @@ function App() {
       localStorage.setItem("islightmode", "1");
       setlightmode(true);
     }
-  }, [lightmode]);
+  }, [lightmode]); //Changes lightmode
+
   useEffect(() => {
     if (!uuid) return;
-
     async function getContacts() {
       let q1 = supabase.from("Contacts").select("User2").eq("User1", uuid);
-
       let q2 = supabase.from("Contacts").select("User1").eq("User2", uuid);
-
       // Wait for both queries to resolve
       let [contacts1, contacts2] = await Promise.all([q1, q2]);
-
       if (!contacts1.data || !contacts2.data) {
         alert("Couldn't get contacts for online status");
         return [];
       }
-
       return [
         ...contacts1.data.map((contact) => contact.User2),
         ...contacts2.data.map((contact) => contact.User1),
@@ -87,7 +85,6 @@ function App() {
     // Call getContacts directly instead of using an async immediately
     getContacts().then((contacts) => {
       onlineroom = supabase.channel("onlineusers");
-
       const trackPresence = async () => {
         onlineroom
           .on("presence", { event: "sync" }, () => {
@@ -97,52 +94,50 @@ function App() {
               return contacts.includes(val[0].user);
             });
             // console.log(onlinecontacts, "online contacts", String(onlinecontacts.reduce((acc:any)=> 1 + acc, 0)));
-           
+
             if (onlinecontacts.length > 0) {
-              setonlineusers(onlinecontacts.map((val: any) => ({user: val[0].user, status:val[0].status})));
+              setonlineusers(
+                onlinecontacts.map((val: any) => ({
+                  user: val[0].user,
+                  status: val[0].status,
+                }))
+              );
             } else {
               setonlineusers(null);
             }
           })
           .subscribe();
-          
-          if(document.hasFocus())
-          await onlineroom.track({ user: uuid, status: 'Online' });
-          else
-          await onlineroom.track({ user: uuid, status: 'Away' });
-          window.onfocus = async () => {await onlineroom.track({ user: uuid, status: 'Online' });}
-          window.onblur = async () => {await onlineroom.track({ user: uuid, status: 'Away' });}
 
+        if (document.hasFocus())
+          await onlineroom.track({ user: uuid, status: "Online" });
+        else await onlineroom.track({ user: uuid, status: "Away" });
+        window.onfocus = async () => {
+          await onlineroom.track({ user: uuid, status: "Online" });
+        };
+        window.onblur = async () => {
+          await onlineroom.track({ user: uuid, status: "Away" });
+        };
       };
-
       trackPresence();
     });
 
     return () => {
       supabase.removeChannel(onlineroom);
     };
-  }, [uuid]);
+  }, [uuid]); //Gets Contacts and check if they're online
 
-  async function getuuid() {
-    let user = await supabase.auth.getUser();
-    let uuid = user.data.user?.id;
-    setuuid(uuid);
-  }
-  function changelightmode() {
-    setlightmode((prev) => !prev);
-  }
-  function getMobileMode(width: number) {
-    let t;
-    clearTimeout(t);
-    t = setTimeout(() => {
-      if (width < 800) {
-        setMobileMode(true);
-      } else {
-        setMobileMode(false);
-      }
-    }, 200);
-  }
   useEffect(() => {
+    function getMobileMode(width: number) {
+      let t;
+      clearTimeout(t);
+      t = setTimeout(() => {
+        if (width < 800) {
+          setMobileMode(true);
+        } else {
+          setMobileMode(false);
+        }
+      }, 200);
+    }
     getMobileMode(window.innerWidth);
     window.addEventListener("resize", ({ target }) => {
       const w = target as Window;
@@ -154,81 +149,53 @@ function App() {
         getMobileMode(w.innerWidth);
       });
     };
-  }, []);
-  useEffect(() => {
-    getuuid(); // get uuid of the current user logged in
-  }, []);
+  }, []); //Handles responsiveness
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!uuid) {
+        setuuid(session?.user.id);
+      }
       if (["INITIAL_SESSION", "SIGNED_IN"].includes(event) && session != null)
         setLogged(true);
       if (event === "SIGNED_OUT") setLogged(false);
     });
-
     return () => {
       data?.subscription?.unsubscribe();
     };
-  }, []);
+  }, [uuid]);
+
   useEffect(() => {
     window.addEventListener("focus", insertlastseen);
     return () => {
       window.removeEventListener("focus", insertlastseen);
     };
-  }, [uuid]);
-  async function insertlastseen() {
-    if (uuid && document.hasFocus()) {
-      var userinUserscheck = await supabase
-        .from("Users")
-        .select("*")
-        .eq("id", uuid); //checks if user already has a spot and a lastseen, so just update
+  }, []);
 
-      if (userinUserscheck.data && userinUserscheck.data?.length == 0) {
-        try {
-          await fetch(
-            "https://chat-app-react-server-qizz.onrender.com/insertlastseen",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                mode: "insert",
-                uuid: uuid,
-                accessToken: (
-                  await supabase.auth.getSession()
-                ).data.session?.access_token,
-              }),
-            }
-          );
-        } catch (e) {
-          alert("Error occured while updating lastseen");
+  async function insertlastseen() {
+      if(!uuid) return
+        const response = await fetch(
+          "https://chat-app-react-server-qizz.onrender.com/upsertlastseen",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              uuid: uuid,
+              accessToken: (
+                await supabase.auth.getSession()
+              ).data.session?.access_token,
+            }),
+          }
+        );
+        if (!response.ok) {
+          console.warn(`HTTP error! status: ${response.status} Inserting Last Seen`)
         }
-      } else {
-        try {
-          await fetch(
-            "https://chat-app-react-server-qizz.onrender.com/insertlastseen",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                mode: "update",
-                uuid: uuid,
-                accessToken: (
-                  await supabase.auth.getSession()
-                ).data.session?.access_token,
-              }),
-            }
-          );
-        } catch (e) {
-          console.error("Error occured while updating lastseen" + e);
-        }
-      }
       localStorage.setItem("lastseenupdate", `${Date.now()}`);
-    }
+      
   }
+
   useEffect(() => {
     insertlastseen();
     let interva = setInterval(() => {
@@ -244,6 +211,7 @@ function App() {
       clearInterval(interva);
     };
   }, [uuid]);
+
   function setshowsettings1() {
     if (!showsettings.includes("flex")) {
       setTimeout(() => {
@@ -323,25 +291,17 @@ function App() {
                 Otheruserid,
                 logged,
                 uuid,
-                setcontent,
-                Content,
-                query,
-                setquery,
               }}
             >
               {/* If its not mobile show, and is not in a chat show leftsection */}
               {/* If its not mobile show, and is not in a chat show leftsection */}
-              {MobileMode ? (
-                <>
-                  {!Currentopenchatid && <LeftSection />}
-                  {Currentopenchatid && <RightSection />}
-                </>
-              ) : (
-                <>
-                  <LeftSection />
-                  <RightSection />
-                </>
-              )}
+ 
+      
+             
+                <LeftSection />
+                <RightSection />
+       
+              
             </ChatContext.Provider>
           </ReloadContactsCtxt.Provider>
         </Onlineusersctxt.Provider>

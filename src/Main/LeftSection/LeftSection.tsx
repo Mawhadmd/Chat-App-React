@@ -8,8 +8,9 @@ import googleicon from "../../assets/googleicon.png";
 import { getuserbyid } from "../util/getuserbyid";
 
 const LeftSection = ({}) => {
-  const { setCurrentopenchatid, query, setquery, logged, uuid } =
+  const { setCurrentopenchatid,logged, uuid, Currentopenchatid} =
     useContext(ChatContext);
+    const [query, setquery] = useState<string>("");
   const { MobileMode } = useContext(SettingContext);
   const { Reloadcontact } = useContext(ReloadContactsCtxt);
   const [contacts, setcontacts] = useState<any[] | undefined>();
@@ -44,7 +45,7 @@ const LeftSection = ({}) => {
         arrayofusers.push({ res, chatId });
       }
     }
-
+    console.log(arrayofusers)
     setcontacts(arrayofusers);
   }
 
@@ -67,7 +68,7 @@ const LeftSection = ({}) => {
       <section
         id="LeftSection"
         className={`flex flex-col bg-Main h-screen relative z-20 transition-all ${
-          MobileMode ? "w-full" : "w-[500px] min-w-[400px]"
+          MobileMode ? !Currentopenchatid?  "w-full" : "hidden": "w-[500px] min-w-[400px]"
         }
         `}
       >
