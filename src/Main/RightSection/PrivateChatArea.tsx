@@ -3,6 +3,7 @@ import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 import BGimage from "../../assets/blackbackground.png";
 import convertTime from "../util/convertTime";
+
 interface Message {
   data: any;
   uuid: string;
@@ -21,18 +22,18 @@ const Message = ({ data, uuid }: Message) => {
       <span className="text-sm   ml-auto w-full">
         {convertTime(data.created_at)}
       </span>
+      {data && data.Pending && <p>("Sending")</p>}
     </div>
   );
 };
-const ChatArea = ({
+const PrivateChatArea = ({
   messages,
   setmessages,
 }: {
-  messages: any;
+  messages: any[] | null;
   setmessages: any;
 }) => {
   const { Currentopenchatid, uuid } = useContext(ChatContext);
-  const ChatArea = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (Currentopenchatid != -1) {
       const channels = supabase
@@ -46,12 +47,29 @@ const ChatArea = ({
             filter: `chatId=eq.${Currentopenchatid}`,
           },
           (payload: any) => {
-            if (payload.new.Sender != uuid)
+            if (payload.new.Sender != uuid) {
               setmessages((prevMessages: any) =>
                 Array.isArray(prevMessages)
                   ? [payload.new, ...prevMessages]
                   : [payload.new]
               );
+            } else {
+              setmessages((messages: any[]) =>
+                messages.map((value) => {
+                  if (
+                    value.Content + value.created_at + value.chatId ==
+                      payload.new.Content +
+                        payload.new.created_at +
+                        payload.new.chatId &&
+                    value.Pending
+                  ) {
+                    return payload.new;
+                  } else {
+                    return value;
+                  }
+                })
+              );
+            }
           }
         )
         .subscribe();
@@ -86,14 +104,15 @@ const ChatArea = ({
 
   const getdate = useCallback(
     (i: number) => {
-      return new Date(messages[i].created_at)
-        .toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "2-digit",
-          day: "numeric",
-          year: "numeric",
-        })
-        .replace(",", "");
+      if (messages)
+        return new Date(messages[i].created_at)
+          .toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "2-digit",
+            day: "numeric",
+            year: "numeric",
+          })
+          .replace(",", "");
     },
     [messages]
   );
@@ -101,7 +120,6 @@ const ChatArea = ({
   return (
     <div
       id="ChatArea"
-      ref={ChatArea}
       style={{ backgroundImage: `url(${BGimage})` }}
       className="overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
@@ -113,18 +131,23 @@ const ChatArea = ({
         ) : (
           messages?.map((data: any, i: number) => (
             <>
-              <Message
-                key={data.id} //maybe get the database key
-                uuid={uuid}
-                data={data}
-              />
-
-              {messages[i + 1] ? (
+              <Message key={data.id} uuid={uuid} data={data} />
+              {messages && messages[i + 1] ? ( //Date of messages
                 getdate(i) != getdate(i + 1) && (
-                  <p className="text-center bg-MainText/10 ">{getdate(i)}</p>
+                  <p
+                    key={data.id + data.created_at}
+                    className="text-center bg-MainText/10 "
+                  >
+                    {getdate(i)}
+                  </p>
                 )
               ) : (
-                <p className="text-center bg-MainText/10">{getdate(i)}</p>
+                <p
+                  key={data.id + data.created_at}
+                  className="text-center bg-MainText/10"
+                >
+                  {getdate(i)}
+                </p>
               )}
             </>
           ))
@@ -138,4 +161,4 @@ const ChatArea = ({
   );
 };
 
-export default ChatArea;
+export default PrivateChatArea;

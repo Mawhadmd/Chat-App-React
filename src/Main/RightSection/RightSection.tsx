@@ -3,18 +3,17 @@ import ChatInput from "./ChatInput";
 import PrivateChatArea from "./PrivateChatArea";
 import GlobalChatArea from "./GlobalChatArea";
 import { ChatContext, SettingContext } from "../App";
-import { useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
-interface UserMessage {
-  name: string;
-  id: string;
-  color: string | null;
-}
 
+
+
+export const ChatMessagesContext = createContext<any>(null);
 const RightSection = () => {
   const context = useContext(ChatContext);
   const { logged, Currentopenchatid } = context;
-  const [messages, setmessages] = useState<UserMessage[] | null>(null);
+  const [messages, setmessages] = useState<any[] | null>(null);
+
   const { MobileMode } = useContext(SettingContext);
   return logged && Currentopenchatid  ? (
     <section
@@ -24,6 +23,7 @@ const RightSection = () => {
       <CurrentHeader></CurrentHeader>
       {Currentopenchatid == "Global" ? (
         <GlobalChatArea
+
           messages={messages}
           setmessages={setmessages}
         ></GlobalChatArea>

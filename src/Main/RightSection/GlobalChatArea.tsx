@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext, SettingContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3";
@@ -7,20 +7,15 @@ import getChatId from "../util/getChatId";
 import BGimage from "../../assets/blackbackground.png";
 import { getuserbyid } from "../util/getuserbyid";
 import { getRandomColor } from "../util/getRandomColor";
-interface UserMessage {
+export interface UserMessage {
   name: string;
   id: string;
   color: string | null;
 }
-interface Message {
+export interface Message {
   data: any;
   uuid: string;
   UserMessageMap: Map<string, UserMessage>;
-}
-interface UserMessage {
-  name: string;
-  id: string;
-  color: string | null;
 }
 const Message = ({ data, uuid, UserMessageMap }: Message) => {
   const { Currentopenchatid, setCurrentopenchatid, setOtheruserid } =
@@ -60,6 +55,7 @@ const Message = ({ data, uuid, UserMessageMap }: Message) => {
           <span className="text-sm   ml-auto w-full">
             {convertTime(data.created_at)}
           </span>
+          {data && data.Pending && <p>("Sending")</p>}
         </div>
       )}
     </div>
@@ -69,14 +65,13 @@ const GlobalChatArea = ({
   messages,
   setmessages,
 }: {
-  messages: any;
+  messages: any[] | null;
   setmessages: any;
 }) => {
   const { uuid } = useContext(ChatContext);
   const [UserMessageMap, setUserMessageMap] = useState(new Map());
-  const ChatArea = useRef<HTMLDivElement>(null);
   const { lightmode } = useContext(SettingContext);
-
+  console.log(UserMessageMap)
   useEffect(() => {
     async function setnewuserinmessage(senderid: string) {
       console.log("setting new user");
@@ -116,14 +111,36 @@ const GlobalChatArea = ({
         (payload: any) => {
           if (!UserMessageMap.get(payload.new.Sender))
             setnewuserinmessage(payload.new.Sender);
-          if (payload.new.Sender != uuid)
+          if (payload.new.Sender != uuid){
             // doesn't fetch the message for this user
+           
             setmessages((PreviousMessages: any) => [
               payload.new,
               ...(PreviousMessages || []),
             ]);
+            (() => new Audio(audio).play())();
+          } else {
+            console.log('y')
+            setmessages((messages: any[]) =>
+              messages.map((value) => {
+                
+                if (
+                  value.Content + value.created_at ==
+                      payload.new.Content +
+                        payload.new.created_at 
+                      &&
+                    value.Pending
+                ) {
+                  console.log('replaced', value, payload.new)
+                  return payload.new;
+                } else {
+                  console.log('same', value)
+                  return value;
+                }
+              })
+            );
+          }
 
-          (() => new Audio(audio).play())();
         }
       )
       .subscribe();
@@ -131,23 +148,20 @@ const GlobalChatArea = ({
     return () => {
       channels.unsubscribe();
     };
-  }, []); //listen to new messages
+  }, [UserMessageMap]); //listen to new messages
 
   useEffect(() => {
     setmessages(null);
-    getData(); //gets messages in the current chat area
+    Setdatatomap(); //gets messages in the current chat area
   }, []);
 
-  async function getData() {
+
+  async function Setdatatomap() {
     const { data, error } = await supabase
-      .from("Messages")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(30);
-    console.log(data, error);
-    Setdatatomap(data, error);
-  }
-  async function Setdatatomap(data: any[] | null, error: any) {
+    .from("Messages")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(30);
     let UserMessageMap = new Map();
     if (!!data) {
       let UsersSet = new Set();
@@ -200,24 +214,25 @@ const GlobalChatArea = ({
         });
       return newMap;
     });
-  }, [lightmode]);
-const getdate = useCallback(
+  }, [lightmode]); //changes color on lightmode change
+
+  const getdate = useCallback(
     (i: number) => {
-      return new Date(messages[i].created_at)
-        .toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "2-digit",
-          day: "numeric",
-          year: "numeric",
-        })
-        .replace(",", "");
+      if (messages && messages[i])
+        return new Date(messages[i].created_at)
+          .toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "2-digit",
+            day: "numeric",
+            year: "numeric",
+          })
+          .replace(",", "");
     },
     [messages]
-  );
+  ); //get date
   return (
     <div
       id="ChatArea"
-      ref={ChatArea}
       style={{ backgroundImage: `url(${BGimage})` }}
       className="overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
@@ -230,19 +245,30 @@ const getdate = useCallback(
           messages?.map((data: any, i: number) => (
             <>
               <Message
-                key={data.id} //maybe get the database key
+                key={data.id}
                 uuid={uuid}
                 data={data}
                 UserMessageMap={UserMessageMap}
               />
 
-{messages[i + 1] ? (
+              {messages && messages[i + 1] ? (
                 getdate(i) != getdate(i + 1) && (
-                  <p className="text-center bg-MainText/10 ">{getdate(i)}</p>
+                  <p
+                    key={data.id + data.created_at}
+                    className="text-center bg-MainText/10 "
+                  >
+                    {getdate(i)}
+                  </p>
                 )
               ) : (
-                <p className="text-center bg-MainText/30">{getdate(i)}</p>
+                <p
+                  key={data.id + data.created_at}
+                  className="text-center bg-MainText/30"
+                >
+                  {getdate(i)}
+                </p>
               )}
+
             </>
           ))
         )

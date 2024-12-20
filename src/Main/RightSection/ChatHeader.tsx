@@ -6,7 +6,7 @@ import { supabase } from "../Supabase";
 import convertTime from "../util/convertTime";
 import defaultpfp from "../../assets/grayuserpfp.png";
 import { getuserbyid } from "../util/getuserbyid";
-const ChatArea = () => {
+const ChatHeader = () => {
   const context = useContext(ChatContext);
   const [lastseen, setlastseen] = useState<string>("");
   const [lastseenglobal, setlastseenglobal] = useState<string>("");
@@ -276,4 +276,4 @@ const ChatArea = () => {
   );
 };
 
-export default ChatArea;
+export default ChatHeader;

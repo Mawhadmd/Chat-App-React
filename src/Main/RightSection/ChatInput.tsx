@@ -3,7 +3,7 @@ import { ChatContext, ReloadContactsCtxt } from "../App";
 import { supabase } from "../Supabase";
 import { getname } from "../util/getnamebyid";
 
-const ChatArea = ({ setmessages }: { setmessages: any }) => {
+const ChatInput = ({ setmessages }: { setmessages: any }) => {
   const context = useContext(ChatContext);
   const {
     setCurrentopenchatid,
@@ -37,11 +37,16 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
     setinputcontent("");
 
     if (contentval != "") {
+      var Timeofthemessage = Date.now()
       if (Currentopenchatid != -1) {
         setmessages((PreviousMessages: any) => [
           {
+            id:Math.round(Math.random() * 1200213000),
+            Pending:true,
             Sender: uuid,
-            created_at: new Date().toLocaleDateString(),
+            Receover: Otheruserid,
+            chatId: Currentopenchatid,
+            created_at: Timeofthemessage,
             Content: contentval,
           },
           ...(PreviousMessages || []),
@@ -59,6 +64,7 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
               },
               body: JSON.stringify({
                 uuid: uuid,
+           
                 accessToken: (
                   await supabase.auth.getSession()
                 ).data.session?.access_token,
@@ -78,7 +84,6 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
             })
             .catch((e) => console.log(e + "Error while inserting a user"));
         }
-
         async function insertmessage() {
           await fetch(
             "https://chat-app-react-server-qizz.onrender.com/Insertprivatemessages",
@@ -91,6 +96,7 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
                 Content: contentval,
                 chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
                 Receiver: Otheruserid,
+                Timeofthemessage: Timeofthemessage,
                 senderid: uuid,
                 accessToken: (
                   await supabase.auth.getSession()
@@ -121,6 +127,7 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
             },
             body: JSON.stringify({
               contents: contentval,
+              Timeofthemessage: Timeofthemessage,
               senderid: uuid,
               accessToken: (
                 await supabase.auth.getSession()
@@ -220,4 +227,4 @@ const ChatArea = ({ setmessages }: { setmessages: any }) => {
   );
 };
 
-export default ChatArea;
+export default ChatInput;

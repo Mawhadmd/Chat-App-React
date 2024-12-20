@@ -13,7 +13,6 @@ function getRandomColor(bgcolor) {
     let colorarray = [Number(`0x${colorshex[0]}${colorshex[1]}`),Number(`0x${colorshex[2]}${colorshex[3]}`),Number(`0x${colorshex[4]}${colorshex[5]}`)]
     contrast = calculateContrastRatio(bgcolorarray,colorarray)
   }
-
     return color;
   }
   function calculateContrastRatio(

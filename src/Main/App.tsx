@@ -81,10 +81,10 @@ function App() {
         ...contacts2.data.map((contact) => contact.User1),
       ];
     }
-    var onlineroom: any;
+
     // Call getContacts directly instead of using an async immediately
     getContacts().then((contacts) => {
-      onlineroom = supabase.channel("onlineusers");
+      var onlineroom = supabase.channel("onlineusers");
       const trackPresence = async () => {
         onlineroom
           .on("presence", { event: "sync" }, () => {
@@ -119,11 +119,12 @@ function App() {
         };
       };
       trackPresence();
+      return () => {
+        onlineroom.unsubscribe()
+      };
     });
 
-    return () => {
-      supabase.removeChannel(onlineroom);
-    };
+  
   }, [uuid]); //Gets Contacts and check if they're online
 
   useEffect(() => {
