@@ -15,6 +15,7 @@ const ChatHeader = () => {
   const [pfp, setpfp] = useState<string>("");
   const [istyping, setistyping] = useState<boolean>();
   const [whoistyping, setwhoistyping] = useState<string[] | null>(null);
+  const { lightmode } = useContext(SettingContext);
   const {
     Currentopenchatid,
     setOtheruserid,
@@ -163,11 +164,10 @@ const ChatHeader = () => {
         )
         .subscribe();
       setloading(true);
-
       getlastseen(null);
       let interval = setInterval(() => {
         getlastseen(null);
-      }, 60000);
+      }, 300000);
       return () => {
         channels.unsubscribe();
         clearInterval(interval);
@@ -230,7 +230,9 @@ const ChatHeader = () => {
         </>
       ) : (
         <div className="w-fit h-full gap-2 flex items-center text-LightModeMain  cursor-pointer">
-          <img src={globe} className="h-10 invert" alt="Globe" />
+           <div className="rounded-full ml-1 border-MainText border-2 border-solid  w-16">
+      <img src={globe} className={`  ${!lightmode ? "invert": ""} `} alt="Globe" />
+      </div>
           <div>
             <span>Global Chat</span>
             <br />

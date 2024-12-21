@@ -18,6 +18,7 @@ function App() {
   );
   const [Reloadcontact, setReloadcontact] = useState<boolean>();
   const [logged, setLogged] = useState(false);
+  const [accessToken, setaccessToken] = useState<string | undefined>();
   const [uuid, setuuid] = useState<string | undefined>();
   const [onlineusers, setonlineusers] = useState<any>(null);
   const timeuntilnextlastseen = 120 * 1000;
@@ -157,6 +158,7 @@ function App() {
       if (!uuid) {
         setuuid(session?.user.id);
       }
+      setaccessToken(session?.access_token)
       if (["INITIAL_SESSION", "SIGNED_IN"].includes(event) && session != null)
         setLogged(true);
       if (event === "SIGNED_OUT") setLogged(false);
@@ -167,51 +169,33 @@ function App() {
   }, [uuid]);
 
   useEffect(() => {
-    window.addEventListener("focus", insertlastseen);
-    return () => {
-      window.removeEventListener("focus", insertlastseen);
-    };
-  }, []);
-
-  async function insertlastseen() {
-      if(!uuid) return
-        const response = await fetch(
-          "https://chat-app-react-server-qizz.onrender.com/upsertlastseen",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              uuid: uuid,
-              accessToken: (
-                await supabase.auth.getSession()
-              ).data.session?.access_token,
-            }),
-          }
-        );
-        if (!response.ok) {
-          console.warn(`HTTP error! status: ${response.status} Inserting Last Seen`)
-        }
-      localStorage.setItem("lastseenupdate", `${Date.now()}`);
-      
-  }
-
-  useEffect(() => {
-    insertlastseen();
-    let interva = setInterval(() => {
-      let lastseen = localStorage.getItem("lastseenupdate");
-      if (lastseen) {
-        if (Date.now() - Number(lastseen) > timeuntilnextlastseen)
-          insertlastseen();
-      } else {
-        insertlastseen();
+    if(!accessToken) return
+    console.log('loaded')
+  window.onbeforeunload = function(){
+     fetch(
+      "https://chat-app-react-server-qizz.onrender.com/upsertlastseen",
+      {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+          
+        },
+        body: JSON.stringify({
+          uuid: uuid,
+          accessToken: accessToken
+        }),
       }
-    }, timeuntilnextlastseen / 2);
-    return () => {
-      clearInterval(interva);
-    };
-  }, [uuid]);
+    );
+    const time = Date.now();
+    while ((Date.now() - time) < 500) {
+
+    }
+  }
+  }, [accessToken]);
+
+
+
 
   function setshowsettings1() {
     if (!showsettings.includes("flex")) {

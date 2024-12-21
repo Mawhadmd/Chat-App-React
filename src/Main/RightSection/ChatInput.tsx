@@ -41,10 +41,8 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       if (Currentopenchatid != -1) {
         setmessages((PreviousMessages: any) => [
           {
-            id:Math.round(Math.random() * 1200213000),
             Pending:true,
             Sender: uuid,
-            Receover: Otheruserid,
             chatId: Currentopenchatid,
             created_at: Timeofthemessage,
             Content: contentval,
@@ -113,7 +111,27 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
                 Messageisin(chatid);
               }
             })
-            .catch((e) => console.log(e + " Error inserting private message"));
+            .catch((e) => {
+              setmessages((messages: any[]) =>
+                messages.map((value) => {
+                  if (
+                    value.Content + value.created_at ==
+                      String(contentval) + Timeofthemessage &&
+                    value.Pending
+                  ) {
+                    return {  
+                      Error:true,
+                      Sender: uuid,
+                      chatId: Currentopenchatid,
+                      created_at: Timeofthemessage,
+                      Content: contentval};
+                  } else {
+                    console.log("same", value);
+                    return value;
+                  }
+                })
+              );
+              console.log(e + " Error inserting private message")});
         }
 
         insertmessage();
@@ -135,22 +153,53 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
             }),
           }
         )
-          .then((res) => console.log(res + "Response Inseting global message"))
-          .catch((e) => console.log(e + " Error Inserting global message"));
+          .then((res) => {
+            if(!res.ok){
+              throw Error('Something Went Wrong' + String(res))
+            }
+            console.log(res + "Response Inseting global message")
+          })
+          .catch((e) =>         
+           { 
+            setmessages((messages: any[]) =>
+              messages.map((value) => {
+                if (
+                  value.Content + value.created_at ==
+                    String(contentval) + Timeofthemessage &&
+                  value.Pending
+                ) {
+                  return {  
+                    Error:true,
+                    Sender: uuid,
+                    chatId: Currentopenchatid,
+                    created_at: Timeofthemessage,
+                    Content: contentval};
+                } else {
+                  console.log("same", value);
+                  return value;
+                }
+              })
+            );
+       
+            console.log(e + " Error Inserting global message")
+          }
+          );
       }
     } else alert("Write something");
   }
 
   useEffect(() => {
     if (Currentopenchatid != -1) {
-      if (!content?.length) {
+      if (!content?.length) { //not typing
         setistyping(false);
       } else {
         setistyping(true);
         window.onblur = () => {
+          if(content.length)
           setistyping(false);
         };
         window.onfocus = () => {
+          if(content.length)
           setistyping(true);
         };
       }
@@ -197,7 +246,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       className="relative gap-3 transition-all  bg-Main flex items-center  h-[10%]  w-full content-center px-5 "
     >
       {contentisfull && (
-        <div className=" absolute w-32 pointer-events-none bg-Main text-Secondary text-center p-1 rounded-lg  top-[-120%] right-6 z-20">
+        <div className=" absolute w-32 pointer-events-none bg-Main text-MainText text-center p-1 rounded-lg  top-[-120%] right-6 z-20">
           You can't have over 300 characters in here
         </div>
       )}

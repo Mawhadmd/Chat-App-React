@@ -1,31 +1,11 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { Fragment, useCallback, useContext, useEffect } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 import BGimage from "../../assets/blackbackground.png";
-import convertTime from "../util/convertTime";
+import Message from "./Messages";
 
-interface Message {
-  data: any;
-  uuid: string;
-}
 
-const Message = ({ data, uuid }: Message) => {
-  return (
-    <div
-      className={`p-1 pl-2 text-xl text-MainText flex break-words flex-col w-fit h-fit max-w-[50vw]  ${
-        String(data.Sender) != String(uuid)
-          ? " bg-actionColor border-MainText  border-solid border-b-[1px] text-black m-2 ml-auto  rounded-t-lg rounded-bl-lg"
-          : "bg-Secondary border-actionColor  border-solid border-b-[1px] text-white m-2  rounded-e-lg rounded-t-lg  "
-      }`}
-    >
-      <span className="p-2  w-full">{data.Content}</span>
-      <span className="text-sm   ml-auto w-full">
-        {convertTime(data.created_at)}
-      </span>
-      {data && data.Pending && <p>("Sending")</p>}
-    </div>
-  );
-};
+
 const PrivateChatArea = ({
   messages,
   setmessages,
@@ -130,33 +110,31 @@ const PrivateChatArea = ({
           </div>
         ) : (
           messages?.map((data: any, i: number) => (
-            <>
-              <Message key={data.id} uuid={uuid} data={data} />
+            <Fragment key={data.Sender + data.created_at} >
+              <Message uuid={uuid} data={data} UserMessageMap={null} />
               {messages && messages[i + 1] ? ( //Date of messages
                 getdate(i) != getdate(i + 1) && (
                   <p
-                    key={data.id + data.created_at}
-                    className="text-center bg-MainText/10 "
+                    className="text-center bg-MainText/10 font-bold "
                   >
                     {getdate(i)}
                   </p>
                 )
               ) : (
                 <p
-                  key={data.id + data.created_at}
-                  className="text-center bg-MainText/10"
+                  className="text-center bg-MainText/10 font-bold"
                 >
                   {getdate(i)}
                 </p>
               )}
-            </>
+            </Fragment>
           ))
         )
       ) : (
         <div className="text-white h-full w-full text-2xl flex justify-center items-center">
           Loading Message...
         </div>
-      )}{" "}
+      )}
     </div>
   );
 };

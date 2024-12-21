@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { supabase } from "../Supabase";
 import globe from "../../assets/global-communication_9512332.png";
 import convertTime from "../util/convertTime";
 import { getname } from "../util/getnamebyid";
+import { SettingContext } from "../App";
 const GlobalChat = ({ setCurrentopenchatid }: any) => {
   const [name, setname] = useState<string>("");
   const [ValuesOfLatestMessage, setValuesOfLatestMessage] = useState<any | undefined>();
-
+const { lightmode } = useContext(SettingContext);
 useEffect(() => {
   const channels = supabase
   .channel("Changes-in-GlobalChat")
@@ -35,6 +36,7 @@ useEffect(() => {
         getname(data[0].Sender).then((name)=>setname(name)).catch((e)=>{console.log('couldn\'t get name ' + e)});
         setValuesOfLatestMessage({ Content: data[0].Content, created_at: data[0].created_at });
       }else{
+        alert(error + 'error occured while getting latest message in message, please ignore if global chat has no messages')
         setValuesOfLatestMessage({})
       }
     }
@@ -46,9 +48,11 @@ useEffect(() => {
       onClick={() => {
         setCurrentopenchatid("Global");
       }}
-      className=" h-24 gap-2 flex items-center pl-5 text-MainText hover:bg-white/20 cursor-pointer border-Secondary/20 border-[1px]"
+      className=" h-24 gap-2 flex items-center text-MainText hover:bg-white/20 cursor-pointer border-Secondary/20 border-[1px]"
     >
-      <img src={globe} className="h-10 invert" alt="Globe" />
+      <div className="rounded-full ml-1 border-MainText border-2 border-solid  w-16">
+      <img src={globe} className={`  ${!lightmode ? "invert": ""} `} alt="Globe" />
+      </div>
       <div className="flex flex-col gap-2 w-full mx-1">
         <span className="font-bold">Global Chat</span>
         <div className="flex justify-between">

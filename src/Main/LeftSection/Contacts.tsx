@@ -111,7 +111,7 @@ const Contacts: React.FC<ContactsProps> = ({
         channel.unsubscribe();
       };
     }
-  }, [Currentopenchatid, userId, issearch]);
+  }, [Currentopenchatid, userId, issearch, chatId]);
 
   //to here]
 
@@ -127,7 +127,7 @@ border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-al
         <img
           src={customPfp || pfp}
           alt="Profile Picture"
-          className="w-20 rounded-full"
+          className="w-20 rounded-full border-MainText border-2 border-solid"
           onError={(e) => {
             const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
             target.onerror = null; // Prevent infinite loop
