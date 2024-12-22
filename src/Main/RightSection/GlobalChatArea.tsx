@@ -2,7 +2,8 @@ import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext, SettingContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3";
-import BGimage from "../../assets/blackbackground.png";
+import BKBGimage from "../../assets/blackbackground.png";
+import WhBGimage from "../../assets/whitebackground.jpg";
 import { getuserbyid } from "../util/getuserbyid";
 import { getRandomColor } from "../util/getRandomColor";
 import Message from "./Messages";
@@ -179,7 +180,7 @@ const GlobalChatArea = ({
   return (
     <div
       id="ChatArea"
-      style={{ backgroundImage: `url(${BGimage})` }}
+      style={{ backgroundImage: `${!lightmode? `url(${BKBGimage})`: `url(${WhBGimage})`}` }}
       className="overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
       {messages ? (

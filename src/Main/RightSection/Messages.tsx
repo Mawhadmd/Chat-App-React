@@ -49,6 +49,7 @@ const Message = ({ data, uuid, UserMessageMap }: Message) => {
               {String(data.Sender) == String(uuid) && data && (
                 <img
                 src={data.Error? Ximage:data.Pending ? clock : CorretMark}
+                alt={`${data.Error? 'Error':data.Pending ? "Sending" : "Sent"}`}
                   className="content-end w-4 h-4 invert right-0"
                 />
               )}
@@ -67,12 +68,12 @@ const Message = ({ data, uuid, UserMessageMap }: Message) => {
                 : "bg-Secondary border-actionColor  border-solid border-b-[1px] text-white m-2  rounded-e-lg rounded-t-lg  "
             }`}
           >
-            <span className="p-2  w-full">{data.Content}</span>
+            <span className="p-2  w-full">{!!data.FileURL?<><img className="max-h-80 " src={`${data.FileURL}`} alt={'img'}/>{data.Content}</>: data.Content}</span>
             <div className="flex items-center gap-1">
               {String(data.Sender) == String(uuid) && data && (
                 <img
                   src={data.Error? Ximage : data.Pending ? clock : CorretMark}
-                  className={`content-end w-4 h-4 ${data.Error? "invert-0":"invert"} right-0`}
+                  className={` content-end w-4 h-4 ${data.Error? "invert-0":"invert"} right-0`}
                 />
               )}
               <span className="text-sm   ml-auto w-full">

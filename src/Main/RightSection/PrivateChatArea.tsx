@@ -1,7 +1,8 @@
 import { Fragment, useCallback, useContext, useEffect } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext } from "../App";
-import BGimage from "../../assets/blackbackground.png";
+import { ChatContext, SettingContext } from "../App";
+import BKBGimage from "../../assets/blackbackground.png";
+import WhBGimage from "../../assets/whitebackground.jpg";
 import Message from "./Messages";
 
 
@@ -14,6 +15,7 @@ const PrivateChatArea = ({
   setmessages: any;
 }) => {
   const { Currentopenchatid, uuid } = useContext(ChatContext);
+  const { lightmode } = useContext(SettingContext);
   useEffect(() => {
     if (Currentopenchatid != -1) {
       const channels = supabase
@@ -100,7 +102,7 @@ const PrivateChatArea = ({
   return (
     <div
       id="ChatArea"
-      style={{ backgroundImage: `url(${BGimage})` }}
+      style={{ backgroundImage: `${!lightmode? `url(${BKBGimage})`: `url(${WhBGimage})`}` }}
       className="overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
       {messages ? (

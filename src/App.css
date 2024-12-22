@@ -14,6 +14,7 @@
   scroll-behavior: smooth;
 }
 body {
+  background-color: rgb(var(--Main));
   margin: 0;
   padding: 0;
 }

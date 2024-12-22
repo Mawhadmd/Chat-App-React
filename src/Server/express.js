@@ -57,10 +57,47 @@ app.post("/Insertglobalmessages", async (req, res) => {
   if (data) return res.status(201).send("Insert successful");
   else return res.status(404).json({ message: "Bad Request", Error: error });
 });
+app.post("/UploadFile", async (req, res) => {
+  const { File, uuid, Timeofthemessage } = req.body;
+  let decodedFile = atob(File);
+  const uint8Array = new Uint8Array(decodedFile.length);
+
+  for (let i = 0; i < decodedFile.length; i++) {
+    uint8Array[i] = decodedFile.charCodeAt(i);
+  }
+  const blob = new Blob([uint8Array], { type: 'application/octet-stream' });
+
+  try {
+    const { data, error: e1 } = await supabase.storage
+      .from("Media")
+      .upload(`${uuid + Timeofthemessage}`, blob);
+
+    if (e1) {
+      console.error("Upload error:", e1);
+      return res.status(400).json({ error: "Upload failed" });
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("Media")
+      .getPublicUrl(data.path);
+
+    return res.status(200).json(urlData);
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 app.post("/Insertprivatemessages", async (req, res) => {
   console.log(JSON.stringify(req.body));
-  const { Content, chatId, Receiver, senderid, Timeofthemessage: Timeofthemessage,} = req.body;
+  const {
+    Content,
+    chatId,
+    FileURL,
+    Receiver,
+    senderid,
+    Timeofthemessage: Timeofthemessage,
+  } = req.body;
   console.log("Insert message private");
   var { data, error } = await supabase
     .from("PrivateMessages")
@@ -68,6 +105,7 @@ app.post("/Insertprivatemessages", async (req, res) => {
       {
         Content: Content,
         chatId: chatId,
+        FileURL: FileURL,
         Receiver: Receiver,
         Sender: senderid,
         created_at: Timeofthemessage,
@@ -96,10 +134,10 @@ app.post("/insertuser", async (req, res) => {
 });
 app.post("/upsertlastseen", async (req, res) => {
   const { uuid } = req.body;
-    var ressupa = await supabase
-      .from("Users")
-      .upsert([{ LastSeen: `${Date.now()}`, id: uuid }])
-      .select();
+  var ressupa = await supabase
+    .from("Users")
+    .upsert([{ LastSeen: `${Date.now()}`, id: uuid }])
+    .select();
   if (ressupa.data) return res.status(201).json(ressupa.data);
   else return res.status(404).json(ressupa.error);
 });
