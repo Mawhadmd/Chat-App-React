@@ -67,8 +67,8 @@ const LeftSection = ({}) => {
     <>
       <section
         id="LeftSection"
-        className={`flex flex-col bg-Main h-screen relative z-20 transition-all ${
-          MobileMode ? !Currentopenchatid?  "w-full" : "hidden": "w-[500px] min-w-[400px]"
+        className={`flex flex-col bg-Main h-screen relative z-20 translate-x-0 transition-all ${
+          MobileMode ? !Currentopenchatid?  "w-full !absolute" : "translate-x-[-100%] !absolute": "w-[500px] min-w-[400px]"
         }
         `}
       >
@@ -90,8 +90,9 @@ const LeftSection = ({}) => {
                       Search Results
                     </div>
                     {SearchResults.map(({ user, chatid }, i) => {
-                      return (
+                      return ( 
                         <Contacts
+                        i = {i}
                           issearch={true}
                           chatId={chatid}
                           key={i}
@@ -114,9 +115,10 @@ const LeftSection = ({}) => {
               <div className=" h-fit  mt-1 flex flex-col items-center justify-center text-MainText text-2xl">
                 {contacts != undefined ? (
                   contacts.length > 0 ? (
-                    contacts.map(({ res, chatId }) => {
+                    contacts.map(({ res, chatId }, i:number) => {
                       return (
                         <Contacts
+                          i = {i}
                           key={chatId}
                           chatId={chatId}
                           user={res?.data.user}
@@ -129,7 +131,7 @@ const LeftSection = ({}) => {
                 ) : (
                   <>
                     <span>Loading...</span>
-                    <div className="fixed inset-0 transition-all z-50 text-MainText flex items-center justify-center text-4xl bg-Main">
+                    <div className="fixed inset-0 transition-all z-50 text-MainText flex items-center justify-center text-4xl bg-Main h-screen w-screen">
                       Loading chat
                     </div>
                   </>

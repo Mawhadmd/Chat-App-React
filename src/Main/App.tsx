@@ -21,7 +21,6 @@ function App() {
   const [accessToken, setaccessToken] = useState<string | undefined>();
   const [uuid, setuuid] = useState<string | undefined>();
   const [onlineusers, setonlineusers] = useState<any>(null);
-  const timeuntilnextlastseen = 120 * 1000;
   const [Currentopenchatid, setCurrentopenchatid] = useState<
     string | undefined
   >(undefined);
@@ -121,11 +120,9 @@ function App() {
       };
       trackPresence();
       return () => {
-        onlineroom.unsubscribe()
+        onlineroom.unsubscribe();
       };
     });
-
-  
   }, [uuid]); //Gets Contacts and check if they're online
 
   useEffect(() => {
@@ -158,7 +155,7 @@ function App() {
       if (!uuid) {
         setuuid(session?.user.id);
       }
-      setaccessToken(session?.access_token)
+      setaccessToken(session?.access_token);
       if (["INITIAL_SESSION", "SIGNED_IN"].includes(event) && session != null)
         setLogged(true);
       if (event === "SIGNED_OUT") setLogged(false);
@@ -169,33 +166,24 @@ function App() {
   }, [uuid]);
 
   useEffect(() => {
-    if(!accessToken) return
-    console.log('loaded')
-  window.onbeforeunload = function(){
-     fetch(
-      "https://chat-app-react-server-qizz.onrender.com/upsertlastseen",
-      {
+    if (!accessToken) return;
+    console.log("loaded");
+    window.onbeforeunload = function () {
+      fetch("https://chat-app-react-server-qizz.onrender.com/upsertlastseen", {
         method: "POST",
         keepalive: true,
         headers: {
           "Content-Type": "application/json",
-          
         },
         body: JSON.stringify({
           uuid: uuid,
-          accessToken: accessToken
+          accessToken: accessToken,
         }),
-      }
-    );
-    const time = Date.now();
-    while ((Date.now() - time) < 500) {
-
-    }
-  }
+      });
+      const time = Date.now();
+      while (Date.now() - time < 500) {}
+    };
   }, [accessToken]);
-
-
-
 
   function setshowsettings1() {
     if (!showsettings.includes("flex")) {
@@ -280,13 +268,9 @@ function App() {
             >
               {/* If its not mobile show, and is not in a chat show leftsection */}
               {/* If its not mobile show, and is not in a chat show leftsection */}
- 
-      
-             
-                <LeftSection />
-                <RightSection />
-       
-              
+
+              <LeftSection />
+              <RightSection />
             </ChatContext.Provider>
           </ReloadContactsCtxt.Provider>
         </Onlineusersctxt.Provider>

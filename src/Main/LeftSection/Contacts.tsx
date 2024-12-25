@@ -4,6 +4,7 @@ import { supabase } from "../Supabase";
 import { ChatContext, Onlineusersctxt } from "../App";
 import convertTime from "../util/convertTime";
 import getChatId from "../util/getChatId";
+import { motion } from "motion/react"
 
 interface User {
   id: string;
@@ -17,12 +18,14 @@ interface ContactsProps {
   user: User;
   issearch?: boolean;
   chatId?: string;
+  i:number,
 }
 //make a new component called searchcontacts
 const Contacts: React.FC<ContactsProps> = ({
   user,
   chatId,
   issearch = false,
+  i = 0,
 }) => {
   const [latestMessage, setLatestMessage] = useState<string | undefined>();
   const [latestMessagetime, setLatestMessagetime] = useState<
@@ -36,14 +39,15 @@ const Contacts: React.FC<ContactsProps> = ({
   const name = user.user_metadata.name;
   const customPfp = user.user_metadata.avatar_url;
 
-  const sortLatestMessage = (data: any) => {
+  const sortLatestMessage = (data: any[]) => {
     if (data && data[0]) {
       let time = convertTime(data[0].created_at);
       setLatestMessagetime(time);
+      console.log(data[0])
       const message =
-        data[0].Sender === uuid
+        (data[0].Sender === uuid
           ? `You: ${data[0].Content}`
-          : `${name}: ${data[0].Content}`;
+          : `${name}: ${data[0].Content}`) +  (data[0].AudioFile? "Audio":"") + (data[0].FileURL? "IMAGE":"");
       setLatestMessage(message);
     }
   };
@@ -63,20 +67,21 @@ const Contacts: React.FC<ContactsProps> = ({
       while (!data) {
         ({ data } = await supabase
           .from("PrivateMessages")
-          .select("Content, Sender, created_at")
+          .select("Content, Sender, created_at, FileURL, AudioFile")
           .eq("chatId", chatId)
           .order("created_at", { ascending: false })
           .limit(1));
         tries++;
         if (tries == 5) break;
       }
-      sortLatestMessage(data);
+      if (data) {
+        sortLatestMessage(data);
+      }
     }
   };
 
   useEffect(() => {
-    if (chatId != "-1") {
-      //-1 means the user is not in your contacts
+    if (chatId != "-1") {  //is  in your contacts
       getLatestMessage();
     }
   }, [chatId]);
@@ -94,10 +99,11 @@ const Contacts: React.FC<ContactsProps> = ({
             filter: `chatId=eq.${chatId}`,
           },
           (payload) => {
+  console.log(payload)
             if (chatId == payload.new.chatId) {
               sortLatestMessage([
                 {
-                  Content: payload.new.Content,
+                  Content: payload.new.Content, //if its an image
                   Sender: payload.new.Sender,
                   created_at: payload.new.created_at,
                 },
@@ -116,58 +122,61 @@ const Contacts: React.FC<ContactsProps> = ({
   //to here]
 
   return (
-    <div
+    <motion.div
+    animate={{opacity: [0, 1] }}
+transition={{ delay:0.1 * i, duration: 1 }}
+     
       onClick={() => {
-        getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
+      getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
       }}
       className="text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
-border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
+  border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
     >
       <div className="relative justify-center items-center flex w-16 h-16 ml-1">
-        <img
-          src={customPfp || pfp}
-          alt="Profile Picture"
-          className="w-20 rounded-full border-MainText border-2 border-solid"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
-            target.onerror = null; // Prevent infinite loop
-            target.src = pfp; // Fallback to 'pfp'
-          }}
-        />
+      <img
+        src={customPfp || pfp}
+        alt="Profile Picture"
+        className="w-20 rounded-full border-MainText border-2 border-solid"
+        onError={(e) => {
+        const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
+        target.onerror = null; // Prevent infinite loop
+        target.src = pfp; // Fallback to 'pfp'
+        }}
+      />
 
-        {onlineusers &&
-          onlineusers.some((u: any) => u.user === userId) &&
-          (onlineusers[onlineusers.findIndex((obj) => obj.user == userId)]
-            .status == "Online" ? (
-            <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>
-          ) : (
-            <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-yellow-500"></span>
-          ))}
+      {onlineusers &&
+        onlineusers.some((u: any) => u.user === userId) &&
+        (onlineusers[onlineusers.findIndex((obj) => obj.user == userId)]
+        .status == "Online" ? (
+        <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>
+        ) : (
+        <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-yellow-500"></span>
+        ))}
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
-        <span className="text-xl font-bold whitespace-nowrap">
-          {`${name}`}{" "}
-          <span className="text-xs">{`#${userId.slice(0, 5)}`}</span>
+      <span className="text-xl font-bold whitespace-nowrap">
+        {`${name}`}{" "}
+        <span className="text-xs">{`#${userId.slice(0, 5)}`}</span>
+      </span>
+      {latestMessage && (
+        <div className="flex justify-between">
+        <span className="text-sm opacity-70">{`${
+          latestMessage.length > 38
+          ? latestMessage.slice(0, 38) + "..."
+          : latestMessage
+        }`}</span>
+        <span className="text-sm text-MainText text-nowrap">
+          At {latestMessagetime}
         </span>
-        {latestMessage && (
-          <div className="flex justify-between">
-            <span className="text-sm opacity-70">{`${
-              latestMessage.length > 38
-                ? latestMessage.slice(0, 38) + "..."
-                : latestMessage
-            }`}</span>
-            <span className="text-sm text-MainText text-nowrap">
-              At {latestMessagetime}
-            </span>
-          </div>
-        )}
-      </div>
-      {inyourcontacts && (
-        <div className="bg-green-600 flex items-center text-center justify-center rounded-xl h-full p-1 text-sm w-28">
-          This guy is in your contacts
         </div>
       )}
-    </div>
+      </div>
+      {inyourcontacts && (
+      <div className="bg-green-600 flex items-center text-center justify-center rounded-xl h-full p-1 text-sm w-28">
+        This guy is in your contacts
+      </div>
+      )}
+    </motion.div>
   );
 };
 

@@ -34,21 +34,22 @@ const PrivateChatArea = ({
                 Array.isArray(prevMessages)
                   ? [payload.new, ...prevMessages]
                   : [payload.new]
-              );
+              );``
             } else {
               setmessages((messages: any[]) =>
                 messages.map((value) => {
-                  if (
-                    value.Content + value.created_at + value.chatId ==
-                      payload.new.Content +
-                        payload.new.created_at +
-                        payload.new.chatId &&
+        
+                    if (
+                    String(value.Content ?? "") + String(value.created_at) + String(value.chatId) ==
+                      String(payload.new.Content) +
+                      String(payload.new.created_at) +
+                      String(payload.new.chatId) &&
                     value.Pending
-                  ) {
+                    ) {
                     return payload.new;
-                  } else {
+                    } else {
                     return value;
-                  }
+                    }
                 })
               );
             }
