@@ -65,7 +65,7 @@ app.post("/UploadFile", async (req, res) => {
   for (let i = 0; i < decodedFile.length; i++) {
     uint8Array[i] = decodedFile.charCodeAt(i);
   }
-  const blob = new Blob([uint8Array], { type: "application/octet-stream" });
+  const blob = new Blob([uint8Array], { type: "image/*" });
 
   try {
     const { data, error: e1 } = await supabase.storage
