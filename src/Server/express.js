@@ -60,12 +60,12 @@ app.post("/UploadFile", async (req, res) => {
   const { File, uuid, Timeofthemessage } = req.body;
   console.log("here");
   let decodedFile = atob(File);
-  const uint8Array = new Uint32Array(decodedFile.length);
+  const uint8Array = new Uint8Array(decodedFile.length);
   console.log(uint8Array);
   for (let i = 0; i < decodedFile.length; i++) {
     uint8Array[i] = decodedFile.charCodeAt(i);
   }
-  const blob = new Blob([uint8Array], { type: "image/*" });
+  const blob = new Blob([uint8Array], { type: "image/png" });
 
   try {
     const { data, error: e1 } = await supabase.storage
