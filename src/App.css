@@ -35,7 +35,7 @@ body {
   color: rgb(var(--Main));
 }
 #RightSection {
-  background: linear-gradient(var(--Main), var(--Secondary));
+
     transition: all 150ms;
 }
 /* @media screen and (width<800px) {
@@ -48,5 +48,5 @@ body {
 } */
 
 #LeftSection {
-  background: linear-gradient(rgb(var(--Main)),rgb(var(--MainBlackfr))) !important;
+  background: linear-gradient(-90deg,rgb(var(--Main)),rgb(var(--MainBlackfr))) !important;
 }

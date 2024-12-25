@@ -8,25 +8,44 @@ import googleicon from "../../assets/googleicon.png";
 import { getuserbyid } from "../util/getuserbyid";
 
 const LeftSection = ({}) => {
-  const { setCurrentopenchatid,logged, uuid, Currentopenchatid} =
+  const { setCurrentopenchatid,logged, query,setquery, uuid, Currentopenchatid} =
     useContext(ChatContext);
-    const [query, setquery] = useState<string>("");
+   
   const { MobileMode } = useContext(SettingContext);
   const { Reloadcontact } = useContext(ReloadContactsCtxt);
   const [contacts, setcontacts] = useState<any[] | undefined>();
   const [SearchResults, setSearchResults] = useState([]);
+  useEffect(() => {
 
+    const subscription = supabase
+      .channel('listens-to-new-users')
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT", // you can also listen to UPDATE and DELETE
+          schema: "public",
+          table: "Contacts",
+          filter: `User2=eq.${String(uuid)}`,
+        }, () =>{
+          console.log("new user added me")
+          getcontacts();
+        })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [uuid]); // this listens if new contacts added me or messaged me
   async function getcontacts() {
     let q1 = await supabase
       .from("Contacts")
       .select("User2, chatId")
-      .eq("User1", uuid);
+      .eq("User1", uuid); //you added them to your contacts
 
     let q2 = await supabase
       .from("Contacts")
       .select("User1, chatId")
-      .eq("User2", uuid);
-
+      .eq("User2", uuid); //they added you to their contacts
     if (q1.error && q2.error)
       console.error(q1.error.details + "errors2:" + q2.error.details);
     let arrayofusers: any[] = [];
@@ -67,7 +86,7 @@ const LeftSection = ({}) => {
     <>
       <section
         id="LeftSection"
-        className={`flex flex-col bg-Main h-screen relative z-20 translate-x-0 transition-all ${
+        className={`flex flex-col bg-Main h-screen relative translate-x-0 transition-all z-20 ${
           MobileMode ? !Currentopenchatid?  "w-full !absolute" : "translate-x-[-100%] !absolute": "w-[500px] min-w-[400px]"
         }
         `}

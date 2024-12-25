@@ -17,14 +17,14 @@ export interface Message {
 }
 const Message = ({ data, uuid, UserMessageMap }: Message) => {
   const { setCurrentopenchatid, setOtheruserid } = useContext(ChatContext);
-  const [avatar_url, setavatar_url] = useState<string | undefined>("");
+  const [avatar_url, setavatar_url] = useState<string | undefined>();
   const {lightmode} = useContext(SettingContext);
   if(data.AudioFile){
     getuserbyid(data.Sender).then(e=>setavatar_url(e.data.user.user_metadata.avatar_url))
   }
   const containerRef = useRef(null)
 
-  const { wavesurfer, isReady, isPlaying, currentTime } = useWavesurfer({
+  const { wavesurfer, isPlaying, currentTime } = useWavesurfer({
     container: containerRef,
     url: data.AudioFile,
     normalize: false,

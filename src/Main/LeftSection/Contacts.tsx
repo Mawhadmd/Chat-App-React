@@ -85,7 +85,7 @@ const Contacts: React.FC<ContactsProps> = ({
       getLatestMessage();
     }
   }, [chatId]);
-
+ 
   useEffect(() => {
     if (!issearch && userId && Currentopenchatid) {
       const channel = supabase
@@ -117,7 +117,7 @@ const Contacts: React.FC<ContactsProps> = ({
         channel.unsubscribe();
       };
     }
-  }, [Currentopenchatid, userId, issearch, chatId]);
+  }, [Currentopenchatid, userId, issearch, chatId]); //this useeffect listens to new messages
 
   //to here]
 

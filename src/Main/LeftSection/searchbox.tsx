@@ -4,7 +4,7 @@ import { ChatContext, SettingContext } from "../App";
 import pfp from "../../assets/grayuserpfp.png";
 import getChatId from "../util/getChatId";
 const Searchbox = ({ setquery, query, setSearchResults }: any) => {
-  const [userPfp, setUserPfp] = useState<string | undefined>("");
+  const [userPfp, setUserPfp] = useState<string | undefined>();
   const { uuid } = useContext(ChatContext);
   const { setshowsettings1 } = useContext(SettingContext);
 
@@ -87,7 +87,7 @@ const Searchbox = ({ setquery, query, setSearchResults }: any) => {
           Settings
         </span>
       </div>
-      <div className=" w-full h-20 bg-Main flex items-center justify-center">
+      <div className=" w-full h-20  flex items-center justify-center">
         <input
           value={query}
           onChange={(e) => setquery(e.target.value)}

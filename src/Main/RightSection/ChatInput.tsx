@@ -62,14 +62,13 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
         var chatid: string | number | null = null;
         if (Currentopenchatid == -1) {
-          fetch("https://chat-app-react-server-qizz.onrender.com/insertuser", {
+          await fetch("https://chat-app-react-server-qizz.onrender.com/insertuser", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
               uuid: uuid,
-
               accessToken: (await supabase.auth.getSession()).data.session
                 ?.access_token,
               Otheruserid: Otheruserid,
@@ -97,7 +96,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
               },
               body: JSON.stringify({
                 Content: contentval,
-                chatId: Currentopenchatid < 1 ? chatid : Currentopenchatid,
+                chatId: Currentopenchatid == -1 ? chatid : Currentopenchatid,
                 Receiver: Otheruserid,
                 Timeofthemessage: Timeofthemessage,
                 senderid: uuid,
@@ -213,7 +212,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         });
       let fileBase64: any = await fileToBase64(File);
       try {
-        let sendFileres = await fetch("http://localhost:8080/UploadFile", {
+        let sendFileres = await fetch("https://chat-app-react-server-qizz.onrender.com/UploadFile", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -236,7 +235,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         if (Currentopenchatid != "Global" && !!Currentopenchatid) {
           var chatid: string | number | null = null;
           if (Currentopenchatid == -1) {
-            fetch(
+            await fetch(
               "https://chat-app-react-server-qizz.onrender.com/insertuser",
               {
                 method: "POST",
@@ -370,7 +369,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       let fileBase64: any = await fileToBase64(Audio);
       setAudio(undefined);
       try {
-        let sendFileres = await fetch("http://localhost:8080/UploadAudio", {
+        let sendFileres = await fetch("https://chat-app-react-server-qizz.onrender.com/UploadAudio", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -394,7 +393,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         if (Currentopenchatid != "Global" && !!Currentopenchatid) {
           var chatid: string | number | null = null;
           if (Currentopenchatid == -1) {
-            fetch(
+            await fetch(
               "https://chat-app-react-server-qizz.onrender.com/insertuser",
               {
                 method: "POST",
@@ -696,7 +695,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
                 {!recordaudio ? (
                   <img
                     src={microphoneImage}
-                    className=""
+                    className="cursor-pointer"
                     alt="Mic"
                     onClick={() => setrecordaudio(true)}
                   />

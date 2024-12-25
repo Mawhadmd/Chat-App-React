@@ -36,7 +36,7 @@ useEffect(() => {
         getname(data[0].Sender).then((name)=>setname(name)).catch((e)=>{console.log('couldn\'t get name ' + e)});
         setValuesOfLatestMessage({ Content: data[0].Content, created_at: data[0].created_at });
       }else{
-        alert(error + 'error occured while getting latest message in message, please ignore if global chat has no messages')
+        console.log(error + ' error occured while getting latest message in message, please ignore if global chat has no messages')
         setValuesOfLatestMessage({})
       }
     }
@@ -55,7 +55,7 @@ useEffect(() => {
       </div>
       <div className="flex flex-col gap-2 w-full mx-1">
         <span className="font-bold">Global Chat</span>
-        <div className="flex justify-between">
+       {ValuesOfLatestMessage && ValuesOfLatestMessage.created_at &&  <div className="flex justify-between">
           <span className=" text-sm text-MainText/60">{`${name}: ${
             ValuesOfLatestMessage.Content?.length > 30
               ? ValuesOfLatestMessage.Content?.slice(0, 30) + "..."
@@ -64,7 +64,7 @@ useEffect(() => {
           <span className=" text-sm text-MainText text-nowrap">
             At {convertTime(ValuesOfLatestMessage.created_at)}
           </span>
-        </div>
+        </div>}
       </div>
     </div>
   );

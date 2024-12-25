@@ -17,6 +17,7 @@ function App() {
     "hidden translate-y-[100vh]"
   );
   const [Reloadcontact, setReloadcontact] = useState<boolean>();
+   const [query, setquery] = useState<string>("");
   const [logged, setLogged] = useState(false);
   const [accessToken, setaccessToken] = useState<string | undefined>();
   const [uuid, setuuid] = useState<string | undefined>();
@@ -260,6 +261,8 @@ function App() {
                 setCurrentopenchatid,
                 Currentopenchatid,
                 onlineusers,
+                setquery,
+                query,
                 setOtheruserid,
                 Otheruserid,
                 logged,
