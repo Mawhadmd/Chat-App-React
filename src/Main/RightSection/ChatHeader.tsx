@@ -182,13 +182,13 @@ const ChatHeader = () => {
   return !loading ? (
     <div
       id="CurrentHeader"
-      className=" text-LightModeMain shadow-[0px_5px_12px_rgba(0,0,0,0.589)] z-10 min-h-16 h-[10%] bg-Main w-full  gap-2 content-center flex px-1 justify-between items-center "
+      className=" text-MainText shadow-[0px_1px_5px_rgba(var(--MainText),0.2)] z-10 min-h-16 h-[10%] bg-Main w-full  gap-2 content-center flex px-1 justify-between items-center "
     >
       {Currentopenchatid != "Global" ? (
         <>
           <div className="flex justify-center items-center gap-3">
             <div className="relative">
-              <img
+              {pfp && <img
                 alt="PFP"
                 src={pfp}
                 className="h-14 w-14 cursor-pointer rounded-full"
@@ -197,7 +197,7 @@ const ChatHeader = () => {
                   target.onerror = null; // Prevent infinite loop
                   target.src = defaultpfp; // Fallback to 'pfp'
                 }}
-              />
+              />}
               {onlineusers &&
                 onlineusers.some((u: any) => u.user === Otheruserid) &&
                 (onlineusers[

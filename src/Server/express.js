@@ -201,6 +201,21 @@ app.post("/getuserslist", async (req, res) => {
     return res.status(400).json("Need ID");
   }
 });
+app.post("/messageisread", async (req, res) => {
+  var { id } = req.body;
+  if(id==null) return res.status(400).json("Need ID");
+  console.log(id)
+  console.log(id==null)
+  console.log(id[0]==null)
+  var { data, error } = await supabase
+  .from("PrivateMessages")
+  .update({ ReadAt: new Date().getTime() })
+  .is('ReadAt', null)
+  .in("id", id).select()
+  console.log(data,error)
+  if (data) return res.status(201).json(data);
+  else return res.status(404).json("Bad Request" + error);
+});
 app.listen(process.env.PORT, () => {
-  console.log("Listening on", process.env.PORT);
+  console.log("Listening on", process.env.PORT)
 });

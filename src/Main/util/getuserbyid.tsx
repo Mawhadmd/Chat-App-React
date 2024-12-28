@@ -1,12 +1,7 @@
 
 import { supabase } from "../Supabase";
-const getCookie = (key: string) => {
-  const cookies = document.cookie.split("; ");
-  const cookie = cookies.find((row) => row.startsWith(`${key}=`));
+import { getCookie } from "./getCookie";
 
-
-  return cookie ? cookie.slice(cookie.indexOf("=")+1) : null;
-};
 export async function getuserbyid(id: string) {
   // Check cache for the user data
 
@@ -44,7 +39,7 @@ export async function getuserbyid(id: string) {
   };
 
   const expirationTime = new Date();
-  expirationTime.setTime(expirationTime.getTime() + 6 * 60 * 60 * 1000); // 6 hours in milliseconds
+  expirationTime.setTime(expirationTime.getTime() + 24 * 60 * 60 * 1000); // 24 hours in milliseconds
 
   document.cookie = `${id}=${JSON.stringify(requireddata)}; expires=${expirationTime.toUTCString()}; `;
 

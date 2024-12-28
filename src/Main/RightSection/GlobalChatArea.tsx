@@ -2,8 +2,6 @@ import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import { ChatContext, SettingContext } from "../App";
 import audio from "../../assets/WhatsappMessage.mp3";
-import BKBGimage from "../../assets/blackbackground.png";
-import WhBGimage from "../../assets/whitebackground.jpg";
 import { getuserbyid } from "../util/getuserbyid";
 import { getRandomColor } from "../util/getRandomColor";
 import Message from "./Messages";
@@ -180,7 +178,7 @@ const GlobalChatArea = ({
   return (
     <div
       id="ChatArea"
-      style={{ backgroundImage: `${!lightmode? `url(${BKBGimage})`: `url(${WhBGimage})`}` }}
+   
       className="overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
       {messages ? (
@@ -216,7 +214,7 @@ const GlobalChatArea = ({
           ))
         )
       ) : (
-        <div className="text-white h-full w-full text-2xl flex justify-center items-center">
+        <div className="text-MainText h-full w-full text-2xl flex justify-center items-center">
           Loading Message...
         </div>
       )}{" "}

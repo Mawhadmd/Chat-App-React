@@ -1,11 +1,7 @@
 import { Fragment, useCallback, useContext, useEffect } from "react";
 import { supabase } from "../Supabase";
-import { ChatContext, SettingContext } from "../App";
-import BKBGimage from "../../assets/blackbackground.png";
-import WhBGimage from "../../assets/whitebackground.jpg";
+import { ChatContext } from "../App";
 import Message from "./Messages";
-
-
 
 const PrivateChatArea = ({
   messages,
@@ -15,7 +11,7 @@ const PrivateChatArea = ({
   setmessages: any;
 }) => {
   const { Currentopenchatid, uuid } = useContext(ChatContext);
-  const { lightmode } = useContext(SettingContext);
+ 
   useEffect(() => {
     if (Currentopenchatid != -1) {
       const channels = supabase
@@ -28,32 +24,67 @@ const PrivateChatArea = ({
             table: "PrivateMessages",
             filter: `chatId=eq.${Currentopenchatid}`,
           },
-          (payload: any) => {
+          async (payload: any) => {
+            console.log(payload)
+            if(payload.eventType=="INSERT"){
             if (payload.new.Sender != uuid) {
+              fetch("http://localhost:8080/messageisread", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  id: [payload.new.id],
+                  accessToken: (await supabase.auth.getSession()).data.session
+                    ?.access_token,
+                }),
+              });
               setmessages((prevMessages: any) =>
                 Array.isArray(prevMessages)
                   ? [payload.new, ...prevMessages]
                   : [payload.new]
-              );``
+              );
+              ``;
             } else {
               setmessages((messages: any[]) =>
                 messages.map((value) => {
-        
-                    if (
-                    String(value.Content ?? "") + String(value.created_at) + String(value.chatId) ==
+                  if (
+                    String(value.Content ?? "") +
+                      String(value.created_at) +
+                      String(value.chatId) ==
                       String(payload.new.Content) +
-                      String(payload.new.created_at) +
-                      String(payload.new.chatId) &&
+                        String(payload.new.created_at) +
+                        String(payload.new.chatId) &&
                     value.Pending
-                    ) {
+                  ) {
                     return payload.new;
-                    } else {
+                  } else {
                     return value;
-                    }
+                  }
                 })
               );
             }
+          }else if(payload.eventType=="UPDATE"){
+            console.log('update')
+            setmessages((messages: any[]) =>
+            messages.map((value) => {
+              if (
+                String(value.Content ? value.Content: "") +
+                  String(value.created_at) +
+                  String(value.chatId) ==
+                  String(payload.new.Content ? payload.new.Content: "") +
+                    String(payload.new.created_at) +
+                    String(payload.new.chatId) &&
+                value.ReadAt == null
+              ) {
+                return payload.new;
+              } else {
+                return value;
+              }
+            })
+          );
           }
+        }
         )
         .subscribe();
 
@@ -80,6 +111,25 @@ const PrivateChatArea = ({
         .eq("chatId", Currentopenchatid)
         .limit(30)
         .order("id", { ascending: false });
+            // Fetch end point from express server and send a post request with data.id array
+        let idsarray = data?.filter((value) => {
+          return uuid != value.Sender && value.ReadAt == null;
+         }).map((value) => value.id)
+         if(idsarray && idsarray.length>0)
+          fetch("http://localhost:8080/messageisread", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      id: idsarray,
+                      accessToken: (await supabase.auth.getSession()).data.session
+                        ?.access_token,
+                    }),
+                  });
+ 
+          
+
       console.log(data, error);
       setmessages(data);
     }
@@ -103,7 +153,7 @@ const PrivateChatArea = ({
   return (
     <div
       id="ChatArea"
-      style={{ backgroundImage: `${!lightmode? `url(${BKBGimage})`: `url(${WhBGimage})`}` }}
+
       className="overflow-scroll overflow-x-hidden bg-center bg-no-repeat bg-cover h-[80%] w-full bg-ChatAreaBG  flex flex-col-reverse "
     >
       {messages ? (
@@ -113,20 +163,16 @@ const PrivateChatArea = ({
           </div>
         ) : (
           messages?.map((data: any, i: number) => (
-            <Fragment key={data.Sender + data.created_at} >
+            <Fragment key={data.Sender + data.created_at}>
               <Message uuid={uuid} data={data} UserMessageMap={null} />
               {messages && messages[i + 1] ? ( //Date of messages
                 getdate(i) != getdate(i + 1) && (
-                  <p
-                    className="text-center bg-MainText/10 font-bold "
-                  >
+                  <p className="text-center bg-MainText/10 font-bold ">
                     {getdate(i)}
                   </p>
                 )
               ) : (
-                <p
-                  className="text-center bg-MainText/10 font-bold"
-                >
+                <p className="text-center bg-MainText/10 font-bold">
                   {getdate(i)}
                 </p>
               )}
@@ -134,7 +180,7 @@ const PrivateChatArea = ({
           ))
         )
       ) : (
-        <div className="text-white h-full w-full text-2xl flex justify-center items-center">
+        <div className="text-MainText h-full w-full text-2xl flex justify-center items-center">
           Loading Message...
         </div>
       )}

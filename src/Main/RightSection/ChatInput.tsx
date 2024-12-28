@@ -28,21 +28,39 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
   const [istyping, setistyping] = useState<boolean>(false);
   const fileuploadref = useRef<HTMLInputElement | null>(null);
   const [recordaudio, setrecordaudio] = useState<boolean>(false);
+  const [nowrecording, setnowrecording] = useState<boolean>(false);
   const [Audio, setAudio] = useState<Blob | undefined>();
+
+
 
   async function Messageisin(chatid: any) {
     setReloadcontact((previous: boolean) => !previous);
     setCurrentopenchatid(chatid);
     setquery("");
   }
+
+
   useEffect(() => {
     (async () => {
       let u = await getname(uuid);
       setusername(u);
     })();
   }, []);
+
+
   async function SetData() {
     if (contentisfull) return;
+  
+    // const profanitycheck = await fetch('https://vector.profanity.dev', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ message: content }),
+    // })
+    //  let data = await profanitycheck.json()
+    //   if (data.isProfanity) {
+    //     alert("Please don't use bad words in the chat");
+    //     return;
+    //   }
     let contentval = content;
     setinputcontent("");
     var Timeofthemessage = Date.now();
@@ -62,18 +80,22 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
         var chatid: string | number | null = null;
         if (Currentopenchatid == -1) {
-          await fetch("https://chat-app-react-server-qizz.onrender.com/insertuser", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              uuid: uuid,
-              accessToken: (await supabase.auth.getSession()).data.session
-                ?.access_token,
-              Otheruserid: Otheruserid,
-            }),
-          })
+          await fetch(
+            "https://chat-app-react-server-qizz.onrender.com/insertuser",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                uuid: uuid,
+                accessToken: (
+                  await supabase.auth.getSession()
+                ).data.session?.access_token,
+                Otheruserid: Otheruserid,
+              }),
+            }
+          )
             .then((response) => {
               if (!response.ok) {
                 // Check if the response status is not in the range 200-299
@@ -212,20 +234,23 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         });
       let fileBase64: any = await fileToBase64(File);
       try {
-        let sendFileres = await fetch("https://chat-app-react-server-qizz.onrender.com/UploadFile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            File: fileBase64,
-            uuid: uuid,
-            Timeofthemessage: Timeofthemessage,
-            accessToken: (
-              await supabase.auth.getSession()
-            ).data.session?.access_token,
-          }),
-        });
+        let sendFileres = await fetch(
+          "https://chat-app-react-server-qizz.onrender.com/UploadFile",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              File: fileBase64,
+              uuid: uuid,
+              Timeofthemessage: Timeofthemessage,
+              accessToken: (
+                await supabase.auth.getSession()
+              ).data.session?.access_token,
+            }),
+          }
+        );
 
         if (!sendFileres.ok)
           throw new Error(`HTTP error! Status: ${sendFileres.status}`); // Throw an error with the status code
@@ -244,8 +269,9 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
                 },
                 body: JSON.stringify({
                   uuid: uuid,
-                  accessToken: (await supabase.auth.getSession()).data.session
-                    ?.access_token,
+                  accessToken: (
+                    await supabase.auth.getSession()
+                  ).data.session?.access_token,
                   Otheruserid: Otheruserid,
                 }),
               }
@@ -369,20 +395,23 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       let fileBase64: any = await fileToBase64(Audio);
       setAudio(undefined);
       try {
-        let sendFileres = await fetch("https://chat-app-react-server-qizz.onrender.com/UploadAudio", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            Audio: fileBase64,
-            uuid: uuid,
-            Timeofthemessage: Timeofthemessage,
-            accessToken: (
-              await supabase.auth.getSession()
-            ).data.session?.access_token,
-          }),
-        });
+        let sendFileres = await fetch(
+          "https://chat-app-react-server-qizz.onrender.com/UploadAudio",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              Audio: fileBase64,
+              uuid: uuid,
+              Timeofthemessage: Timeofthemessage,
+              accessToken: (
+                await supabase.auth.getSession()
+              ).data.session?.access_token,
+            }),
+          }
+        );
 
         if (!sendFileres.ok)
           throw new Error(`HTTP error! Status: ${sendFileres.status}`); // Throw an error with the status code
@@ -402,8 +431,9 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
                 },
                 body: JSON.stringify({
                   uuid: uuid,
-                  accessToken: (await supabase.auth.getSession()).data.session
-                    ?.access_token,
+                  accessToken: (
+                    await supabase.auth.getSession()
+                  ).data.session?.access_token,
                   Otheruserid: Otheruserid,
                 }),
               }
@@ -484,6 +514,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     }
   }
 
+
   useEffect(() => {
     if (Currentopenchatid != -1) {
       if (!content?.length) {
@@ -500,6 +531,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       }
     }
   }, [content]);
+
 
   useEffect(() => {
     const channelB = supabase.channel("istyping");
@@ -528,6 +560,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     };
   }, [Currentopenchatid, istyping]);
 
+
   useEffect(() => {
     if (!!content || content == "")
       if (content.length > 300) {
@@ -535,9 +568,11 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       } else setcontentisfull(false);
   }, [content]);
 
+
   useEffect(() => {
     clearFileInput();
   }, [Currentopenchatid, SetFile]);
+
 
   useEffect(() => {
     let mediaRecorder: MediaRecorder;
@@ -548,7 +583,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
         console.log(stream);
-        // setmediastream(stream)
+        setnowrecording(true);
         if (recordaudio) {
           console.log("You let the browser use your mic");
           mediaRecorder.start();
@@ -570,6 +605,8 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         }
       } catch (err) {
         console.log(err);
+        setrecordaudio(false);
+        setnowrecording(false);
         alert("Enable your mic");
       }
     };
@@ -588,10 +625,20 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     };
   }, [recordaudio]);
 
+
+  useEffect(() => {
+    setrecordaudio(false);
+    setnowrecording(false);
+    setAudio(undefined);
+  }, [Currentopenchatid]);
+
+
   const clearFileInput = async () => {
     SetFile(undefined);
     if (fileuploadref.current) fileuploadref.current.value = "";
   };
+
+
   return (
     <>
       <div className={`relative ${File ? "  min-h-20" : "translate-y-[300%]"}`}>
@@ -601,10 +648,11 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
           alt="X"
           onClick={clearFileInput}
         />
+        {File && 
         <img
-          className="w-fit max-h-full mx-auto"
-          src={File && URL.createObjectURL(File)}
-        />
+        className="w-fit max-h-full mx-auto"
+        src={URL.createObjectURL(File)}
+      />}
       </div>
 
       <div
@@ -616,7 +664,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
             You can't have over 300 characters in here
           </div>
         )}
-        {!recordaudio ? (
+        {!nowrecording ? (
           !Audio ? (
             <div className="relative w-full">
               <input
@@ -629,7 +677,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
                 value={content}
                 type="text"
                 placeholder="Text Here"
-                className={`w-full shadow-[-5px_5px_15px_1px_rgba(0,0,0,0.589)] transition-all placeholder:text-Main rounded-3xl p-4 focus:!ring-4 focus:p-3 bg-MainText text-Main ${
+                className={`w-full shadow-[-5px_5px_15px_1px_rgba(0,0,0,0.589)] transition-all placeholder:text-Main rounded-xl p-4 focus:!ring-4 focus:p-3 bg-MainText text-Main ${
                   !contentisfull ? "focus:ring-Secondary" : "focus:ring-red-500"
                 } focus:outline-none`}
               />
@@ -669,7 +717,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         <div className="justify-center flex items-center gap-2 ">
           {Currentopenchatid != "Global" && (
             <div className="flex items-center gap-3">
-              {!recordaudio && !Audio && (
+              {!nowrecording && !Audio && (
                 <div className="h-full w-12  cursor-pointer">
                   <label htmlFor="fileupload">
                     <img
@@ -692,7 +740,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
               )}
 
               <div className="h-full w-12 ">
-                {!recordaudio ? (
+                {!nowrecording ? (
                   <img
                     src={microphoneImage}
                     className="cursor-pointer"
@@ -714,11 +762,12 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
           <button
             onClick={() => {
               if (recordaudio) setrecordaudio(false);
+              if (nowrecording) setnowrecording(false);
               else SetData();
             }}
             className={`w-[5%] min-w-fit hover:bg-actionColor hover:text-black text-white transition-all duration-500 bg-Secondary rounded-full p-4`}
           >
-            {!recordaudio ? (File ? "Upload" : "Send") : "Finish"}
+            {!nowrecording ? (File ? "Upload" : "Send") : "Finish"}
           </button>
         </div>
       </div>

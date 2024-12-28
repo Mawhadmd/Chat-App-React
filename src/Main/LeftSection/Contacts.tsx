@@ -99,7 +99,6 @@ const Contacts: React.FC<ContactsProps> = ({
             filter: `chatId=eq.${chatId}`,
           },
           (payload) => {
-  console.log(payload)
             if (chatId == payload.new.chatId) {
               sortLatestMessage([
                 {
