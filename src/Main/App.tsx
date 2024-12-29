@@ -17,7 +17,7 @@ function App() {
     "hidden translate-y-[100vh]"
   );
   const [Reloadcontact, setReloadcontact] = useState<boolean>();
-   const [query, setquery] = useState<string>("");
+  const [query, setquery] = useState<string>("");
   const [logged, setLogged] = useState(false);
   const [accessToken, setaccessToken] = useState<string | undefined>();
   const [uuid, setuuid] = useState<string | undefined>();
@@ -165,7 +165,21 @@ function App() {
       data?.subscription?.unsubscribe();
     };
   }, [uuid]);
-
+  const askforpermission = () => {
+    Notification.requestPermission().then((result) => {
+      if(result == 'granted'){
+        alert('already enables')
+      }else{
+        alert('please enable the Notification in your browser')
+      }
+    });
+  };
+  useEffect(() => {
+    setTimeout(() => {
+      if(logged)
+      askforpermission();
+    }, 10000);
+  }, []);
   useEffect(() => {
     if (!accessToken) return;
     console.log("loaded");
@@ -203,14 +217,14 @@ function App() {
     <>
       <div
         onClick={() => setshowsettings1()}
-        className={`flex items-center justify-center gap-5 p-5  fixed inset-0 bg-Main rounded-md z-[99] transition-all 
+        className={`flex flex-col-reverse items-center justify-center gap-5 p-5  fixed inset-0 bg-Main rounded-md z-[99] transition-all 
           ${showsettings}`}
       >
         <div
           onClick={(e) => {
             e.stopPropagation();
           }}
-          className="relative max-md:flex-1 p-3 rounded-xl w-[40%] h-full bg-Secondary flex flex-col items-center shadow-[0_0_10px_MainBlack] gap-5 pt-10 "
+          className="max-md:w-full relative max-md:flex-1 p-3 rounded-xl w-[40%] h-full bg-Secondary flex flex-col items-center shadow-[0_0_10px_MainBlack] gap-5 pt-10 "
         >
           <a
             href="mailto:mawhadmd@gmail.com"
@@ -224,6 +238,8 @@ function App() {
           >
             <p className="text-center">Suggestion</p>
           </a>
+
+          <button className="text-center max-md:w-fit p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main" onClick={askforpermission}>Enable Notification</button>
           <span className="mt-auto">
             Your id is <span className="font-bold">{uuid?.slice(0, 5)}</span>{" "}
             <br />

@@ -64,19 +64,22 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     let contentval = content;
     setinputcontent("");
     var Timeofthemessage = Date.now();
+    if (Currentopenchatid != -1 && (contentval != "" || !File || !Audio)) {
+      setmessages((PreviousMessages: any) => [
+        {
+          Pending: true,
+          Sender: uuid,
+          chatId: Currentopenchatid,
+          created_at: Timeofthemessage,
+          FileURL: File ? URL.createObjectURL(File): null,
+          AudioFile: Audio? URL.createObjectURL(Audio): null,
+          Content: contentval,
+        },
+        ...(PreviousMessages || []),
+      ]);
+      document.getElementById('ChatArea')?.scrollTo(0 ,0)
+    }
     if (contentval != "" && !File && !Audio) {
-      if (Currentopenchatid != -1) {
-        setmessages((PreviousMessages: any) => [
-          {
-            Pending: true,
-            Sender: uuid,
-            chatId: Currentopenchatid,
-            created_at: Timeofthemessage,
-            Content: contentval,
-          },
-          ...(PreviousMessages || []),
-        ]);
-      }
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
         var chatid: string | number | null = null;
         if (Currentopenchatid == -1) {
@@ -213,17 +216,6 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
           });
       }
     } else if (File) {
-      setmessages((PreviousMessages: any) => [
-        {
-          Pending: true,
-          Sender: uuid,
-          chatId: Currentopenchatid,
-          created_at: Timeofthemessage,
-          FileURL: URL.createObjectURL(File),
-          Content: contentval,
-        },
-        ...(PreviousMessages || []),
-      ]);
       SetFile(undefined);
       const fileToBase64 = (file: File) =>
         new Promise((resolve, reject) => {
@@ -374,17 +366,6 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       }
       clearFileInput();
     } else if (Audio) {
-      setmessages((PreviousMessages: any) => [
-        {
-          Pending: true,
-          Sender: uuid,
-          chatId: Currentopenchatid,
-          created_at: Timeofthemessage,
-          AudioFile: URL.createObjectURL(Audio),
-        },
-        ...(PreviousMessages || []),
-      ]);
-
       const fileToBase64 = (file: Blob) =>
         new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -512,6 +493,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     } else {
       alert("Write something");
     }
+
   }
 
 

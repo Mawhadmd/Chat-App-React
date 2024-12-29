@@ -9,6 +9,7 @@ const getChatId = async (
   let encodings = uuid + userId;
   let cache = getCookie(encodings);
   if (cache) {
+    console.log(cache);
     let chatidAndOtherUser = cache.split("---");
     console.log(chatidAndOtherUser);
     let chatid = chatidAndOtherUser[0];
@@ -33,11 +34,21 @@ const getChatId = async (
         `and(User1.eq.${userId},User2.eq.${uuid}),and(User2.eq.${userId},User1.eq.${uuid})`
       )
       .limit(1);
+    if (!(data && data.length > 0)) {
+      if (!setCurrentopenchatid) {
+        return -1;
+      } else {
+        setCurrentopenchatid(-1);
+        setOtheruserid(userId);
+        return
+      }
+    }
     document.cookie = `${encodings}=${
       data?.[0].chatId + "---" + userId
     }; expires=${new Date(
       new Date().getTime() + 720 * 60 * 60 * 1000
     ).toUTCString()}; `;
+
     console.log(data);
     if (error) {
       console.log("Error while getting chatid");
@@ -46,16 +57,12 @@ const getChatId = async (
 
     if (!(setOtheruserid && setCurrentopenchatid)) {
       // If the function is called from somewhere else without those to set functions it will just return the chatid
-      if (data && data?.length > 0) {
-        return data?.[0].chatId;
-      } else return -1;
+      return data?.[0].chatId;
     }
 
-    if (data && data[0] && data.length != 0) {
-      //this will set the chatid and the other user id
-      setCurrentopenchatid(data[0].chatId);
-      setOtheruserid(userId);
-    } else setCurrentopenchatid(-1);
+    //this will set the chatid and the other user id
+    setCurrentopenchatid(data[0].chatId);
+    setOtheruserid(userId);
   } catch (error) {
     console.error("Error getting chat ID:", error);
     alert("Couldn't get the chat. Please try again later or contact support.");
