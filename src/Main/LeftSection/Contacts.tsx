@@ -4,7 +4,8 @@ import { supabase } from "../Supabase";
 import { ChatContext, Onlineusersctxt } from "../App";
 import convertTime from "../util/convertTime";
 import getChatId from "../util/getChatId";
-import { motion } from "motion/react"
+import { motion } from "motion/react";
+import { getuserbyid } from "../util/getuserbyid";
 
 interface User {
   id: string;
@@ -18,7 +19,7 @@ interface ContactsProps {
   user: User;
   issearch?: boolean;
   chatId?: string;
-  i:number,
+  i: number;
 }
 //make a new component called searchcontacts
 const Contacts: React.FC<ContactsProps> = ({
@@ -27,11 +28,13 @@ const Contacts: React.FC<ContactsProps> = ({
   issearch = false,
   i = 0,
 }) => {
+  const [missedmessage, setmissedmessages] = useState<number | undefined>();
   const [latestMessage, setLatestMessage] = useState<string | undefined>();
   const [latestMessagetime, setLatestMessagetime] = useState<
     string | undefined
   >();
   const [inyourcontacts, setinyourcontacts] = useState<boolean>(false);
+  const [ischosen, setischosen] = useState<boolean>(false);
   const { setCurrentopenchatid, Currentopenchatid, uuid, setOtheruserid } =
     useContext(ChatContext);
   const { onlineusers }: { onlineusers: any[] } = useContext(Onlineusersctxt);
@@ -43,11 +46,13 @@ const Contacts: React.FC<ContactsProps> = ({
     if (data && data[0]) {
       let time = convertTime(data[0].created_at);
       setLatestMessagetime(time);
-      console.log(data[0])
+      console.log(data[0]);
       const message =
         (data[0].Sender === uuid
           ? `You: ${data[0].Content}`
-          : `${name}: ${data[0].Content}`) +  (data[0].AudioFile? "Audio":"") + (data[0].FileURL? "IMAGE":"");
+          : `${name}: ${data[0].Content}`) +
+        (data[0].AudioFile ? "Audio" : "") +
+        (data[0].FileURL ? "IMAGE" : "");
       setLatestMessage(message);
     }
   };
@@ -81,13 +86,14 @@ const Contacts: React.FC<ContactsProps> = ({
   };
 
   useEffect(() => {
-    if (chatId != "-1") {  //is  in your contacts
+    if (chatId != "-1") {
+      //is  in your contacts
       getLatestMessage();
     }
   }, [chatId]);
- 
+
   useEffect(() => {
-    if (!issearch && userId && Currentopenchatid) {
+    if (!issearch && userId && chatId) {
       const channel = supabase
         .channel(`Receive-Pvt-Chat-changes-${chatId}`)
         .on(
@@ -99,13 +105,10 @@ const Contacts: React.FC<ContactsProps> = ({
             filter: `chatId=eq.${chatId}`,
           },
           (payload) => {
+            console.log(payload.new)
             if (chatId == payload.new.chatId) {
               sortLatestMessage([
-                {
-                  Content: payload.new.Content, //if its an image
-                  Sender: payload.new.Sender,
-                  created_at: payload.new.created_at,
-                },
+                  payload.new
               ]);
             }
           }
@@ -115,65 +118,139 @@ const Contacts: React.FC<ContactsProps> = ({
       return () => {
         channel.unsubscribe();
       };
+    }else{
+      console.log(issearch, userId , Currentopenchatid)
     }
   }, [Currentopenchatid, userId, issearch, chatId]); //this useeffect listens to new messages
 
   //to here]
 
+  useEffect(() => {
+    if (issearch) return;
+    const listentomissedmessages = supabase
+      .channel("listentomissedmessages"+chatId)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "PrivateMessages",
+          filter: `chatId=eq.${chatId}`,
+        },
+        async (payload) => {
+         if(payload.new.Sender != uuid){
+          let userdata = (await getuserbyid(payload.new.Sender)).data.user
+          .user_metadata;
+        new Notification(userdata.name, {
+          body: payload.new.Content,
+          icon: userdata.avatar_url,
+        });
+         }
+          console.log("New message inserted:", payload.new);
+          if(payload.new.Sender != uuid)
+          setmissedmessages((prev) => (prev || 0) + 1);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "PrivateMessages",
+          filter: `chatId=eq.${chatId}`,
+        },
+        (payload) => {
+          console.log("Message updated:", payload.new, payload.old);
+          if(payload.new.Sender != uuid)
+          if(payload.new.ReadAt && !payload.old.ReadAt){
+            setmissedmessages(prev => (prev || 1) - 1)
+          }
+        }
+      )
+      .subscribe();
+    const getmissedmessagescount = async () => {
+      const { data, error } = await supabase
+        .from("PrivateMessages")
+        .select("ReadAt")
+        .eq("chatId", chatId)
+        .neq("Sender", uuid)
+        .is("ReadAt", null);
+      if (error) {
+        alert("error while check missed messages" + JSON.stringify(error));
+        setmissedmessages(undefined);
+      }
+      setmissedmessages(data?.length || undefined);
+    };
+    getmissedmessagescount();
+    return () => {
+      listentomissedmessages.unsubscribe();
+    };
+  }, []);
+  useEffect(() => {
+    setischosen(Currentopenchatid == chatId)
+  }, [Currentopenchatid]);
   return (
     <motion.div
-    animate={{opacity: [0, 1] }}
-transition={{ delay:0.1 * i, duration: 1 }}
-     
+      animate={{ opacity: [0, 1] }}
+      transition={{ delay: 0.1 * i, duration: 1 }}
       onClick={() => {
-      getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
+        
+        getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
       }}
-      className="text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
-  border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all "
+      className={`${ischosen? 'bg-Secondary/90':''} text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
+  border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all `}
     >
       <div className="relative justify-center items-center flex w-16 h-16 ml-1">
-      <img
-        src={customPfp || pfp}
-        alt="Profile Picture"
-        className="w-20 rounded-full border-MainText border-2 border-solid"
-        onError={(e) => {
-        const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
-        target.onerror = null; // Prevent infinite loop
-        target.src = pfp; // Fallback to 'pfp'
-        }}
-      />
+        <img
+          src={customPfp || pfp}
+          alt="Profile Picture"
+          className="w-20 rounded-full border-MainText border-2 border-solid"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
+            target.onerror = null; // Prevent infinite loop
+            target.src = pfp; // Fallback to 'pfp'
+          }}
+        />
 
-      {onlineusers &&
-        onlineusers.some((u: any) => u.user === userId) &&
-        (onlineusers[onlineusers.findIndex((obj) => obj.user == userId)]
-        .status == "Online" ? (
-        <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>
-        ) : (
-        <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-yellow-500"></span>
-        ))}
+        {onlineusers &&
+          onlineusers.some((u: any) => u.user === userId) &&
+          (onlineusers[onlineusers.findIndex((obj) => obj.user == userId)]
+            .status == "Online" ? (
+            <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-green-500"></span>
+          ) : (
+            <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-yellow-500"></span>
+          ))}
       </div>
       <div className="flex flex-col h-[80%] justify-between w-full mx-1">
-      <span className="text-xl font-bold whitespace-nowrap">
-        {`${name}`}{" "}
-        <span className="text-xs">{`#${userId.slice(0, 5)}`}</span>
-      </span>
-      {latestMessage && (
         <div className="flex justify-between">
-        <span className="text-sm opacity-70">{`${
-          latestMessage.length > 38
-          ? latestMessage.slice(0, 38) + "..."
-          : latestMessage
-        }`}</span>
-        <span className="text-sm text-MainText text-nowrap">
-          At {latestMessagetime}
-        </span>
+          <span className="text-xl font-bold whitespace-nowrap">
+            {`${name}`}{" "}
+            <span className="text-[8px]">{`#${userId.slice(0, 5)}`}</span>
+          </span>
+
+          {!!missedmessage && (
+            <div className="flex text-xs justify-center items-center whitespace-nowrap h-5 w-5 p-2 bg-green-600 rounded-full mr-1">
+              {missedmessage}
+            </div>
+          )}
         </div>
-      )}
+        {latestMessage && (
+          <div className="flex justify-between">
+            <span className="text-sm opacity-70">{`${
+              latestMessage.length > 38
+                ? latestMessage.slice(0, 38) + "..."
+                : latestMessage
+            }`}</span>
+            <span className="text-sm text-MainText text-nowrap">
+              At {latestMessagetime}
+            </span>
+          </div>
+        )}
       </div>
       {inyourcontacts && (
-      <div className="bg-green-600 flex items-center text-center justify-center rounded-xl h-full p-1 text-sm w-28">
-        This guy is in your contacts
-      </div>
+        <div className="bg-green-600 flex items-center text-center justify-center rounded-xl h-full p-1 text-sm w-28">
+          This guy is in your contacts
+        </div>
       )}
     </motion.div>
   );

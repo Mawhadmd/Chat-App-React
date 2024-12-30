@@ -3,11 +3,13 @@ import { supabase } from "../Supabase";
 import globe from "../../assets/global-communication_9512332.png";
 import convertTime from "../util/convertTime";
 import { getname } from "../util/getnamebyid";
-import { SettingContext } from "../App";
+import { ChatContext, SettingContext } from "../App";
 const GlobalChat = ({ setCurrentopenchatid }: any) => {
   const [name, setname] = useState<string>("");
   const [ValuesOfLatestMessage, setValuesOfLatestMessage] = useState<any | undefined>();
 const { lightmode } = useContext(SettingContext);
+const { Currentopenchatid } = useContext(ChatContext);
+ const [ischosen, setischosen] = useState<boolean>(false);
 useEffect(() => {
   const channels = supabase
   .channel("Changes-in-GlobalChat")
@@ -42,13 +44,15 @@ useEffect(() => {
     }
     fetchlatestmessage();
   }, []);
-
+  useEffect(() => {
+    setischosen(Currentopenchatid == "Global")
+  }, [Currentopenchatid]);
   return (
     !!ValuesOfLatestMessage && <div
       onClick={() => {
         setCurrentopenchatid("Global");
       }}
-      className=" h-24 gap-2 flex items-center text-MainText hover:bg-white/20 cursor-pointer border-Secondary/20 border-[1px]"
+      className={`${ischosen? 'bg-Secondary/90':''} h-24 gap-2 flex items-center text-MainText hover:bg-white/20 cursor-pointer border-Secondary/20 border-[1px]`}
     >
       <div className="rounded-full ml-1 border-MainText border-2 border-solid  w-16">
       <img src={globe} className={`  ${!lightmode ? "invert": ""} `} alt="Globe" />

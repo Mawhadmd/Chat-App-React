@@ -21,7 +21,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
   const { setReloadcontact } = useContext(ReloadContactsCtxt);
   const [File, SetFile] = useState<File | undefined>();
   const [content, setinputcontent] = useState<
-    string | readonly string[] | undefined
+    string | readonly string[]
   >("");
   const [contentisfull, setcontentisfull] = useState<boolean>(false);
   const [username, setusername] = useState<boolean>(false);
@@ -50,7 +50,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
 
   async function SetData() {
     if (contentisfull) return;
-  
+    
     // const profanitycheck = await fetch('https://vector.profanity.dev', {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
@@ -64,7 +64,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     let contentval = content;
     setinputcontent("");
     var Timeofthemessage = Date.now();
-    if (Currentopenchatid != -1 && (contentval != "" || !File || !Audio)) {
+    if (Currentopenchatid != -1 && (contentval != "" || !!File || !!Audio)) {
       setmessages((PreviousMessages: any) => [
         {
           Pending: true,
@@ -78,6 +78,9 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
         ...(PreviousMessages || []),
       ]);
       document.getElementById('ChatArea')?.scrollTo(0 ,0)
+    }else {
+      alert("Write something");
+      return
     }
     if (contentval != "" && !File && !Audio) {
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
@@ -490,29 +493,32 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       } catch (e) {
         console.log("error while uploading audio", e);
       }
-    } else {
-      alert("Write something");
-    }
-
+    } 
+document.getElementById('input')?.focus()
   }
 
 
   useEffect(() => {
-    if (Currentopenchatid != -1) {
-      if (!content?.length) {
-        //not typing
-        setistyping(false);
-      } else {
-        setistyping(true);
-        window.onblur = () => {
-          if (content.length) setistyping(false);
-        };
-        window.onfocus = () => {
-          if (content.length) setistyping(true);
-        };
-      }
+    const handleBlur = () => {
+      if (content.length) setistyping(false);
+    };
+
+    const handleFocus = () => {
+      if (content.length>0) setistyping(true);
+    };
+    if (Currentopenchatid !== -1) {
+      setistyping(content.length > 0);
+
+      window.addEventListener('blur', handleBlur);
+      window.addEventListener('focus', handleFocus);
+  
     }
-  }, [content]);
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [content, Currentopenchatid]);
+  
 
 
   useEffect(() => {
@@ -650,6 +656,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
           !Audio ? (
             <div className="relative w-full">
               <input
+              id="input"
                 onKeyDown={({ key }) => {
                   if (String(key) == "Enter") SetData();
                 }}

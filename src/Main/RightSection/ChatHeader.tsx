@@ -47,6 +47,7 @@ const ChatHeader = () => {
     }
   }, []); //gets the numbers of users online by tracking them on a websocket
   useEffect(() => {
+    setistyping(false);
     const channelB = supabase.channel("istyping");
     let NumberOfPeopleTypingInGlobal: any[] = [];
     channelB
@@ -179,6 +180,8 @@ const ChatHeader = () => {
     setCurrentopenchatid(undefined);
     setOtheruserid(undefined);
   }
+  console.log('onlien',onlineusers)
+  console.log('typing',istyping)
   return !loading ? (
     <div
       id="CurrentHeader"

@@ -112,12 +112,21 @@ function App() {
         if (document.hasFocus())
           await onlineroom.track({ user: uuid, status: "Online" });
         else await onlineroom.track({ user: uuid, status: "Away" });
-        window.onfocus = async () => {
-          await onlineroom.track({ user: uuid, status: "Online" });
-        };
-        window.onblur = async () => {
+  
+        window.addEventListener('blur', async ()=>{
           await onlineroom.track({ user: uuid, status: "Away" });
-        };
+        })
+        window.addEventListener('focus', async ()=>{
+          await onlineroom.track({ user: uuid, status: "Online" });
+        })
+        return ()=>{
+          window.removeEventListener('blur', async ()=>{
+            await onlineroom.track({ user: uuid, status: "Away" });
+          })
+          window.removeEventListener('focus', async ()=>{
+            await onlineroom.track({ user: uuid, status: "Online" });
+          })
+        }
       };
       trackPresence();
       return () => {
@@ -168,7 +177,7 @@ function App() {
   const askforpermission = () => {
     Notification.requestPermission().then((result) => {
       if(result == 'granted'){
-        alert('already enables')
+        alert('already enabled')
       }else{
         alert('please enable the Notification in your browser')
       }

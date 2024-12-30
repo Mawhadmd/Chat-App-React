@@ -58,15 +58,10 @@ const PrivateChatArea = ({
             filter: `chatId=eq.${Currentopenchatid}`,
           },
           async (payload: any) => {
-            let userdata = (await getuserbyid(payload.new.Sender)).data.user
-              .user_metadata;
-            new Notification(userdata.name, {
-              body: payload.new.Content,
-              icon: userdata.avatar_url,
-            });
             console.log(payload);
             if (payload.eventType == "INSERT") {
               if (payload.new.Sender != uuid) {
+          
                 fetch(
                   "https://chat-app-react-server-qizz.onrender.com/messageisread",
                   {
