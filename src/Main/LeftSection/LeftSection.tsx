@@ -8,17 +8,22 @@ import googleicon from "../../assets/googleicon.png";
 import { getuserbyid } from "../util/getuserbyid";
 
 const LeftSection = ({}) => {
-  const { setCurrentopenchatid,logged, query,setquery, uuid, Currentopenchatid} =
-    useContext(ChatContext);
-   
+  const {
+    setCurrentopenchatid,
+    logged,
+    query,
+    setquery,
+    uuid,
+    Currentopenchatid,
+  } = useContext(ChatContext);
+
   const { MobileMode } = useContext(SettingContext);
   const { Reloadcontact } = useContext(ReloadContactsCtxt);
   const [contacts, setcontacts] = useState<any[] | undefined>();
   const [SearchResults, setSearchResults] = useState([]);
   useEffect(() => {
-
     const subscription = supabase
-      .channel('listens-to-new-users')
+      .channel("listens-to-new-users")
       .on(
         "postgres_changes",
         {
@@ -26,10 +31,12 @@ const LeftSection = ({}) => {
           schema: "public",
           table: "Contacts",
           filter: `User2=eq.${String(uuid)}`,
-        }, () =>{
-          console.log("new user added me")
+        },
+        () => {
+          console.log("new user added me");
           getcontacts();
-        })
+        }
+      )
       .subscribe();
 
     return () => {
@@ -64,7 +71,7 @@ const LeftSection = ({}) => {
         arrayofusers.push({ res, chatId });
       }
     }
-    console.log(arrayofusers)
+    console.log(arrayofusers);
     setcontacts(arrayofusers);
   }
 
@@ -87,7 +94,11 @@ const LeftSection = ({}) => {
       <section
         id="LeftSection"
         className={`flex flex-col bg-Main h-screen relative translate-x-0 transition-all z-20 ${
-          MobileMode ? !Currentopenchatid?  "w-full !absolute" : "translate-x-[-100%] !absolute": "w-[500px] min-w-[400px]"
+          MobileMode
+            ? !Currentopenchatid
+              ? "w-full !absolute"
+              : "translate-x-[-100%] !absolute"
+            : "w-[500px] min-w-[400px]"
         }
         `}
       >
@@ -109,9 +120,9 @@ const LeftSection = ({}) => {
                       Search Results
                     </div>
                     {SearchResults.map(({ user, chatid }, i) => {
-                      return ( 
+                      return (
                         <Contacts
-                        i = {i}
+                          i={i}
                           issearch={true}
                           chatId={chatid}
                           key={i}
@@ -134,10 +145,10 @@ const LeftSection = ({}) => {
               <div className=" h-fit  mt-1 flex flex-col items-center justify-center text-MainText text-2xl">
                 {contacts != undefined ? (
                   contacts.length > 0 ? (
-                    contacts.map(({ res, chatId }, i:number) => {
+                    contacts.map(({ res, chatId }, i: number) => {
                       return (
                         <Contacts
-                          i = {i}
+                          i={i}
                           key={chatId}
                           chatId={chatId}
                           user={res?.data.user}
@@ -159,14 +170,36 @@ const LeftSection = ({}) => {
             )}
           </>
         ) : (
-          <button
-            id="login"
-            className="transition-all duration-300 hover:bg-actionColor bg-Main gap-4 flex justify-center items-center shadow-[-4px_4px_5px_rgba(62,74,100,0.589)] mt-11 p-3 w-fit mx-auto rounded-2xl "
-            onClick={handlelogin}
-          >
-            <img src={googleicon} alt="icon" className="w-10 h-full" />
-            <span className="text-MainText font-bold">Sign In</span>
-          </button>
+          <>
+            <button
+              id="login"
+              className="transition-all duration-300  hover:text-Main  hover:bg-actionColor/50 bg-Main gap-4 flex justify-center items-center shadow-[-4px_4px_5px_rgba(62,74,100,0.589)] mt-11 p-3 w-fit mx-auto rounded-2xl "
+              onClick={handlelogin}
+            >
+              <img src={googleicon} alt="icon" className="w-10 h-full" />
+              <span className=" font-bold">Sign In</span>
+            </button>
+            <div className="text-center text-MainText text-xl mt-5 px-4">
+              <h2 className="text-3xl font-bold text-MainText">
+                Welcome to Chatty
+              </h2>
+              <p>
+                You need to login to start chatting, This app allows you to
+                connect and chat with your contacts seamlessly. Use the search
+                box to find users and start conversations. For the best
+                experience, please use the app on a desktop web browser.
+              </p>
+              <br />
+              <h3 className="text-2xl font-bold text-MainText">
+                Latest updates and features:
+              </h3>
+                <ul className="list-disc list-inside mt-4 text-left ml-4">
+                <li className="mb-2">Real-time contact updates</li>
+                <li className="mb-2">Improved search functionality</li>
+                <li className="mb-2">Enhanced mobile mode for better usability</li>
+                </ul>
+            </div>
+          </>
         )}
 
         <div className={`${!logged ? "hidden" : "static"}`}>

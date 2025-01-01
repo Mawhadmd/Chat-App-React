@@ -19,7 +19,7 @@ const GlobalChatArea = ({
   messages: any[] | null;
   setmessages: any;
 }) => {
-  const { uuid } = useContext(ChatContext);
+  const { uuid,soundison } = useContext(ChatContext);
   const [UserMessageMap, setUserMessageMap] = useState(new Map());
   const { lightmode } = useContext(SettingContext);
 
@@ -63,13 +63,14 @@ const GlobalChatArea = ({
           if (!UserMessageMap.get(payload.new.Sender))
             setnewuserinmessage(payload.new.Sender);
           if (payload.new.Sender != uuid) {
+            if(soundison) new Audio(audio).play()
             // doesn't fetch the message for this user
 
             setmessages((PreviousMessages: any) => [
               payload.new,
               ...(PreviousMessages || []),
             ]);
-            (() => new Audio(audio).play())();
+           
           } else {
             setmessages((messages: any[]) =>
               messages.map((value) => {

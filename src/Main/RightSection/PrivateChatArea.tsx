@@ -9,8 +9,8 @@ import {
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 import Message from "./Messages";
-import { getuserbyid } from "../util/getuserbyid";
 
+import audio from "../../assets/WhatsappMessage.mp3";
 const PrivateChatArea = ({
   messages,
   setmessages,
@@ -18,7 +18,7 @@ const PrivateChatArea = ({
   messages: any[] | null;
   setmessages: any;
 }) => {
-  const { Currentopenchatid, uuid } = useContext(ChatContext);
+  const { Currentopenchatid, uuid,soundison } = useContext(ChatContext);
   const chatref = useRef<HTMLDivElement>(null);
   const [amount, setamount] = useState(30);
   useEffect(() => {
@@ -59,9 +59,10 @@ const PrivateChatArea = ({
           },
           async (payload: any) => {
             console.log(payload);
+            
             if (payload.eventType == "INSERT") {
               if (payload.new.Sender != uuid) {
-          
+                if(soundison) new Audio(audio).play()
                 fetch(
                   "https://chat-app-react-server-qizz.onrender.com/messageisread",
                   {

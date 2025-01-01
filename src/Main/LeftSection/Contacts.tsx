@@ -197,8 +197,8 @@ const Contacts: React.FC<ContactsProps> = ({
         
         getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
       }}
-      className={`${ischosen? 'bg-Secondary/90':''} text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
-  border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-white/20 transition-all `}
+      className={`${ischosen? 'bg-Secondary/50':''} text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
+  border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-MainText/20 transition-all `}
     >
       <div className="relative justify-center items-center flex w-16 h-16 ml-1">
         <img

@@ -52,7 +52,7 @@ useEffect(() => {
       onClick={() => {
         setCurrentopenchatid("Global");
       }}
-      className={`${ischosen? 'bg-Secondary/90':''} h-24 gap-2 flex items-center text-MainText hover:bg-white/20 cursor-pointer border-Secondary/20 border-[1px]`}
+      className={`${ischosen? 'bg-Secondary/50':''} h-24 gap-2 flex items-center text-MainText hover:bg-MainText/20 cursor-pointer border-Secondary/20 border-[1px]`}
     >
       <div className="rounded-full ml-1 border-MainText border-2 border-solid  w-16">
       <img src={globe} className={`  ${!lightmode ? "invert": ""} `} alt="Globe" />

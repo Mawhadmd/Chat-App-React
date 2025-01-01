@@ -18,6 +18,7 @@ function App() {
   );
   const [Reloadcontact, setReloadcontact] = useState<boolean>();
   const [query, setquery] = useState<string>("");
+  const [soundison,setsoundison] = useState<boolean>(true);
   const [logged, setLogged] = useState(false);
   const [accessToken, setaccessToken] = useState<string | undefined>();
   const [uuid, setuuid] = useState<string | undefined>();
@@ -248,7 +249,10 @@ function App() {
             <p className="text-center">Suggestion</p>
           </a>
 
-          <button className="text-center max-md:w-fit p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main" onClick={askforpermission}>Enable Notification</button>
+          <button className="text-center max-md:w-fit whitespace-nowrap content-center p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main" onClick={askforpermission}>Enable Notification</button>
+            <button className="text-center max-md:w-fit whitespace-nowrap content-center p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main" onClick={() => setsoundison(prev => {alert('Sound is ' + (prev ? 'Disabled' : 'Enabled')); return !prev})}>
+            {soundison ? "Disable Sound" : "Enable Sound"}
+            </button>
           <span className="mt-auto">
             Your id is <span className="font-bold">{uuid?.slice(0, 5)}</span>{" "}
             <br />
@@ -286,6 +290,8 @@ function App() {
                 setCurrentopenchatid,
                 Currentopenchatid,
                 onlineusers,
+                soundison,
+                setsoundison,
                 setquery,
                 query,
                 setOtheruserid,
