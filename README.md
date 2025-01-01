@@ -8,4 +8,4 @@ I created my own **database structure**, and I hope I won’t regret it in the f
 
 I kept detailed notes throughout the project, documenting every challenge and solution. Be warned, it’s quite lengthy:
 
-[**Project Documentation**](https://1drv.ms/w/c/8b1e0522eb787e4e/EduLBfTLu5dOqCRTO2oPZwQBA02kARVexQXIzEXy_a0e7Q?e=Ez8ZZs)
+[**Project Documentation**]([https://1drv.ms/w/c/8b1e0522eb787e4e/EduLBfTLu5dOqCRTO2oPZwQBA02kARVexQXIzEXy_a0e7Q?e=Ez8ZZs](https://1drv.ms/w/c/8b1e0522eb787e4e/EcqqgVzc1qlOhW9vCiE0JiUBwFTE-zcC_fSKoAGOU3MVJg?e=x5wcau))
