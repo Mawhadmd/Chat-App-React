@@ -16,7 +16,7 @@ I created my own **database structure**, and I hope I won’t regret it in the f
    - View past messages in conversations, even after logging out and back in.
 
 4. **User Presence**
-   - Displays whether users are online or offline.
+   - Displays users' status: online, away, and last seen.
 
 5. **Customizable Chatrooms**
    - Create, join, or leave chatrooms to communicate with multiple users.
