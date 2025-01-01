@@ -1,6 +1,6 @@
 # Chat App Project
 
-This project started with the goal of learning **Tailwind**, which I successfully achieved. However, as development progressed, the focus shifted to the **backend**, as it presented more challenges. The chat app is mainly backend-driven, with a **React-based frontend**.
+This project started with the goal of learning **Tailwind**, which I successfully achieved. However, as development progressed, the focus shifted to the **backend**, as it presented more challenges. The chat app is mainly backend-driven, which I used supabase for, with a **React-based frontend**.
 
 Throughout the process, I created my own **database structure**, and I hope it serves well in the future. React brought its own set of challenges, with even minor issues sometimes taking hours to solve. Nonetheless, this project has been a great learning experience.
 
