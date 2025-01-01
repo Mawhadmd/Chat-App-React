@@ -1,50 +1,46 @@
-# React + TypeScript + Vite
+# Chat App Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project has been quite the journey. It started with the goal of learning **Tailwind**, which I accomplished. However, the focus later shifted to the **backend**, as it became the more complex aspect. The chat app is primarily backend-heavy, with some frontend components built in **React**.
 
-Currently, two official plugins are available:
+I created my own **database structure**, and I hope I won’t regret it in the future. React presented challenges, and even small issues would sometimes keep me wondering for hours. But in the end, it’s been a great learning experience.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Main Features for Users
 
-## Expanding the ESLint configuration
+1. **Account Creation & Login**
+   - Users can create an account, log in, and manage their profile.
+   
+2. **Real-Time Messaging**
+   - Send and receive messages instantly in active chat rooms or private chats.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+3. **Message History**
+   - View past messages in conversations, even after logging out and back in.
 
-- Configure the top-level `parserOptions` property like this:
+4. **User Presence**
+   - Displays users' status: online, away, and last seen.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+5. **Customizable Chatrooms**
+   - Create, join, or leave chatrooms to communicate with multiple users.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+6. **Private Messaging**
+   - Send private messages to other users.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+7. **Typing Indicators**
+   - Shows when someone is typing a message.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+8. **Notifications**
+   - Alerts for new messages when the user is away or in a different chat.
+
+9. **Search**
+   - Search for messages or users within chats.
+
+10. **Responsive Design**
+    - Interface adapts to different screen sizes, ensuring a smooth experience on both mobile and desktop devices.
+   
+
+Features like blocking chats, deleting chats, messages, creating groups, editing messages, or video and audio calls weren't implemented because the purpose of this project was to learn tailwind, and those projects are create exercises for DELETE and PUT HTTP requests/database queries. Maybe in the future.
+
+## Documentation
+
+I kept detailed notes throughout the project, documenting every challenge and solution. Be warned, it’s quite lengthy:
+
+[**Project Documentation**](https://1drv.ms/w/c/8b1e0522eb787e4e/EcqqgVzc1qlOhW9vCiE0JiUBwFTE-zcC_fSKoAGOU3MVJg?e=x5wcau)
