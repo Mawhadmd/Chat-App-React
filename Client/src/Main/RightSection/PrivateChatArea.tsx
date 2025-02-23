@@ -9,20 +9,21 @@ import {
 import { supabase } from "../Supabase";
 import { ChatContext } from "../App";
 import Message from "./Messages";
-
 import audio from "../../assets/WhatsappMessage.mp3";
+
+type PrivateChatAreaTypes= {
+  messages: any[] | null;
+  setmessages: any;
+}
 const PrivateChatArea = ({
   messages,
   setmessages,
-}: {
-  messages: any[] | null;
-  setmessages: any;
-}) => {
-  const { Currentopenchatid, uuid,soundison } = useContext(ChatContext);
-  const chatref = useRef<HTMLDivElement>(null);
+}: PrivateChatAreaTypes) => {
+  const { Currentopenchatid, uuid, soundison } = useContext(ChatContext);
+  const chatref = useRef<HTMLDivElement | null>(null);
   const [amount, setamount] = useState(30);
   useEffect(() => {
-    chatref.current?.addEventListener("scroll", (f) => {
+    const onscroll = (f: Event) => {
       const e = f.target as HTMLDivElement;
       if (e.scrollHeight - e.clientHeight + e.scrollTop < 1) {
         setamount((prev) => prev + 10);
@@ -31,18 +32,11 @@ const PrivateChatArea = ({
           e.scrollHeight - e.clientHeight + e.scrollTop
         );
       }
-    });
+    };
+
+    chatref.current?.addEventListener("scroll", onscroll);
     return () => {
-      chatref.current?.removeEventListener("scroll", (f) => {
-        const e = f.target as HTMLDivElement;
-        if (e.scrollHeight - e.clientHeight + e.scrollTop < 1) {
-          setamount((prev) => prev + (10 * prev) / 100);
-          console.log(
-            "User has scrolled to the top!",
-            e.scrollHeight - e.clientHeight + e.scrollTop
-          );
-        }
-      });
+      chatref.current?.removeEventListener("scroll", onscroll);
     };
   }, []);
   useEffect(() => {
@@ -59,10 +53,10 @@ const PrivateChatArea = ({
           },
           async (payload: any) => {
             console.log(payload);
-            
+
             if (payload.eventType == "INSERT") {
               if (payload.new.Sender != uuid) {
-                if(soundison) new Audio(audio).play()
+                if (soundison) new Audio(audio).play();
                 fetch(
                   "https://chat-app-react-server-qizz.onrender.com/messageisread",
                   {

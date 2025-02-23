@@ -1,12 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-weight: 400;
   transition: all 150ms;
   color: var(--Main);
@@ -22,21 +23,28 @@ body {
   display: flex;
 }
 :root {
-  --Main: 15,17,8;
-  --MainText: 202, 216 ,222;
-  --Secondary: 36,25,9;
-  --actionColor: 0,246,237;
+  --Main: 15, 17, 8;
+  --MainText: 202, 216, 222;
+  --Secondary: 36, 25, 9;
+  --actionColor: 0, 246, 237;
   --MainBlackfr: 0, 0, 0;
   /* colors are set in app.jsx */
 }
 
+[data-theme="dark"] {
+  --actionColor: 0,200,200;
+  --Main: 202, 216 ,222;
+  --MainText: 15,17,8;
+  --Secondary: 100,88,83;
+  --MainBlackfr: 255,255,255;
+}
+
 ::selection {
-  background-color: rgb(255,255,25);
+  background-color: rgb(255, 255, 25);
   color: rgb(var(--Main));
 }
 #RightSection {
-
-    transition: all 150ms;
+  transition: all 150ms;
 }
 /* @media screen and (width<800px) {
   #RightSection {
@@ -48,5 +56,9 @@ body {
 } */
 
 #LeftSection {
-  background: linear-gradient(-90deg,rgb(var(--Main)),rgb(var(--MainBlackfr))) !important;
+  background: linear-gradient(
+    -90deg,
+    rgb(var(--Main)),
+    rgb(var(--MainBlackfr))
+  ) !important;
 }

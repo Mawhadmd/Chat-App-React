@@ -13,6 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.46.1",
     "@wavesurfer/react": "^1.0.8",
+    "lucide-react": "^0.475.0",
     "motion": "^11.15.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -9,61 +9,29 @@ export const ReloadContactsCtxt = createContext<any>(null);
 export const Onlineusersctxt = createContext<any>(null);
 
 function App() {
-  const [lightmode, setlightmode] = useState<boolean>(
-    localStorage.getItem("islightmode") == "1" ? true : false
-  );
-  const [MobileMode, setMobileMode] = useState<boolean>(false);
-  const [showsettings, setshowsettings] = useState<string>(
-    "hidden translate-y-[100vh]"
-  );
+  const [lightmode, setlightmode] = useState<boolean>(localStorage.getItem("islightmode") == "1" ? true : false);
+  const [showsettings, setshowsettings] = useState<string>( "hidden translate-y-[100vh]");
   const [Reloadcontact, setReloadcontact] = useState<boolean>();
   const [query, setquery] = useState<string>("");
-  const [soundison,setsoundison] = useState<boolean>(true);
+  const [soundison, setsoundison] = useState<boolean>(true);
   const [logged, setLogged] = useState(false);
   const [accessToken, setaccessToken] = useState<string | undefined>();
   const [uuid, setuuid] = useState<string | undefined>();
   const [onlineusers, setonlineusers] = useState<any>(null);
-  const [Currentopenchatid, setCurrentopenchatid] = useState<
-    string | undefined
-  >(undefined);
+  const [Currentopenchatid, setCurrentopenchatid] = useState<string | undefined>(undefined);
   const [Otheruserid, setOtheruserid] = useState<string | undefined>(undefined);
+  
   const changelightmode = useCallback(() => {
     setlightmode((prev) => !prev);
   }, [setlightmode]);
 
   useEffect(() => {
-    const Darkcolors = {
-      "--Main": "15,17,8", // main dark
-      "--MainText": "202, 216 ,222", // main dark text
-      "--Secondary": "36,25,9", //sec dark
-      "--actionColor": "0,246,237", //action
-      "--MainBlackfr": "0, 0, 0",
-    };
-    const lightcolors = {
-      "--actionColor": "0,200,200", //action
-      "--Main": "202, 216 ,222", // main light
-      "--MainText": "15,17,8", // main light text
-      "--Secondary": "100,88,83", // sec light
-      "--MainBlackfr": "255,255,255",
-    };
-    const rootStyle = document.documentElement.style;
-
-    if (!lightmode) {
-      Object.entries(Darkcolors).forEach(([key, value]) => {
-        rootStyle.setProperty(key, value);
-      });
-      localStorage.setItem("islightmode", "0");
-      setlightmode(false);
-    } else if (
-      lightmode &&
-      getComputedStyle(document.documentElement).getPropertyValue("--Main") ==
-        "15,17,8"
-    ) {
-      Object.entries(lightcolors).forEach(([key, value]) => {
-        rootStyle.setProperty(key, value);
-      });
+    if (lightmode){
+      document.documentElement.setAttribute("data-theme", "light");
       localStorage.setItem("islightmode", "1");
-      setlightmode(true);
+    }else{
+      document.documentElement.setAttribute("data-theme", "dark");
+      localStorage.setItem("islightmode", "0");
     }
   }, [lightmode]); //Changes lightmode
 
@@ -83,7 +51,6 @@ function App() {
         ...contacts2.data.map((contact) => contact.User1),
       ];
     }
-
     // Call getContacts directly instead of using an async immediately
     getContacts().then((contacts) => {
       var onlineroom = supabase.channel("onlineusers");
@@ -113,21 +80,21 @@ function App() {
         if (document.hasFocus())
           await onlineroom.track({ user: uuid, status: "Online" });
         else await onlineroom.track({ user: uuid, status: "Away" });
-  
-        window.addEventListener('blur', async ()=>{
+
+        window.addEventListener("blur", async () => {
           await onlineroom.track({ user: uuid, status: "Away" });
-        })
-        window.addEventListener('focus', async ()=>{
+        });
+        window.addEventListener("focus", async () => {
           await onlineroom.track({ user: uuid, status: "Online" });
-        })
-        return ()=>{
-          window.removeEventListener('blur', async ()=>{
+        });
+        return () => {
+          window.removeEventListener("blur", async () => {
             await onlineroom.track({ user: uuid, status: "Away" });
-          })
-          window.removeEventListener('focus', async ()=>{
+          });
+          window.removeEventListener("focus", async () => {
             await onlineroom.track({ user: uuid, status: "Online" });
-          })
-        }
+          });
+        };
       };
       trackPresence();
       return () => {
@@ -136,30 +103,7 @@ function App() {
     });
   }, [uuid]); //Gets Contacts and check if they're online
 
-  useEffect(() => {
-    function getMobileMode(width: number) {
-      let t;
-      clearTimeout(t);
-      t = setTimeout(() => {
-        if (width < 800) {
-          setMobileMode(true);
-        } else {
-          setMobileMode(false);
-        }
-      }, 200);
-    }
-    getMobileMode(window.innerWidth);
-    window.addEventListener("resize", ({ target }) => {
-      const w = target as Window;
-      getMobileMode(w.innerWidth);
-    });
-    return () => {
-      window.removeEventListener("resize", ({ target }) => {
-        const w = target as Window;
-        getMobileMode(w.innerWidth);
-      });
-    };
-  }, []); //Handles responsiveness
+
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -175,21 +119,24 @@ function App() {
       data?.subscription?.unsubscribe();
     };
   }, [uuid]);
-  const askforpermission = () => {
+
+  const AskNotificationPermision = () => {
     Notification.requestPermission().then((result) => {
-      if(result == 'granted'){
-        alert('already enabled')
-      }else{
-        alert('please enable the Notification in your browser')
+      if (result == "granted") {
+        alert("already enabled");
+      } else {
+        alert("please enable the Notification in your browser");
       }
     });
   };
+
   useEffect(() => {
-    setTimeout(() => {
-      if(logged)
-      askforpermission();
+    let timeout = setTimeout(() => {
+      if (logged) AskNotificationPermision();
     }, 10000);
+    return () => clearTimeout(timeout)
   }, []);
+
   useEffect(() => {
     if (!accessToken) return;
     console.log("loaded");
@@ -208,7 +155,7 @@ function App() {
       const time = Date.now();
       while (Date.now() - time < 500) {}
     };
-  }, [accessToken]);
+  }, [accessToken]); //Updates last seen
 
   function setshowsettings1() {
     if (!showsettings.includes("flex")) {
@@ -249,10 +196,23 @@ function App() {
             <p className="text-center">Suggestion</p>
           </a>
 
-          <button className="text-center max-md:w-fit whitespace-nowrap content-center p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main" onClick={askforpermission}>Enable Notification</button>
-            <button className="text-center max-md:w-fit whitespace-nowrap content-center p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main" onClick={() => setsoundison(prev => {alert('Sound is ' + (prev ? 'Disabled' : 'Enabled')); return !prev})}>
+          <button
+            className="text-center max-md:w-fit whitespace-nowrap content-center p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main"
+            onClick={AskNotificationPermision}
+          >
+            Enable Notification
+          </button>
+          <button
+            className="text-center max-md:w-fit whitespace-nowrap content-center p-5 bg-actionColor rounded-xl text-black hover:text-MainText w-[50%] h-16 hover:bg-Main"
+            onClick={() =>
+              setsoundison((prev) => {
+                alert("Sound is " + (prev ? "Disabled" : "Enabled"));
+                return !prev;
+              })
+            }
+          >
             {soundison ? "Disable Sound" : "Enable Sound"}
-            </button>
+          </button>
           <span className="mt-auto">
             Your id is <span className="font-bold">{uuid?.slice(0, 5)}</span>{" "}
             <br />
@@ -279,7 +239,7 @@ function App() {
         </button>
       </div>
       <SettingContext.Provider
-        value={{ setshowsettings1, MobileMode, lightmode }}
+        value={{ setshowsettings1, lightmode }}
       >
         <Onlineusersctxt.Provider value={{ onlineusers }}>
           <ReloadContactsCtxt.Provider
