@@ -260,9 +260,6 @@ function App() {
                 uuid,
               }}
             >
-              {/* If its not mobile show, and is not in a chat show leftsection */}
-              {/* If its not mobile show, and is not in a chat show leftsection */}
-
               <LeftSection />
               <RightSection />
             </ChatContext.Provider>

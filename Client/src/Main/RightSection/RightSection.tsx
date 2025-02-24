@@ -5,6 +5,7 @@ import GlobalChatArea from "./GlobalChatArea";
 import { ChatContext, SettingContext } from "../App";
 import { createContext, useContext, useState } from "react";
 import { motion } from "motion/react";
+import React from "react";
 
 
 
@@ -47,4 +48,4 @@ const RightSection = () => {
   );
 };
 
-export default RightSection;
+export default React.memo(RightSection);

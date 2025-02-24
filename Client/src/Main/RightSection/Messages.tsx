@@ -1,7 +1,7 @@
 import { useContext, useRef, useState } from "react";
 import convertTime from "../util/convertTime";
 import getChatId from "../util/getChatId";
-import { ChatContext, SettingContext } from "../App";
+import { ChatContext } from "../App";
 import { UserMessage } from "./GlobalChatArea";
 import clock from "../../assets/clock_18625172.png";
 import CorretMark from "../../assets/tick_8564026.png";
