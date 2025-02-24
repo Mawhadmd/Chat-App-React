@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { supabase } from "../Supabase";
-import {Globe} from "lucide-react";
+import { Globe } from "lucide-react";
 import convertTime from "../util/convertTime";
 import { getname } from "../util/getnamebyid";
 import { ChatContext, SettingContext } from "../App";
@@ -60,6 +60,7 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
   useEffect(() => {
     setischosen(Currentopenchatid == "Global");
   }, [Currentopenchatid]);
+
   return (
     !!ValuesOfLatestMessage && (
       <div
@@ -70,13 +71,14 @@ const GlobalChat = ({ setCurrentopenchatid }: any) => {
           ischosen ? "bg-Secondary/50" : ""
         } h-24 gap-2 flex items-center text-MainText hover:bg-MainText/20 cursor-pointer border-Secondary/20 border-[1px]`}
       >
-        <div className="rounded-full ml-1   ">
+        <div className="rounded-full w-1/6 flex justify-center items-center ">
           <Globe
-            strokeWidth={1}
-            className={`size-16 ${!lightmode ? "invert" : ""}`}
+            className="size-full"
+            strokeWidth={0.7}
+            stroke={!lightmode ? "#000" : "#fff"}
           />
         </div>
-        <div className="flex flex-col gap-2 w-full mx-1">
+        <div className="flex flex-col gap-2 w-5/6 mx-1">
           <span className="font-bold">Global Chat</span>
           {ValuesOfLatestMessage && ValuesOfLatestMessage.created_at && (
             <div className="flex justify-between">

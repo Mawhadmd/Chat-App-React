@@ -6,6 +6,7 @@ import Contacts from "./Contacts";
 import GlobalChat from "./GlobalChat";
 import googleicon from "../../assets/googleicon.png";
 import { getuserbyid } from "../util/getuserbyid";
+import React from "react";
 
 const LeftSection = ({}) => {
   const {
@@ -215,4 +216,4 @@ const LeftSection = ({}) => {
   );
 };
 
-export default LeftSection;
+export default React.memo(LeftSection);

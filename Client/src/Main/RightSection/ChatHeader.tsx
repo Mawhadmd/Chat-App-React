@@ -1,11 +1,12 @@
 // import pfp from "../../assets/grayuserpfp.png";
-import globe from "../../assets/global-communication_9512332.png";
+
 import { ChatContext, Onlineusersctxt, SettingContext } from "../App";
 import { useContext, useEffect, useState } from "react";
 import { supabase } from "../Supabase";
 import convertTime from "../util/convertTime";
 import defaultpfp from "../../assets/grayuserpfp.png";
 import { getuserbyid } from "../util/getuserbyid";
+import { Globe } from "lucide-react";
 const ChatHeader = () => {
   const context = useContext(ChatContext);
   const [lastseen, setlastseen] = useState<string>("");
@@ -233,8 +234,12 @@ const ChatHeader = () => {
         </>
       ) : (
         <div className="w-fit h-full gap-2 flex items-center text-LightModeMain  cursor-pointer">
-           <div className="rounded-full ml-1 border-MainText border-2 border-solid  w-16">
-      <img src={globe} className={`  ${!lightmode ? "invert": ""} `} alt="Globe" />
+           <div className="rounded-full">
+           <Globe
+            strokeWidth={1}
+            stroke={!lightmode ? "#000" : "#fff"}
+            className={`size-16`}
+          />
       </div>
           <div>
             <span>Global Chat</span>

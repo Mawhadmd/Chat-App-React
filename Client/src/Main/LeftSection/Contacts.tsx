@@ -105,11 +105,9 @@ const Contacts: React.FC<ContactsProps> = ({
             filter: `chatId=eq.${chatId}`,
           },
           (payload) => {
-            console.log(payload.new)
+            console.log(payload.new);
             if (chatId == payload.new.chatId) {
-              sortLatestMessage([
-                  payload.new
-              ]);
+              sortLatestMessage([payload.new]);
             }
           }
         )
@@ -118,8 +116,8 @@ const Contacts: React.FC<ContactsProps> = ({
       return () => {
         channel.unsubscribe();
       };
-    }else{
-      console.log(issearch, userId , Currentopenchatid)
+    } else {
+      console.log(issearch, userId, Currentopenchatid);
     }
   }, [Currentopenchatid, userId, issearch, chatId]); //this useeffect listens to new messages
 
@@ -128,7 +126,7 @@ const Contacts: React.FC<ContactsProps> = ({
   useEffect(() => {
     if (issearch) return;
     const listentomissedmessages = supabase
-      .channel("listentomissedmessages"+chatId)
+      .channel("listentomissedmessages" + chatId)
       .on(
         "postgres_changes",
         {
@@ -138,17 +136,17 @@ const Contacts: React.FC<ContactsProps> = ({
           filter: `chatId=eq.${chatId}`,
         },
         async (payload) => {
-         if(payload.new.Sender != uuid){
-          let userdata = (await getuserbyid(payload.new.Sender)).data.user
-          .user_metadata;
-        new Notification(userdata.name, {
-          body: payload.new.Content,
-          icon: userdata.avatar_url,
-        });
-         }
+          if (payload.new.Sender != uuid) {
+            let userdata = (await getuserbyid(payload.new.Sender)).data.user
+              .user_metadata;
+            new Notification(userdata.name, {
+              body: payload.new.Content,
+              icon: userdata.avatar_url,
+            });
+          }
           console.log("New message inserted:", payload.new);
-          if(payload.new.Sender != uuid)
-          setmissedmessages((prev) => (prev || 0) + 1);
+          if (payload.new.Sender != uuid)
+            setmissedmessages((prev) => (prev || 0) + 1);
         }
       )
       .on(
@@ -161,10 +159,10 @@ const Contacts: React.FC<ContactsProps> = ({
         },
         (payload) => {
           console.log("Message updated:", payload.new, payload.old);
-          if(payload.new.Sender != uuid)
-          if(payload.new.ReadAt && !payload.old.ReadAt){
-            setmissedmessages(prev => (prev || 1) - 1)
-          }
+          if (payload.new.Sender != uuid)
+            if (payload.new.ReadAt && !payload.old.ReadAt) {
+              setmissedmessages((prev) => (prev || 1) - 1);
+            }
         }
       )
       .subscribe();
@@ -187,24 +185,25 @@ const Contacts: React.FC<ContactsProps> = ({
     };
   }, []);
   useEffect(() => {
-    setischosen(Currentopenchatid == chatId)
+    setischosen(Currentopenchatid == chatId);
   }, [Currentopenchatid]);
   return (
     <motion.div
       animate={{ opacity: [0, 1] }}
       transition={{ delay: 0.1 * i, duration: 1 }}
       onClick={() => {
-        
         getChatId(userId, uuid, setOtheruserid, setCurrentopenchatid);
       }}
-      className={`${ischosen? 'bg-Secondary/50':''} text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
+      className={`${
+        ischosen ? "bg-Secondary/50" : ""
+      } text-MainText items-center  w-full mx-auto h-20 border-Secondary/20 border-spacing-2 border-[1px]
   border-solid mb-[-1px] flex gap-3 cursor-pointer hover:bg-MainText/20 transition-all `}
     >
-      <div className="relative justify-center items-center flex w-16 h-16 ml-1">
+      <div className=" relative justify-center aspect-square items-center flex w-1/6 ml-1">
         <img
+          className="rounded-full w-full h-full"
           src={customPfp || pfp}
           alt="Profile Picture"
-          className="w-20 rounded-full border-MainText border-2 border-solid"
           onError={(e) => {
             const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
             target.onerror = null; // Prevent infinite loop
@@ -221,7 +220,7 @@ const Contacts: React.FC<ContactsProps> = ({
             <span className="absolute w-4 h-4 right-0 top-[60%] rounded-full bg-yellow-500"></span>
           ))}
       </div>
-      <div className="flex flex-col h-[80%] justify-between w-full mx-1">
+      <div className="flex flex-col h-[80%] justify-between w-5/6 mx-1">
         <div className="flex justify-between">
           <span className="text-xl font-bold whitespace-nowrap">
             {`${name}`}{" "}

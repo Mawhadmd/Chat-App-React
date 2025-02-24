@@ -3,11 +3,11 @@ import { ChatContext, ReloadContactsCtxt, SettingContext } from "../App";
 import { supabase } from "../Supabase";
 import { getname } from "../util/getnamebyid";
 import xicon from "../../assets/letter-x_16083478.png";
-import microphoneImage from "../../assets/mic_4812038.png";
-import fileupload from "../../assets/folder_16798973.png";
+
+
 import rec from "../../assets/rec-button_17003646.png";
 import { motion } from "motion/react";
-
+import { FolderUp, Mic } from "lucide-react";
 const ChatInput = ({ setmessages }: { setmessages: any }) => {
   const context = useContext(ChatContext);
   const { lightmode } = useContext(SettingContext);
@@ -20,9 +20,7 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
   } = context;
   const { setReloadcontact } = useContext(ReloadContactsCtxt);
   const [File, SetFile] = useState<File | undefined>();
-  const [content, setinputcontent] = useState<
-    string | readonly string[]
-  >("");
+  const [content, setinputcontent] = useState<string | readonly string[]>("");
   const [contentisfull, setcontentisfull] = useState<boolean>(false);
   const [username, setusername] = useState<boolean>(false);
   const [istyping, setistyping] = useState<boolean>(false);
@@ -31,14 +29,11 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
   const [nowrecording, setnowrecording] = useState<boolean>(false);
   const [Audio, setAudio] = useState<Blob | undefined>();
 
-
-
   async function Messageisin(chatid: any) {
     setReloadcontact((previous: boolean) => !previous);
     setCurrentopenchatid(chatid);
     setquery("");
   }
-
 
   useEffect(() => {
     (async () => {
@@ -47,10 +42,9 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     })();
   }, []);
 
-
   async function SetData() {
     if (contentisfull) return;
-    
+
     // const profanitycheck = await fetch('https://vector.profanity.dev', {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
@@ -62,26 +56,29 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
     //     return;
     //   }
     let contentval = content;
+    if(contentval == "" && !File && !Audio) {
+      alert("Write something");
+      return;
+    }
     setinputcontent("");
     var Timeofthemessage = Date.now();
-    if (Currentopenchatid != -1 && (contentval != "" || !!File || !!Audio)) {
+    console.log(Currentopenchatid, (contentval != "" || !!File || !!Audio));
+    if (Currentopenchatid != -1) { //Checks if the user is in contacts and the content is not empty
       setmessages((PreviousMessages: any) => [
         {
           Pending: true,
           Sender: uuid,
           chatId: Currentopenchatid,
           created_at: Timeofthemessage,
-          FileURL: File ? URL.createObjectURL(File): null,
-          AudioFile: Audio? URL.createObjectURL(Audio): null,
+          FileURL: File ? URL.createObjectURL(File) : null,
+          AudioFile: Audio ? URL.createObjectURL(Audio) : null,
           Content: contentval,
         },
         ...(PreviousMessages || []),
       ]);
-      document.getElementById('ChatArea')?.scrollTo(0 ,0)
-    }else {
-      alert("Write something");
-      return
-    }
+      document.getElementById("ChatArea")?.scrollTo(0, 0);
+    } 
+ 
     if (contentval != "" && !File && !Audio) {
       if (Currentopenchatid != "Global" && !!Currentopenchatid) {
         var chatid: string | number | null = null;
@@ -493,10 +490,9 @@ const ChatInput = ({ setmessages }: { setmessages: any }) => {
       } catch (e) {
         console.log("error while uploading audio", e);
       }
-    } 
-document.getElementById('input')?.focus()
+    }
+    document.getElementById("input")?.focus();
   }
-
 
   useEffect(() => {
     const handleBlur = () => {
@@ -504,22 +500,19 @@ document.getElementById('input')?.focus()
     };
 
     const handleFocus = () => {
-      if (content.length>0) setistyping(true);
+      if (content.length > 0) setistyping(true);
     };
     if (Currentopenchatid !== -1) {
       setistyping(content.length > 0);
 
-      window.addEventListener('blur', handleBlur);
-      window.addEventListener('focus', handleFocus);
-  
+      window.addEventListener("blur", handleBlur);
+      window.addEventListener("focus", handleFocus);
     }
     return () => {
-      window.removeEventListener('blur', handleBlur);
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("focus", handleFocus);
     };
   }, [content, Currentopenchatid]);
-  
-
 
   useEffect(() => {
     const channelB = supabase.channel("istyping");
@@ -548,7 +541,6 @@ document.getElementById('input')?.focus()
     };
   }, [Currentopenchatid, istyping]);
 
-
   useEffect(() => {
     if (!!content || content == "")
       if (content.length > 300) {
@@ -556,11 +548,9 @@ document.getElementById('input')?.focus()
       } else setcontentisfull(false);
   }, [content]);
 
-
   useEffect(() => {
     clearFileInput();
   }, [Currentopenchatid, SetFile]);
-
 
   useEffect(() => {
     let mediaRecorder: MediaRecorder;
@@ -613,19 +603,16 @@ document.getElementById('input')?.focus()
     };
   }, [recordaudio]);
 
-
   useEffect(() => {
     setrecordaudio(false);
     setnowrecording(false);
     setAudio(undefined);
   }, [Currentopenchatid]);
 
-
   const clearFileInput = async () => {
     SetFile(undefined);
     if (fileuploadref.current) fileuploadref.current.value = "";
   };
-
 
   return (
     <>
@@ -636,11 +623,12 @@ document.getElementById('input')?.focus()
           alt="X"
           onClick={clearFileInput}
         />
-        {File && 
-        <img
-        className="w-fit max-h-full mx-auto"
-        src={URL.createObjectURL(File)}
-      />}
+        {File && (
+          <img
+            className="w-fit max-h-full mx-auto"
+            src={URL.createObjectURL(File)}
+          />
+        )}
       </div>
 
       <div
@@ -656,7 +644,7 @@ document.getElementById('input')?.focus()
           !Audio ? (
             <div className="relative w-full">
               <input
-              id="input"
+                id="input"
                 onKeyDown={({ key }) => {
                   if (String(key) == "Enter") SetData();
                 }}
@@ -709,13 +697,7 @@ document.getElementById('input')?.focus()
               {!nowrecording && !Audio && (
                 <div className="h-full w-12  cursor-pointer">
                   <label htmlFor="fileupload">
-                    <img
-                      src={fileupload}
-                      className={` cursor-pointer ${
-                        !lightmode ? "invert" : ""
-                      }`}
-                      alt="Upload File"
-                    />
+                    <FolderUp className={` cursor-pointer size-12 ${lightmode == 0? 'invert': ''}`} />
                   </label>
                   <input
                     ref={fileuploadref}
@@ -730,12 +712,8 @@ document.getElementById('input')?.focus()
 
               <div className="h-full w-12 ">
                 {!nowrecording ? (
-                  <img
-                    src={microphoneImage}
-                    className="cursor-pointer"
-                    alt="Mic"
-                    onClick={() => setrecordaudio(true)}
-                  />
+                  <Mic className={` cursor-pointer size-12 ${lightmode == 0? 'invert': ''}`} onClick={() => setrecordaudio(true)}/>
+               
                 ) : (
                   <motion.img
                     animate={{ scale: [1, 1.1, 1], opacity: [1, 0.5, 1] }}

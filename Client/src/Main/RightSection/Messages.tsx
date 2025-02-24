@@ -19,7 +19,7 @@ export interface Message {
 const Message = ({ data, uuid, UserMessageMap }: Message) => {
   const { setCurrentopenchatid, setOtheruserid } = useContext(ChatContext);
   const [avatar_url, setavatar_url] = useState<string | undefined>();
-  const { lightmode } = useContext(SettingContext);
+
   if (data.AudioFile) {
     getuserbyid(data.Sender).then((e) =>
       setavatar_url(e.data.user.user_metadata.avatar_url)
@@ -175,9 +175,7 @@ const Message = ({ data, uuid, UserMessageMap }: Message) => {
                         : CorretMark
                       : dbcheck
                   }
-                  className={`content-end ${
-                    lightmode ? "invert-0" : "invert"
-                  } w-4 h-4  right-0`}
+                  className={`content-end  w-4 h-4  right-0`}
                 />
               )}
               <span className="text-sm   ml-auto w-full ">
