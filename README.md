@@ -1,8 +1,8 @@
 # Chat App Project
 
-> NOTE: *This project was my first ever project with react, it was first implemented using SCSS and then migrated to Tailwind, the design is humble and there are some bugs, this app took me 3 months, the code is spaghetti and it's mayhem in there, for your safety do not see the code; Anyway, i'm planning to build another one to see where my skills have brought me, I will try to write the next chat app, fast, using CI/CD (As in my portfolio), and most importantly clean code.*
+# > NOTE: **This project was my first ever project with react, it was first implemented using SCSS and then migrated to Tailwind, the design is humble and there are some bugs, this app took me 3 months, the code is spaghetti and it's mayhem in there, for your safety do not see the code; Anyway, i'm planning to build another one to see where my skills have brought me, I will try to write the next chat app, fast, using CI/CD (As in my portfolio), and most importantly clean code.**
 >
-> *You may have noticed that i do not usually use testing in my programs, that's because i see testing a waste of time, since i'm working alone, otherwise testing must be implemented if there is a group working on the project*
+> **You may have noticed that i do not usually use testing in my programs, that's because i see testing a waste of time, since i'm working alone, otherwise testing must be implemented if there is a group working on the project**
 >
 
 This project has been quite the journey. It started with the goal of learning **Tailwind**, which I accomplished. However, the focus later shifted to the **backend**, as it became the more complex aspect. The chat app is primarily backend-heavy, with some frontend components built in **React**.
