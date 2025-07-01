@@ -17,6 +17,7 @@ I started building this project with the purpose of learning React more comprehe
 - Real-time interaction in apps
 - Supabase
 - TypeScript
+- and More
 
 ### Issues
 
@@ -53,6 +54,52 @@ SUPABASE_URL="Your URL"
 PORT=8080
 ```
 
+3.5- Database schema for supabase
+```
+-- Enable UUID extension if not already enabled
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Users table
+CREATE TABLE public.Users (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  LastSeen text NOT NULL
+);
+
+-- Contacts table
+CREATE TABLE public.Contacts (
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  User1 uuid NOT NULL,
+  User2 uuid NOT NULL,
+  chatId bigserial PRIMARY KEY,
+  CONSTRAINT fk_user1 FOREIGN KEY (User1) REFERENCES public.Users(id),
+  CONSTRAINT fk_user2 FOREIGN KEY (User2) REFERENCES public.Users(id)
+);
+
+-- Messages table
+CREATE TABLE public.Messages (
+  id bigserial PRIMARY KEY,
+  Sender uuid NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  Content text NOT NULL,
+  CONSTRAINT fk_sender_messages FOREIGN KEY (Sender) REFERENCES public.Users(id)
+);
+
+-- PrivateMessages table
+CREATE TABLE public.PrivateMessages (
+  id bigserial PRIMARY KEY,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  Content text NOT NULL DEFAULT '',
+  Receiver uuid NOT NULL,
+  Sender uuid NOT NULL,
+  chatId bigint NOT NULL,
+  FileURL text,
+  AudioFile text,
+  ReadAt timestamp with time zone,
+  CONSTRAINT fk_receiver FOREIGN KEY (Receiver) REFERENCES public.Users(id),
+  CONSTRAINT fk_sender FOREIGN KEY (Sender) REFERENCES public.Users(id),
+  CONSTRAINT fk_chat FOREIGN KEY (chatId) REFERENCES public.Contacts(chatId)
+);
+```
 
 4- Config
 In your client code, replace any links pointing to the hosted (Render) server with:
