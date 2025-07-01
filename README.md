@@ -1,51 +1,72 @@
-# Chat App Project
+# Chatty (Abandoned)
 
-> NOTE: **This project was my first ever project with react, the design is humble and there are some bugs, this app took me 3 months, the code is spaghetti and it's mayhem in there, for your safety do not see the code; Anyway, i'm planning to build another one to see where my skills have brought me, I will try to write the next chat app, fast, using CI/CD (As in my portfolio), and most importantly clean code.**
->
-> **You may have noticed that i do not usually use testing in my programs, that's because i see testing a waste of time, since i'm working alone, otherwise testing must be implemented if there is a group working on the project**
->
+This project is a modern Chat-App that has many features, including authorization, authentication, real-time, image/audio sharing, and more. 
 
-This project has been quite the journey. It started with the goal of learning **Tailwind**, which I accomplished. However, the focus later shifted to the **backend**, as it became the more complex aspect. The chat app is primarily backend-heavy, with some frontend components built in **React**.
+### Why I built it
 
-I created my own **database structure**, and I hope I won’t regret it in the future. React presented challenges, and even small issues would sometimes keep me wondering for hours. But in the end, it’s been a great learning experience.
+I loved the idea of having my own chat app, use it to talk with friends while knowing exactly how each message is reaching the other side. I actually built a simple chat app back in my junior years using PHP and Ajax, but it wasn't real-time; instead, it was polling every couple of seconds. I consider this my most comprehensive project as of july first 2025, and i would love to create more projects and application like this.
 
-## Main Features for Users
+### How I built it
 
-1. **Account Creation & Login**
-   - Users can create an account, log in, and manage their profile.
-   
-2. **Real-Time Messaging**
-   - Send and receive messages instantly in active chat rooms or private chats.
+I started building this project with the purpose of learning React more comprehensively, purpose was achieved. I also learned:
 
-3. **Message History**
-   - View past messages in conversations, even after logging out and back in.
+- Tailwind
+- SCSS
+- Deploying
+- Continuous integration
+- Real-time interaction in apps
+- Supabase
+- TypeScript
 
-4. **User Presence**
-   - Displays users' status: online, away, and last seen.
+### Issues
 
-5. **Customizable Chatrooms**
-   - Create, join, or leave chatrooms to communicate with multiple users.
+Although the chatting mechanism and real time is working correctly, there are a couple of issues, or bugs, that've been noticed while using the app. But, since the project has been abandoned, I didn't bother to fix it. 
 
-6. **Private Messaging**
-   - Send private messages to other users.
+## Requirements
 
-7. **Typing Indicators**
-   - Shows when someone is typing a message.
+To use the app, you need:
 
-8. **Notifications**
-   - Alerts for new messages when the user is away or in a different chat.
+- A Google account
 
-9. **Search**
-   - Search for messages or users within chats.
+### How to run
 
-10. **Responsive Design**
-    - Interface adapts to different screen sizes, ensuring a smooth experience on both mobile and desktop devices.
-   
+1- Clone it
+```
+git clone https://github.com/Mawhadmd/Chat-App-React
+cd Chat-App-React
+```
 
-Features like blocking chats, deleting chats, messages, creating groups, editing messages, or video and audio calls weren't implemented because the purpose of this project was to learn tailwind, and those projects are create exercises for DELETE and PUT HTTP requests/database queries. Maybe in the future.
+2- Install dependencies
+```
+cd server
+npm install
 
-## Documentation
+cd ../client
+npm install
+```
 
-I kept detailed notes throughout the project, documenting every challenge and solution. Be warned, it’s quite lengthy:
+3- Add env variables
+for server
+```
+SUPABASE_KEY="Your Key"
+SUPABASE_URL="Your URL"
+PORT=8080
+```
 
-[**Project Documentation**](https://1drv.ms/w/c/8b1e0522eb787e4e/EcqqgVzc1qlOhW9vCiE0JiUBwFTE-zcC_fSKoAGOU3MVJg?e=x5wcau)
+
+4- Config
+In your client code, replace any links pointing to the hosted (Render) server with:
+from `https://chat-app-react-server-qizz.onrender.com` to `http://localhost:8080`
+
+5- Finally, run it
+```
+cd server
+npm run start
+
+cd ../client
+npm run dev
+```
+## Useful Resources
+
+I wrote detailed notes throughout the project, basically my thought process. It’s quite lengthy:
+(**Project Docs**)[https://1drv.ms/w/c/8b1e0522eb787e4e/EcqqgVzc1qlOhW9vCiE0JiUBwFTE-zcC_fSKoAGOU3MVJg?e=x5wcau]
