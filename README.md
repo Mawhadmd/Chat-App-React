@@ -44,7 +44,7 @@ npm install
 
 cd ../client
 npm install
-cd..
+cd ..
 ```
 
 3- Add env variables
