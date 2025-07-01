@@ -1,14 +1,14 @@
 # Chatty (Abandoned)
 
-This project is a modern Chat-App that has many features, including authorization, authentication, real-time, image/audio sharing, and more. 
+This project is a modern chat app that has many features, including authorization, authentication, real-time, image/audio sharing, and more. 
 
 ### Why I built it
 
-I loved the idea of having my own chat app, use it to talk with friends while knowing exactly how each message is reaching the other side. I actually built a simple chat app back in my junior years using PHP and Ajax, but it wasn't real-time; instead, it was polling every couple of seconds. I consider this my most comprehensive project as of july first 2025, and i would love to create more projects and application like this.
+I loved the idea of having my own chat app, use it to talk with friends while knowing exactly how each message is reaching the other side. I built a simple chat app back in my junior years using PHP and Ajax, but it wasn't real-time; instead, it was polling every couple of seconds. I consider this an upgrade of that and my most comprehensive project as of July 1, 2025, and I would love to create more projects and applications like this.
 
 ### How I built it
 
-I started building this project with the purpose of learning React more comprehensively, purpose was achieved. I also learned:
+I started building this project to learn React more comprehensively, purpose was achieved. I also learned:
 
 - Tailwind
 - SCSS
@@ -21,7 +21,7 @@ I started building this project with the purpose of learning React more comprehe
 
 ### Issues
 
-Although the chatting mechanism and real time is working correctly, there are a couple of issues, or bugs, that've been noticed while using the app. But, since the project has been abandoned, I didn't bother to fix it. 
+Although the chatting mechanism and real-time functionality are working correctly, a couple of issues, or bugs, have been noticed while using the app. But, since the project has been abandoned, I didn't bother to fix it. 
 
 ## Requirements
 
